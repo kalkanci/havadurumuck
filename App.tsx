@@ -166,7 +166,11 @@ const App: React.FC = () => {
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
-      <Background city={location.name} />
+      <Background 
+        city={location.name} 
+        weatherCode={weather?.current.weather_code}
+        isDay={weather?.current.is_day}
+      />
       
       {/* Weather Overlay (Rain/Snow effects) */}
       {weather && <WeatherOverlay weatherCode={weather.current.weather_code} />}

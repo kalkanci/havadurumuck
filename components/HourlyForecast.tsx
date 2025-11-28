@@ -12,16 +12,20 @@ interface HourlyForecastProps {
 const getTempGradient = (temp: number, isDay: number) => {
     // Gece ise biraz daha koyu tonlar
     if (isDay === 0) {
-        if (temp < 0) return "bg-gradient-to-br from-indigo-900 to-slate-900 border-indigo-500/30";
-        if (temp < 10) return "bg-gradient-to-br from-blue-900 to-indigo-900 border-blue-500/30";
-        return "bg-gradient-to-br from-slate-800 to-slate-900 border-slate-600/30";
+        if (temp < 0) return "bg-gradient-to-br from-indigo-950 to-slate-900 border-indigo-500/30";
+        if (temp < 10) return "bg-gradient-to-br from-blue-950 to-indigo-950 border-blue-500/30";
+        return "bg-gradient-to-br from-slate-900 to-black border-slate-600/30";
     }
 
-    if (temp < 0) return "bg-gradient-to-br from-blue-600 to-purple-600 border-blue-400/30";
-    if (temp < 10) return "bg-gradient-to-br from-sky-500 to-blue-600 border-sky-400/30";
-    if (temp < 20) return "bg-gradient-to-br from-teal-400 to-emerald-600 border-teal-400/30";
-    if (temp < 28) return "bg-gradient-to-br from-yellow-400 to-orange-500 border-yellow-400/30";
-    return "bg-gradient-to-br from-orange-500 to-red-600 border-orange-400/30";
+    // Gündüz Tonları (Okunabilirlik için koyulaştırıldı)
+    if (temp < 0) return "bg-gradient-to-br from-blue-800 to-indigo-900 border-blue-400/30";
+    if (temp < 10) return "bg-gradient-to-br from-sky-800 to-blue-900 border-sky-400/30";
+    // Yeşil/Turkuaz alanı - Önceden çok parlaktı, şimdi koyu zümrüt
+    if (temp < 20) return "bg-gradient-to-br from-teal-800 to-emerald-900 border-teal-500/30";
+    // Sarı/Turuncu alanı - Şimdi koyu amber/turuncu
+    if (temp < 28) return "bg-gradient-to-br from-amber-700 to-orange-800 border-amber-500/30";
+    // Sıcak kırmızı alanı - Koyu kırmızı
+    return "bg-gradient-to-br from-red-800 to-rose-900 border-red-500/30";
 };
 
 const HourlyForecast: React.FC<HourlyForecastProps> = ({ weather }) => {
@@ -76,7 +80,7 @@ const HourlyForecast: React.FC<HourlyForecastProps> = ({ weather }) => {
                 {/* Info Row: Wind or Rain */}
                 <div className="w-full flex justify-center items-center h-4">
                      {rainProb > 15 ? (
-                        <div className="flex items-center gap-1 bg-black/10 px-1.5 py-0.5 rounded-full">
+                        <div className="flex items-center gap-1 bg-black/20 px-1.5 py-0.5 rounded-full">
                             <Droplets size={8} className="text-blue-100" />
                             <span className="text-[9px] font-bold text-blue-50">%{rainProb}</span>
                         </div>

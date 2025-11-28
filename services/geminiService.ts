@@ -85,3 +85,51 @@ export const getGeminiAdvice = async (weather: WeatherData, locationName: string
     throw error; 
   }
 };
+
+export const generateCityImage = async (city: string, weatherCode: number, isDay: boolean): Promise<string | null> => {
+  if (!ai) return null;
+
+  try {
+    const condition = getWeatherLabel(weatherCode);
+    const timeOfDay = isDay ? "daylight, bright" : "night time, cinematic lighting, city lights";
+    const mood = isDay ? "vibrant, realistic" : "moody, mysterious";
+    
+    // Prompt mühendisliği: Şehir + Hava Durumu + Saat
+    const prompt = `
+      Cinematic ultra-realistic wide angle photography of ${city} iconic landmark or street view.
+      Weather condition: ${condition} (make sure the sky and atmosphere reflect this).
+      Time: ${timeOfDay}.
+      Style: ${mood}, high resolution, 8k, detailed textures, masterpiece, award winning photography.
+      No text, no overlays, just the scenery.
+    `;
+
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash-image',
+      contents: {
+        parts: [
+          { text: prompt }
+        ]
+      },
+      config: {
+        // Image generation specific configs usually go here if supported by SDK wrapper, 
+        // but primarily the model handles the prompt.
+      }
+    });
+
+    // Response içerisinden resim verisini bulma
+    if (response.candidates && response.candidates[0].content.parts) {
+      for (const part of response.candidates[0].content.parts) {
+        if (part.inlineData) {
+          const base64String = part.inlineData.data;
+          return `data:image/png;base64,${base64String}`;
+        }
+      }
+    }
+    
+    return null;
+
+  } catch (error) {
+    console.error("Gemini Image Gen Error:", error);
+    return null;
+  }
+};
