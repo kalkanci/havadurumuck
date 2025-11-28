@@ -2,10 +2,27 @@ import { GoogleGenAI, Type } from "@google/genai";
 import { WeatherData, AdviceResponse } from "../types";
 import { getWeatherLabel } from "../constants";
 
-// Vite projelerinde env değişkenleri import.meta.env üzerinden ve VITE_ öneki ile okunur
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// Vite/Vercel ortamında API anahtarını güvenli bir şekilde alma
+const getApiKey = (): string | undefined => {
+  try {
+    // @ts-ignore - Vite types might be missing in some setups
+    return import.meta.env.VITE_API_KEY;
+  } catch (e) {
+    console.warn("API Key okunamadı.");
+    return undefined;
+  }
+};
+
+const apiKey = getApiKey();
+const ai = apiKey ? new GoogleGenAI({ apiKey }) : null;
 
 export const getGeminiAdvice = async (weather: WeatherData, locationName: string): Promise<AdviceResponse> => {
+  if (!ai) {
+    console.warn("API Anahtarı eksik (VITE_API_KEY). Fallback kullanılıyor.");
+    // Hata fırlatmak yerine null/fallback dönerek UI'ın çökmesini engelliyoruz
+    throw new Error("API Key Eksik");
+  }
+
   try {
     const current = weather.current;
     
@@ -13,7 +30,6 @@ export const getGeminiAdvice = async (weather: WeatherData, locationName: string
         return (arr && arr[index] !== undefined) ? arr[index] : fallback;
     };
 
-    // Gelecek saatlerin trendini prompt'a ek veri olarak sunuyoruz (kullanıcı promptunda görünmese de analiz için önemli)
     const nextHoursData = weather.hourly?.time?.slice(0, 6) || [];
     const trendContext = nextHoursData.length > 0 ? nextHoursData.map((t, i) => {
       const date = new Date(t);
@@ -25,7 +41,6 @@ export const getGeminiAdvice = async (weather: WeatherData, locationName: string
 
     const uvIndex = safeGet(weather.daily?.uv_index_max, 0, 0);
 
-    // Kullanıcının istediği prompt yapısı
     const prompt = `
       Sen bir hava durumu asistanısın. Şu anki veriler:
       Konum: ${locationName}
@@ -69,25 +84,23 @@ export const getGeminiAdvice = async (weather: WeatherData, locationName: string
     const text = response.text;
     if (!text) throw new Error("AI boş yanıt döndürdü.");
 
-    // JSON formatında olduğundan emin olalım (SDK parse etse bile)
     const result = JSON.parse(text) as AdviceResponse;
     return result;
 
   } catch (error: any) {
     console.error("Gemini AI Error:", error);
-    // Hata durumunda fallback yapısına uygun boş bir cevap dönülür, 
-    // UI tarafında bu yakalanıp statik mesaj gösterilebilir veya throw edilebilir.
     throw error; 
   }
 };
 
 export const generateCityImage = async (city: string, weatherCode: number, isDay: boolean): Promise<string | null> => {
+  if (!ai) return null;
+
   try {
     const condition = getWeatherLabel(weatherCode);
     const timeOfDay = isDay ? "daylight, bright" : "night time, cinematic lighting, city lights";
     const mood = isDay ? "vibrant, realistic" : "moody, mysterious";
     
-    // Prompt mühendisliği: Şehir + Hava Durumu + Saat
     const prompt = `
       Cinematic ultra-realistic wide angle photography of ${city} iconic landmark or street view.
       Weather condition: ${condition} (make sure the sky and atmosphere reflect this).
@@ -103,13 +116,9 @@ export const generateCityImage = async (city: string, weatherCode: number, isDay
           { text: prompt }
         ]
       },
-      config: {
-        // Image generation specific configs usually go here if supported by SDK wrapper, 
-        // but primarily the model handles the prompt.
-      }
+      config: {}
     });
 
-    // Response içerisinden resim verisini bulma
     if (response.candidates && response.candidates[0].content.parts) {
       for (const part of response.candidates[0].content.parts) {
         if (part.inlineData) {
