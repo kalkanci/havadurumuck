@@ -184,9 +184,9 @@ const App: React.FC = () => {
 
       <div className="relative z-10 flex flex-col min-h-screen p-4 md:max-w-md md:mx-auto transition-transform duration-300">
         
-        {/* Pull to Refresh Indicator */}
+        {/* Pull to Refresh Indicator - Adjusted position */}
         {refreshing && (
-           <div className="absolute top-20 left-0 right-0 flex justify-center z-50">
+           <div className="absolute top-24 left-0 right-0 flex justify-center z-50">
              <div className="bg-slate-800/80 backdrop-blur rounded-full p-2 shadow-lg animate-spin">
                <RefreshCw size={20} className="text-blue-400" />
              </div>
@@ -195,7 +195,7 @@ const App: React.FC = () => {
 
         {/* GPS Permission Warning Banner */}
         {gpsError && !loading && (
-          <div className="mt-16 mb-4 p-3 bg-red-500/80 backdrop-blur-md rounded-xl flex items-center justify-between shadow-lg animate-bounce-short">
+          <div className="mt-20 mb-4 p-3 bg-red-500/80 backdrop-blur-md rounded-xl flex items-center justify-between shadow-lg animate-bounce-short">
             <div className="flex items-center gap-2">
               <Navigation size={18} className="text-white" />
               <span className="text-sm font-medium">Konum izni kapalı</span>
@@ -209,8 +209,13 @@ const App: React.FC = () => {
           </div>
         )}
 
-        {/* Header with extra padding for Safe Area / Status Bar */}
-        <header className="flex items-center justify-between mb-6 pt-14">
+        {/* Header with DYNAMIC safe area padding. 
+            Replaced 'pt-14' with dynamic calculation to avoid hardcoded black bars. 
+        */}
+        <header 
+          className="flex items-center justify-between mb-6"
+          style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}
+        >
           <button onClick={() => setIsDrawerOpen(true)} className="p-2 glass-card rounded-full hover:bg-white/10 transition-colors">
             <Menu size={24} />
           </button>
