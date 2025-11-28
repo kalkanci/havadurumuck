@@ -2,15 +2,10 @@ import { GoogleGenAI, Type } from "@google/genai";
 import { WeatherData, AdviceResponse } from "../types";
 import { getWeatherLabel } from "../constants";
 
-// API Key kontrolü
-const apiKey = process.env.API_KEY;
-const ai = apiKey ? new GoogleGenAI({ apiKey }) : null;
+// Vite projelerinde env değişkenleri import.meta.env üzerinden ve VITE_ öneki ile okunur
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 export const getGeminiAdvice = async (weather: WeatherData, locationName: string): Promise<AdviceResponse> => {
-  if (!ai) {
-    throw new Error("API Anahtarı eksik.");
-  }
-
   try {
     const current = weather.current;
     
@@ -87,8 +82,6 @@ export const getGeminiAdvice = async (weather: WeatherData, locationName: string
 };
 
 export const generateCityImage = async (city: string, weatherCode: number, isDay: boolean): Promise<string | null> => {
-  if (!ai) return null;
-
   try {
     const condition = getWeatherLabel(weatherCode);
     const timeOfDay = isDay ? "daylight, bright" : "night time, cinematic lighting, city lights";
