@@ -1,3 +1,4 @@
+
 import { CurrentWeather, AdviceResponse } from '../types';
 
 // Haversine formula for distance
@@ -41,4 +42,21 @@ export const formatTime = (isoString: string) => {
     minute: '2-digit',
     hour12: false 
   });
+};
+
+// Rüzgar Yönü Çevirici
+export const getWindDirection = (degrees: number): string => {
+  const directions = ['K', 'KKD', 'KD', 'DKD', 'D', 'DGD', 'GD', 'GGD', 'G', 'GGB', 'GB', 'BGB', 'B', 'BKB', 'KB', 'KKB'];
+  const index = Math.round(degrees / 22.5) % 16;
+  return directions[index];
+};
+
+// Gün Uzunluğu Hesaplayıcı
+export const getDayDuration = (sunrise: string, sunset: string): string => {
+  const start = new Date(sunrise).getTime();
+  const end = new Date(sunset).getTime();
+  const diffMs = end - start;
+  const hours = Math.floor(diffMs / (1000 * 60 * 60));
+  const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+  return `${hours} sa ${minutes} dk`;
 };

@@ -1,3 +1,4 @@
+
 import { WeatherData, GeoLocation, AirQuality } from '../types';
 
 const GEO_API_URL = 'https://geocoding-api.open-meteo.com/v1/search';
@@ -63,12 +64,13 @@ export const searchCity = async (query: string): Promise<GeoLocation[]> => {
 
 export const fetchWeather = async (lat: number, lon: number): Promise<WeatherData> => {
   // 1. Hava Durumu Verisi
+  // Daily parametrelerine: apparent_temperature_max/min, precipitation_sum, precipitation_hours, wind_gusts_10m_max, wind_direction_10m_dominant eklendi.
   const weatherParams = new URLSearchParams({
     latitude: lat.toString(),
     longitude: lon.toString(),
     current: 'temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,cloud_cover,pressure_msl,surface_pressure,wind_speed_10m,wind_direction_10m',
     hourly: 'temperature_2m,weather_code,is_day,wind_speed_10m,wind_direction_10m,precipitation_probability',
-    daily: 'weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max,precipitation_probability_max,wind_speed_10m_max',
+    daily: 'weather_code,temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,sunrise,sunset,uv_index_max,precipitation_probability_max,precipitation_sum,precipitation_hours,wind_speed_10m_max,wind_gusts_10m_max,wind_direction_10m_dominant',
     timezone: 'auto',
     forecast_days: '7'
   });
