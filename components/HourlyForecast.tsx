@@ -2,103 +2,99 @@ import React from 'react';
 import { WeatherData } from '../types';
 import { getWeatherIcon } from '../constants';
 import { formatTime } from '../utils/helpers';
-import { Droplets, Wind } from 'lucide-react';
+import { Droplets, Navigation } from 'lucide-react';
 
 interface HourlyForecastProps {
   weather: WeatherData;
 }
 
+// Sıcaklığa göre arka plan rengi
+const getTempGradient = (temp: number, isDay: number) => {
+    // Gece ise biraz daha koyu tonlar
+    if (isDay === 0) {
+        if (temp < 0) return "bg-gradient-to-br from-indigo-900 to-slate-900 border-indigo-500/30";
+        if (temp < 10) return "bg-gradient-to-br from-blue-900 to-indigo-900 border-blue-500/30";
+        return "bg-gradient-to-br from-slate-800 to-slate-900 border-slate-600/30";
+    }
+
+    if (temp < 0) return "bg-gradient-to-br from-blue-600 to-purple-600 border-blue-400/30";
+    if (temp < 10) return "bg-gradient-to-br from-sky-500 to-blue-600 border-sky-400/30";
+    if (temp < 20) return "bg-gradient-to-br from-teal-400 to-emerald-600 border-teal-400/30";
+    if (temp < 28) return "bg-gradient-to-br from-yellow-400 to-orange-500 border-yellow-400/30";
+    return "bg-gradient-to-br from-orange-500 to-red-600 border-orange-400/30";
+};
+
 const HourlyForecast: React.FC<HourlyForecastProps> = ({ weather }) => {
-  // Show 24 hours
   const hoursCount = 24;
   const hours = weather.hourly.time.slice(0, hoursCount); 
   const temps = weather.hourly.temperature_2m.slice(0, hoursCount);
   const codes = weather.hourly.weather_code.slice(0, hoursCount);
-  const isDay = weather.hourly.is_day.slice(0, hoursCount);
+  const isDayList = weather.hourly.is_day.slice(0, hoursCount);
   const rainProbs = weather.hourly.precipitation_probability?.slice(0, hoursCount) || new Array(hoursCount).fill(0);
-  const windSpeeds = weather.hourly.wind_speed_10m.slice(0, hoursCount);
-
-  // Min/Max hesabı (Barların yüksekliğini ayarlamak için)
-  const maxTemp = Math.max(...temps);
-  const minTemp = Math.min(...temps);
-  const range = maxTemp - minTemp || 1; // 0'a bölünmeyi önle
+  const windDirs = weather.hourly.wind_direction_10m?.slice(0, hoursCount) || new Array(hoursCount).fill(0);
 
   return (
     <div className="w-full mb-8">
       <div className="flex items-center justify-between mb-4 px-1">
-        <h3 className="text-slate-400 text-xs font-semibold uppercase tracking-wider">24 Saatlik Akış</h3>
-        <span className="text-[10px] text-slate-500 bg-white/5 px-2 py-1 rounded-full">Sola kaydır</span>
+        <h3 className="text-slate-400 text-xs font-semibold uppercase tracking-wider">Saatlik Akış</h3>
+        <span className="text-[10px] text-slate-500">Rüzgar & Yağış Detaylı</span>
       </div>
       
       {/* Scrollable Container */}
-      <div className="overflow-x-auto no-scrollbar pb-4">
-        <div className="flex space-x-3 min-w-max px-1">
-            
+      <div className="overflow-x-auto no-scrollbar pb-2">
+        <div className="flex space-x-3 px-1 min-w-max">
           {hours.map((time, index) => {
             const temp = temps[index];
+            const code = codes[index];
+            const isDay = isDayList[index];
             const formattedTime = formatTime(time);
             const isNow = index === 0;
-            
-            // Bar Yüksekliği Hesaplama (%20 ile %100 arası dolsun ki bar hiç kaybolmasın)
-            const heightPercent = 20 + ((temp - minTemp) / range) * 80;
-
-            // Sıcaklığa göre renk belirleme
-            let barColor = "bg-blue-500";
-            if (temp > 30) barColor = "bg-red-500";
-            else if (temp > 20) barColor = "bg-orange-500";
-            else if (temp > 10) barColor = "bg-yellow-400";
-            else if (temp > 0) barColor = "bg-cyan-400";
+            const bgGradient = getTempGradient(temp, isDay);
+            const rainProb = rainProbs[index];
+            const windDir = windDirs[index];
 
             return (
               <div 
                 key={time} 
                 className={`
                   relative flex flex-col items-center justify-between 
-                  w-[72px] h-64 p-3 rounded-[2rem] border transition-all duration-300
-                  ${isNow 
-                    ? 'bg-slate-800/80 border-blue-500/50 shadow-lg shadow-blue-500/10 scale-105 z-10' 
-                    : 'glass-card border-white/5 hover:bg-slate-800/40'}
+                  w-28 h-28 p-3 rounded-3xl transition-all duration-300 border
+                  ${isNow ? 'scale-105 z-10 shadow-2xl ring-1 ring-white/30' : 'scale-100 shadow-md opacity-90'}
+                  ${bgGradient}
                 `}
               >
-                {/* 1. Saat */}
-                <span className={`text-xs font-bold mb-2 ${isNow ? 'text-blue-300' : 'text-slate-400'}`}>
-                  {isNow ? 'Şimdi' : formattedTime}
+                {/* Time */}
+                <span className="text-[11px] font-bold text-white/90 drop-shadow-md tracking-wide">
+                    {isNow ? 'ŞİMDİ' : formattedTime}
                 </span>
 
-                {/* 2. Hava İkonu */}
-                <div className="w-8 h-8 mb-2 drop-shadow-md transition-transform hover:scale-110">
-                  {getWeatherIcon(codes[index], isDay[index])}
+                {/* Icon */}
+                <div className="w-9 h-9 drop-shadow-lg filter transform transition-transform group-hover:scale-110">
+                     {getWeatherIcon(code, isDay)}
                 </div>
 
-                {/* 3. Bar Grafiği Alanı (Equalizer Style) */}
-                <div className="flex-1 w-full flex items-end justify-center my-2">
-                  <div className="w-2 h-full bg-slate-700/30 rounded-full relative overflow-hidden">
-                    {/* Doluluk Oranı */}
-                    <div 
-                      className={`absolute bottom-0 left-0 w-full rounded-full transition-all duration-1000 ease-out ${barColor} shadow-[0_0_10px_rgba(255,255,255,0.3)]`}
-                      style={{ height: `${heightPercent}%` }}
-                    />
-                  </div>
-                </div>
-
-                {/* 4. Ekstra Bilgiler (Rüzgar veya Yağış varsa göster) */}
-                <div className="h-6 flex items-center justify-center mb-1">
-                    {rainProbs[index] > 20 ? (
-                        <div className="flex flex-col items-center text-blue-300 animate-pulse">
-                            <Droplets size={10} />
-                            <span className="text-[9px] font-bold">%{rainProbs[index]}</span>
+                {/* Info Row: Wind or Rain */}
+                <div className="w-full flex justify-center items-center h-4">
+                     {rainProb > 15 ? (
+                        <div className="flex items-center gap-1 bg-black/10 px-1.5 py-0.5 rounded-full">
+                            <Droplets size={8} className="text-blue-100" />
+                            <span className="text-[9px] font-bold text-blue-50">%{rainProb}</span>
                         </div>
-                    ) : (
-                        <div className="flex flex-col items-center text-slate-500">
-                            <Wind size={10} />
-                            <span className="text-[9px]">{Math.round(windSpeeds[index])}</span>
+                     ) : (
+                        <div className="flex items-center gap-1" title="Rüzgar Yönü">
+                            {/* Rüzgar okunu döndür */}
+                            <Navigation 
+                                size={10} 
+                                className="text-white/70" 
+                                style={{ transform: `rotate(${windDir}deg)` }} 
+                            />
                         </div>
-                    )}
+                     )}
                 </div>
 
-                {/* 5. Sıcaklık */}
-                <span className="text-lg font-bold text-white tracking-tighter">
-                  {Math.round(temp)}°
+                {/* Temp */}
+                <span className="text-xl font-bold text-white tracking-tighter drop-shadow-md">
+                    {Math.round(temp)}°
                 </span>
               </div>
             );

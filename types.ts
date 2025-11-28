@@ -27,6 +27,7 @@ export interface HourlyForecast {
   weather_code: number[];
   is_day: number[];
   wind_speed_10m: number[];
+  wind_direction_10m: number[]; // Yeni: Rüzgar Yönü
   precipitation_probability: number[];
 }
 
@@ -38,8 +39,9 @@ export interface DailyForecast {
   sunrise: string[];
   sunset: string[];
   uv_index_max: number[];
-  precipitation_probability_max: number[]; // Artık zorunlu
-  wind_speed_10m_max: number[]; // Yeni eklenen
+  precipitation_probability_max: number[];
+  wind_speed_10m_max: number[];
+  moon_phase: number[]; // Yeni: Ay Fazı (0.0 - 1.0)
 }
 
 export interface AirQuality {

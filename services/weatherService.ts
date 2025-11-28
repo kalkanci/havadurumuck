@@ -74,9 +74,10 @@ export const fetchWeather = async (lat: number, lon: number): Promise<WeatherDat
     latitude: lat.toString(),
     longitude: lon.toString(),
     current: 'temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,cloud_cover,pressure_msl,surface_pressure,wind_speed_10m,wind_direction_10m',
-    hourly: 'temperature_2m,weather_code,is_day,wind_speed_10m,precipitation_probability',
-    // precipitation_probability_max ve wind_speed_10m_max eklendi
-    daily: 'weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max,precipitation_probability_max,wind_speed_10m_max',
+    hourly: 'temperature_2m,weather_code,is_day,wind_speed_10m,wind_direction_10m,precipitation_probability',
+    // wind_direction_10m eklendi
+    daily: 'weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max,precipitation_probability_max,wind_speed_10m_max,moon_phase',
+    // moon_phase eklendi
     timezone: 'auto',
     forecast_days: '7'
   });
