@@ -2,11 +2,18 @@
 <html lang="tr">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="https://lucide.dev/favicon.ico" />
+    <!-- Modern 3D Glassmorphism Weather Icon -->
+    <link rel="icon" type="image/png" href="https://cdn.dribbble.com/users/702789/screenshots/16900827/media/865c3290623f990924b455b9347d4837.png?resize=400x300&vertical=center" />
+    <link rel="apple-touch-icon" href="https://cdn.dribbble.com/users/702789/screenshots/16900827/media/865c3290623f990924b455b9347d4837.png?resize=400x300&vertical=center" />
+    
+    <!-- Viewport for Notch Support -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    <meta name="theme-color" content="#000000" />
+    
+    <!-- Translucent Status Bar Settings -->
+    <meta name="theme-color" content="#0f172a" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    
     <title>Atmosfer AI Hava Durumu</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -21,10 +28,11 @@
       }
       
       body {
-        background-color: #000000;
+        background-color: #0f172a; /* Slate-900 matches app theme */
         color: white;
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         overscroll-behavior-y: none; /* Prevent bounce effect on body */
+        -webkit-tap-highlight-color: transparent;
       }
       
       .glass-card {

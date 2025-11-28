@@ -5,21 +5,20 @@ import { getWeatherLabel } from "../constants";
 // Vite/Vercel ortamında API anahtarını güvenli bir şekilde alma
 const getApiKey = (): string | undefined => {
   try {
-    // @ts-ignore - Vite types might be missing in some setups
+    // @ts-ignore
     return import.meta.env.VITE_API_KEY;
   } catch (e) {
-    console.warn("API Key okunamadı.");
     return undefined;
   }
 };
 
 const apiKey = getApiKey();
+// Eğer API key yoksa null dönüyoruz, uygulama çökmesin
 const ai = apiKey ? new GoogleGenAI({ apiKey }) : null;
 
 export const getGeminiAdvice = async (weather: WeatherData, locationName: string): Promise<AdviceResponse> => {
   if (!ai) {
-    console.warn("API Anahtarı eksik (VITE_API_KEY). Fallback kullanılıyor.");
-    // Hata fırlatmak yerine null/fallback dönerek UI'ın çökmesini engelliyoruz
+    // API Key yoksa hatayı yakalayan üst katmana fırlat
     throw new Error("API Key Eksik");
   }
 
@@ -94,19 +93,22 @@ export const getGeminiAdvice = async (weather: WeatherData, locationName: string
 };
 
 export const generateCityImage = async (city: string, weatherCode: number, isDay: boolean): Promise<string | null> => {
-  if (!ai) return null;
+  if (!ai) {
+    console.warn("API Key missing, skipping image generation.");
+    return null;
+  }
 
   try {
     const condition = getWeatherLabel(weatherCode);
-    const timeOfDay = isDay ? "daylight, bright" : "night time, cinematic lighting, city lights";
-    const mood = isDay ? "vibrant, realistic" : "moody, mysterious";
+    const timeOfDay = isDay ? "daylight, bright sun" : "night time, city lights, cinematic lighting";
+    const atmosphere = isDay ? "vibrant colors, blue sky" : "moody, dark atmosphere, glowing lights";
     
+    // Prompt optimizations for Nano Banana (Flash Image)
     const prompt = `
-      Cinematic ultra-realistic wide angle photography of ${city} iconic landmark or street view.
-      Weather condition: ${condition} (make sure the sky and atmosphere reflect this).
-      Time: ${timeOfDay}.
-      Style: ${mood}, high resolution, 8k, detailed textures, masterpiece, award winning photography.
-      No text, no overlays, just the scenery.
+      A breathtaking, vertical cinematic wallpaper of ${city} city.
+      Conditions: ${condition}, ${timeOfDay}.
+      Style: Hyper-realistic 8k photography, wide angle, ${atmosphere}.
+      No text, no overlays. High quality.
     `;
 
     const response = await ai.models.generateContent({
@@ -116,14 +118,17 @@ export const generateCityImage = async (city: string, weatherCode: number, isDay
           { text: prompt }
         ]
       },
-      config: {}
+      // Flash image genellikle config gerektirmez veya desteklemez, sade tutuyoruz
     });
 
     if (response.candidates && response.candidates[0].content.parts) {
       for (const part of response.candidates[0].content.parts) {
         if (part.inlineData) {
           const base64String = part.inlineData.data;
-          return `data:image/png;base64,${base64String}`;
+          // Base64 string'in geçerli olup olmadığını kontrol et
+          if (base64String && base64String.length > 100) {
+              return `data:image/png;base64,${base64String}`;
+          }
         }
       }
     }

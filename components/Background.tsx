@@ -14,7 +14,6 @@ const Background: React.FC<BackgroundProps> = ({ city, weatherCode = 0, isDay = 
   const prevPropsRef = useRef({ city: '', weatherCode: -1, isDay: -1 });
 
   useEffect(() => {
-    // Sadece şehir, hava durumu veya gece/gündüz değiştiğinde çalıştır
     const hasChanged = 
         city !== prevPropsRef.current.city || 
         weatherCode !== prevPropsRef.current.weatherCode || 
@@ -25,33 +24,53 @@ const Background: React.FC<BackgroundProps> = ({ city, weatherCode = 0, isDay = 
     prevPropsRef.current = { city, weatherCode, isDay };
 
     const fetchImage = async () => {
-      // Gemini ile görsel oluştur
-      const base64Image = await generateCityImage(city, weatherCode, isDay === 1);
+      console.log(`[Background] Fetching image for ${city}...`);
       
-      if (base64Image) {
-        setNextImg(base64Image);
-        setIsTransitioning(true);
-      } else {
-        // Fallback: Gemini başarısız olursa Pollinations kullan (eski yöntem)
-        const encodedCity = encodeURIComponent(city);
-        const seed = Date.now(); // Cache breaker for fallback
-        const fallbackUrl = `https://image.pollinations.ai/prompt/cinematic%20shot%20of%20${encodedCity}%20city%20landmark%20weather%20moody?width=1080&height=1920&nologo=true&seed=${seed}`;
-        setNextImg(fallbackUrl);
-        setIsTransitioning(true);
+      try {
+        // 1. Önce Gemini ile dene
+        const base64Image = await generateCityImage(city, weatherCode, isDay === 1);
+        
+        if (base64Image) {
+          console.log("[Background] Gemini image generated.");
+          setNextImg(base64Image);
+          setIsTransitioning(true);
+        } else {
+          console.warn("[Background] Gemini returned null, using fallback.");
+          useFallback(city);
+        }
+      } catch (err) {
+        console.error("[Background] Error generating image:", err);
+        useFallback(city);
       }
     };
 
-    // İlk yüklemede çok beklemesin diye ufak bir gecikme ile çağırıyoruz
-    // Bu sayede UI render olduktan hemen sonra işlem başlar
     const timeout = setTimeout(fetchImage, 100);
-
     return () => clearTimeout(timeout);
   }, [city, weatherCode, isDay]);
 
+  const useFallback = (cityName: string) => {
+    const encodedCity = encodeURIComponent(cityName);
+    const seed = Date.now();
+    // Alternatif olarak Unsplash source veya Pollinations
+    const fallbackUrl = `https://image.pollinations.ai/prompt/cinematic%20wide%20shot%20of%20${encodedCity}%20city%20landmark%20weather%20moody?width=1080&height=1920&nologo=true&seed=${seed}&model=flux`;
+    setNextImg(fallbackUrl);
+    setIsTransitioning(true);
+  };
+
   const handleImageLoad = () => {
-    // Yeni resim yüklendiğinde geçişi tamamla
     setCurrentImg(nextImg);
     setIsTransitioning(false);
+  };
+
+  const handleImageError = () => {
+    console.error("[Background] Image load failed (Base64/URL error). Retrying with fallback.");
+    if (!nextImg.includes('pollinations.ai')) {
+        // Eğer hata veren resim Gemini resmiyse, fallback'e geç
+        useFallback(city);
+    } else {
+        // Fallback de hata verirse geçişi iptal et (siyah ekran kalsın veya gradient)
+        setIsTransitioning(false);
+    }
   };
 
   return (
@@ -71,6 +90,7 @@ const Background: React.FC<BackgroundProps> = ({ city, weatherCode = 0, isDay = 
           src={nextImg}
           alt="Next Background"
           onLoad={handleImageLoad}
+          onError={handleImageError}
           className={`absolute inset-0 w-full h-[65%] object-cover transition-opacity duration-1000 ease-in-out ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}
         />
       )}
@@ -81,7 +101,7 @@ const Background: React.FC<BackgroundProps> = ({ city, weatherCode = 0, isDay = 
       )}
 
       {/* Stronger Gradient Overlay for Fade Out to Bottom */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-slate-900/60 to-slate-900 via-50% to-90% h-full pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-slate-900/60 to-slate-900 via-50% to-90% h-full pointer-events-none" />
       
       {/* Additional bottom fade to ensure seamless transition to content background */}
       <div className="absolute bottom-0 left-0 right-0 h-1/2 bg-gradient-to-t from-slate-900 via-slate-900 to-transparent pointer-events-none" />

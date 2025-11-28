@@ -1,0 +1,22 @@
+{
+  "name": "Atmosfer AI",
+  "short_name": "Atmosfer",
+  "description": "Sinematik, mobil öncelikli ve akıllı tavsiyeler sunan hava durumu deneyimi.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "https://cdn.dribbble.com/users/702789/screenshots/16900827/media/865c3290623f990924b455b9347d4837.png?resize=192x192&vertical=center",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://cdn.dribbble.com/users/702789/screenshots/16900827/media/865c3290623f990924b455b9347d4837.png?resize=512x512&vertical=center",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
