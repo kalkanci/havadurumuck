@@ -6,6 +6,9 @@
     <link rel="icon" type="image/png" href="https://cdn.dribbble.com/users/702789/screenshots/16900827/media/865c3290623f990924b455b9347d4837.png?resize=400x300&vertical=center" />
     <link rel="apple-touch-icon" href="https://cdn.dribbble.com/users/702789/screenshots/16900827/media/865c3290623f990924b455b9347d4837.png?resize=400x300&vertical=center" />
     
+    <!-- PWA Manifest Link (Critical for Vercel/Installation) -->
+    <link rel="manifest" href="/manifest.json" />
+
     <!-- Viewport for Notch Support -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     
@@ -42,7 +45,18 @@
         border: 1px solid rgba(255, 255, 255, 0.1);
       }
 
-      /* --- Full Screen Weather Animations --- */
+      /* --- Animations --- */
+      
+      /* iOS Style Navigation Push */
+      @keyframes slideInRight {
+        from { transform: translateX(100%); }
+        to { transform: translateX(0); }
+      }
+      
+      .animate-slide-in-right {
+        animation: slideInRight 0.4s cubic-bezier(0.32, 0.72, 0, 1) forwards;
+      }
+
       @keyframes rain {
         0% { background-position: 0 0; opacity: 0; }
         20% { opacity: 1; }
@@ -94,5 +108,20 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/index.tsx"></script>
+    
+    <!-- Service Worker Registration for PWA -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then(registration => {
+              console.log('SW registered: ', registration);
+            })
+            .catch(registrationError => {
+              console.log('SW registration failed: ', registrationError);
+            });
+        });
+      }
+    </script>
   </body>
 </html>

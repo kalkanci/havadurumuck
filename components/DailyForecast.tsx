@@ -1,8 +1,8 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { WeatherData } from '../types';
 import { getWeatherIcon, getWeatherLabel } from '../constants';
-import { X, Droplets, Wind, Sun, Calendar, ArrowUp, ArrowDown, Sunrise, Sunset, Navigation, Clock, ThermometerSun, Umbrella } from 'lucide-react';
+import { ChevronLeft, Droplets, Wind, Sun, Calendar, ArrowUp, ArrowDown, Sunrise, Sunset, Navigation, Clock, ThermometerSun, Umbrella } from 'lucide-react';
 import { formatTime, getWindDirection, getDayDuration } from '../utils/helpers';
 
 interface DailyForecastProps {
@@ -30,8 +30,18 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ weather }) => {
 
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
 
-  const openModal = (index: number) => setSelectedDay(index);
-  const closeModal = () => setSelectedDay(null);
+  // Prevent background scrolling when modal is open
+  useEffect(() => {
+    if (selectedDay !== null) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'auto';
+    }
+    return () => { document.body.style.overflow = 'auto'; };
+  }, [selectedDay]);
+
+  const openPage = (index: number) => setSelectedDay(index);
+  const closePage = () => setSelectedDay(null);
 
   const dayData = selectedDay !== null ? {
     date: new Date(time[selectedDay]),
@@ -69,7 +79,7 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ weather }) => {
             return (
               <div 
                 key={dateStr} 
-                onClick={() => openModal(index)}
+                onClick={() => openPage(index)}
                 className="flex items-center justify-between p-2 -mx-2 rounded-xl hover:bg-white/5 transition-colors cursor-pointer active:scale-95 duration-200"
               >
                 <div className="flex items-center gap-2 w-28">
@@ -96,41 +106,47 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ weather }) => {
         </div>
       </div>
 
-      {/* Expanded Detail Modal */}
+      {/* Full Screen Page Transition */}
       {selectedDay !== null && dayData && (
-        <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center">
-          {/* Backdrop */}
-          <div 
-            className="absolute inset-0 bg-slate-950/80 backdrop-blur-md transition-opacity duration-300" 
-            onClick={closeModal} 
-          />
-          
-          <div className="relative w-full max-w-md m-0 sm:m-4 h-[90vh] sm:h-auto overflow-y-auto sm:overflow-hidden rounded-t-[2rem] sm:rounded-[2rem] border-t sm:border border-white/10 shadow-2xl animate-slideUp sm:animate-zoomIn flex flex-col bg-slate-900/90 no-scrollbar">
+        <div className="fixed inset-0 z-[200] bg-slate-900 animate-slide-in-right flex flex-col h-full w-full overflow-hidden">
             
-            {/* Modal Header Decoration */}
-            <div className="sticky top-0 z-20 bg-slate-900/95 backdrop-blur-xl border-b border-white/5 p-4 flex justify-between items-center">
-               <div>
-                  <h2 className="text-2xl font-bold text-white tracking-tight">
-                    {selectedDay === 0 ? 'Bugün' : dayData.date.toLocaleDateString('tr-TR', { weekday: 'long' })}
-                  </h2>
-                  <p className="text-blue-200/60 font-medium text-xs uppercase tracking-wide">
-                    {dayData.date.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })}
-                  </p>
-               </div>
-               <button 
-                  onClick={closeModal} 
-                  className="p-2 bg-white/10 hover:bg-white/20 rounded-full text-slate-200 transition-all active:scale-90"
-                >
-                  <X size={20} />
-                </button>
+            {/* Artistic Background Layer */}
+            <div className="absolute inset-0 bg-gradient-to-b from-blue-900/20 to-slate-900 pointer-events-none z-0" />
+            <div className="absolute top-0 right-0 p-10 opacity-10 pointer-events-none z-0 scale-150">
+               {getWeatherIcon(dayData.code)}
+            </div>
+
+            {/* iOS Style Header */}
+            <div className="relative z-50 pt-[env(safe-area-inset-top)] bg-slate-900/80 backdrop-blur-xl border-b border-white/5 shadow-sm">
+                <div className="flex items-center justify-between px-4 h-14">
+                    <button 
+                        onClick={closePage}
+                        className="flex items-center gap-1 text-blue-400 font-medium active:opacity-50 transition-opacity -ml-2 p-2"
+                    >
+                        <ChevronLeft size={24} />
+                        <span className="text-base">Geri</span>
+                    </button>
+                    
+                    <div className="absolute left-1/2 -translate-x-1/2 text-center">
+                         <h2 className="text-base font-bold text-white">
+                            {selectedDay === 0 ? 'Bugün' : dayData.date.toLocaleDateString('tr-TR', { weekday: 'long' })}
+                         </h2>
+                         <p className="text-[10px] text-slate-400">
+                            {dayData.date.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })}
+                         </p>
+                    </div>
+
+                    <div className="w-10"></div> {/* Spacer for centering */}
+                </div>
             </div>
             
-            <div className="p-5 pb-10 space-y-4">
+            {/* Scrollable Content */}
+            <div className="flex-1 overflow-y-auto no-scrollbar relative z-10 p-5 pb-20">
               
               {/* Main Status Card */}
-              <div className="bg-gradient-to-br from-blue-600/20 to-indigo-600/20 border border-blue-500/20 rounded-3xl p-6 text-center relative overflow-hidden">
+              <div className="bg-gradient-to-br from-blue-600/10 to-indigo-600/10 border border-blue-500/20 rounded-3xl p-6 text-center relative overflow-hidden mb-6 shadow-lg">
                 <div className="relative z-10 flex flex-col items-center">
-                    <div className="w-24 h-24 mb-2 drop-shadow-2xl">
+                    <div className="w-20 h-20 mb-2 drop-shadow-2xl">
                         {getWeatherIcon(dayData.code)}
                     </div>
                     <div className="text-xl font-medium text-blue-100 mb-4">{getWeatherLabel(dayData.code)}</div>
@@ -264,7 +280,6 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ weather }) => {
 
               </div>
             </div>
-          </div>
         </div>
       )}
     </>
