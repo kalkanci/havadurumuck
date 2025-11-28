@@ -16,7 +16,6 @@ export const getDetailedAddress = async (lat: number, lon: number): Promise<{ ci
     const addr = data.address || {};
     
     // Öncelik Sıralaması: Mahalle > Semt > Köy > İlçe > Şehir
-    // Bu 'city' değişkeni ana başlık (Büyük Font) olacak.
     let specificLocationName = 
       addr.neighbourhood || 
       addr.suburb || 
@@ -26,28 +25,22 @@ export const getDetailedAddress = async (lat: number, lon: number): Promise<{ ci
       addr.city_district ||
       'Bilinmeyen Konum';
 
-    // Eğer mahalle yoksa ama sokak varsa, sokağı başlık yapalım
     if (specificLocationName === 'Bilinmeyen Konum' && addr.road) {
       specificLocationName = addr.road;
     }
 
-    // Alt metin oluşturma: İlçe, İl, Ülke
     const contextParts = [];
-    
-    // Eğer başlıkta sokak adı yoksa ve sokak verisi varsa, başa ekle
     if (addr.road && specificLocationName !== addr.road) {
         contextParts.push(addr.road);
     }
 
-    // İlçe/Semt (Eğer başlıkta kullanılmadıysa)
     if (addr.town && specificLocationName !== addr.town) contextParts.push(addr.town);
     else if (addr.district && specificLocationName !== addr.district) contextParts.push(addr.district);
     
-    // İl (Province)
     if (addr.city && specificLocationName !== addr.city) contextParts.push(addr.city);
     else if (addr.province && specificLocationName !== addr.province) contextParts.push(addr.province);
     
-    const fullAddress = contextParts.slice(0, 2).join(', '); // Çok uzamaması için ilk 2 parçayı al
+    const fullAddress = contextParts.slice(0, 2).join(', ');
 
     return { city: specificLocationName, address: fullAddress };
   } catch (error) {
@@ -75,9 +68,7 @@ export const fetchWeather = async (lat: number, lon: number): Promise<WeatherDat
     longitude: lon.toString(),
     current: 'temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,cloud_cover,pressure_msl,surface_pressure,wind_speed_10m,wind_direction_10m',
     hourly: 'temperature_2m,weather_code,is_day,wind_speed_10m,wind_direction_10m,precipitation_probability',
-    // wind_direction_10m eklendi
-    daily: 'weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max,precipitation_probability_max,wind_speed_10m_max,moon_phase',
-    // moon_phase eklendi
+    daily: 'weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max,precipitation_probability_max,wind_speed_10m_max',
     timezone: 'auto',
     forecast_days: '7'
   });
@@ -96,7 +87,11 @@ export const fetchWeather = async (lat: number, lon: number): Promise<WeatherDat
       fetch(`${AIR_QUALITY_API_URL}?${aqiParams.toString()}`)
     ]);
 
-    if (!weatherRes.ok) throw new Error('Weather fetch failed');
+    if (!weatherRes.ok) {
+        const errorText = await weatherRes.text();
+        console.error("Open-Meteo API Error:", errorText);
+        throw new Error(`Weather fetch failed: ${weatherRes.status}`);
+    }
     
     const weatherData = await weatherRes.json();
     let aqiData: AirQuality | undefined;

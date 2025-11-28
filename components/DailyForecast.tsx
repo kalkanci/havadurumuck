@@ -1,28 +1,15 @@
 import React, { useState } from 'react';
 import { WeatherData } from '../types';
 import { getWeatherIcon, getWeatherLabel } from '../constants';
-import { X, Droplets, Wind, Sun, Calendar, Moon } from 'lucide-react';
+import { X, Droplets, Wind, Sun, Calendar } from 'lucide-react';
 import { formatTime } from '../utils/helpers';
 
 interface DailyForecastProps {
   weather: WeatherData;
 }
 
-// Basit Ay Fazı İkonu Seçici
-const getMoonIcon = (phase: number) => {
-    // 0: New Moon, 0.25: First Quarter, 0.5: Full Moon, 0.75: Last Quarter
-    if (phase === 0 || phase === 1) return <span title="Yeni Ay">🌑</span>;
-    if (phase > 0 && phase < 0.25) return <span title="Hilal">🌒</span>;
-    if (phase === 0.25) return <span title="İlk Dördün">🌓</span>;
-    if (phase > 0.25 && phase < 0.5) return <span title="Şişkin Ay">🌔</span>;
-    if (phase === 0.5) return <span title="Dolunay">🌕</span>;
-    if (phase > 0.5 && phase < 0.75) return <span title="Şişkin Ay">🌖</span>;
-    if (phase === 0.75) return <span title="Son Dördün">🌗</span>;
-    return <span title="Hilal">🌘</span>;
-};
-
 const DailyForecast: React.FC<DailyForecastProps> = ({ weather }) => {
-  const { time, weather_code, temperature_2m_max, temperature_2m_min, precipitation_probability_max, wind_speed_10m_max, sunrise, sunset, uv_index_max, moon_phase } = weather.daily;
+  const { time, weather_code, temperature_2m_max, temperature_2m_min, precipitation_probability_max, wind_speed_10m_max, sunrise, sunset, uv_index_max } = weather.daily;
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
 
   const openModal = (index: number) => setSelectedDay(index);
@@ -38,8 +25,7 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ weather }) => {
     wind: wind_speed_10m_max ? wind_speed_10m_max[selectedDay] : 0,
     uv: uv_index_max[selectedDay],
     sunrise: sunrise[selectedDay],
-    sunset: sunset[selectedDay],
-    moon: moon_phase ? moon_phase[selectedDay] : 0
+    sunset: sunset[selectedDay]
   } : null;
 
   return (
@@ -56,7 +42,6 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ weather }) => {
             const date = new Date(dateStr);
             const dayName = index === 0 ? 'Bugün' : date.toLocaleDateString('tr-TR', { weekday: 'long' });
             const isWeekend = date.getDay() === 0 || date.getDay() === 6;
-            const phase = moon_phase ? moon_phase[index] : 0;
             
             return (
               <div 
@@ -65,7 +50,6 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ weather }) => {
                 className="flex items-center justify-between p-2 -mx-2 rounded-xl hover:bg-white/5 transition-colors cursor-pointer active:scale-95 duration-200"
               >
                 <div className="flex items-center gap-2 w-28">
-                    <span className="text-xs opacity-50 grayscale scale-75">{getMoonIcon(phase)}</span>
                     <span className={`font-medium ${isWeekend ? 'text-blue-300' : 'text-slate-200'}`}>{dayName}</span>
                 </div>
                 
@@ -140,19 +124,11 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ weather }) => {
                 </div>
               </div>
 
-              <div className="bg-slate-800/50 p-4 rounded-2xl flex items-center space-x-3 border border-slate-700/50">
+              <div className="bg-slate-800/50 p-4 rounded-2xl flex items-center space-x-3 border border-slate-700/50 col-span-2">
                 <Sun className="text-orange-400" size={24} />
                 <div>
                   <p className="text-[10px] uppercase text-slate-500 font-bold">UV İndeksi</p>
                   <p className="text-lg font-bold">{dayData.uv.toFixed(1)}</p>
-                </div>
-              </div>
-
-               <div className="bg-slate-800/50 p-4 rounded-2xl flex items-center space-x-3 border border-slate-700/50">
-                <Moon className="text-purple-400" size={24} />
-                <div>
-                  <p className="text-[10px] uppercase text-slate-500 font-bold">Ay Fazı</p>
-                  <p className="text-lg font-bold flex items-center gap-2">{getMoonIcon(dayData.moon)}</p>
                 </div>
               </div>
 
