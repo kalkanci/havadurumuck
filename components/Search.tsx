@@ -1,0 +1,102 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { Search as SearchIcon, MapPin, X } from 'lucide-react';
+import { GeoLocation } from '../types';
+import { searchCity } from '../services/weatherService';
+
+interface SearchProps {
+  onSelect: (location: GeoLocation) => void;
+  onCurrentLocation: () => void;
+}
+
+const Search: React.FC<SearchProps> = ({ onSelect, onCurrentLocation }) => {
+  const [query, setQuery] = useState('');
+  const [results, setResults] = useState<GeoLocation[]>([]);
+  const [isOpen, setIsOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const wrapperRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const delayDebounce = setTimeout(async () => {
+      if (query.length >= 2) {
+        setLoading(true);
+        const data = await searchCity(query);
+        setResults(data);
+        setLoading(false);
+        setIsOpen(true);
+      } else {
+        setResults([]);
+        setIsOpen(false);
+      }
+    }, 500);
+
+    return () => clearTimeout(delayDebounce);
+  }, [query]);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [wrapperRef]);
+
+  const handleSelect = (loc: GeoLocation) => {
+    setQuery('');
+    setIsOpen(false);
+    onSelect(loc);
+  };
+
+  return (
+    <div ref={wrapperRef} className="relative w-full z-50">
+      <div className="relative flex items-center">
+        <div className="absolute left-3 text-slate-400">
+          <SearchIcon size={20} />
+        </div>
+        <input
+          type="text"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Şehir ara..."
+          className="w-full bg-slate-800/80 backdrop-blur-md text-white pl-10 pr-12 py-3 rounded-2xl border border-slate-700/50 focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400 placeholder-slate-400 transition-all shadow-lg"
+        />
+        {query ? (
+          <button 
+            onClick={() => setQuery('')}
+            className="absolute right-3 text-slate-400 hover:text-white"
+          >
+            <X size={18} />
+          </button>
+        ) : (
+          <button 
+            onClick={onCurrentLocation}
+            className="absolute right-3 text-slate-400 hover:text-blue-400 transition-colors"
+          >
+            <MapPin size={20} />
+          </button>
+        )}
+      </div>
+
+      {isOpen && results.length > 0 && (
+        <ul className="absolute top-full left-0 right-0 mt-2 bg-slate-800/90 backdrop-blur-xl border border-slate-700 rounded-2xl shadow-2xl max-h-60 overflow-y-auto no-scrollbar overflow-hidden">
+          {results.map((loc) => (
+            <li
+              key={loc.id}
+              onClick={() => handleSelect(loc)}
+              className="px-4 py-3 hover:bg-white/10 cursor-pointer flex flex-col border-b border-slate-700/50 last:border-none transition-colors"
+            >
+              <span className="font-medium text-white">{loc.name}</span>
+              <span className="text-xs text-slate-400">
+                {loc.admin1 ? `${loc.admin1}, ` : ''}{loc.country}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+};
+
+export default Search;

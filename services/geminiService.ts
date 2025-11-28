@@ -1,0 +1,87 @@
+import { GoogleGenAI, Type } from "@google/genai";
+import { WeatherData, AdviceResponse } from "../types";
+import { getWeatherLabel } from "../constants";
+
+// API Key kontrolü
+const apiKey = process.env.API_KEY;
+const ai = apiKey ? new GoogleGenAI({ apiKey }) : null;
+
+export const getGeminiAdvice = async (weather: WeatherData, locationName: string): Promise<AdviceResponse> => {
+  if (!ai) {
+    throw new Error("API Anahtarı eksik.");
+  }
+
+  try {
+    const current = weather.current;
+    
+    const safeGet = (arr: any[] | undefined, index: number, fallback: any = 0) => {
+        return (arr && arr[index] !== undefined) ? arr[index] : fallback;
+    };
+
+    // Gelecek saatlerin trendini prompt'a ek veri olarak sunuyoruz (kullanıcı promptunda görünmese de analiz için önemli)
+    const nextHoursData = weather.hourly?.time?.slice(0, 6) || [];
+    const trendContext = nextHoursData.length > 0 ? nextHoursData.map((t, i) => {
+      const date = new Date(t);
+      const hourString = date.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+      const temp = safeGet(weather.hourly?.temperature_2m, i);
+      const code = safeGet(weather.hourly?.weather_code, i);
+      return `${hourString}: ${Math.round(temp)}°C (${getWeatherLabel(code)})`;
+    }).join(', ') : "";
+
+    const uvIndex = safeGet(weather.daily?.uv_index_max, 0, 0);
+
+    // Kullanıcının istediği prompt yapısı
+    const prompt = `
+      Sen bir hava durumu asistanısın. Şu anki veriler:
+      Konum: ${locationName}
+      Sıcaklık: ${current.temperature_2m}°C (Hissedilen: ${current.apparent_temperature}°C)
+      Durum: ${getWeatherLabel(current.weather_code)}
+      Rüzgar: ${current.wind_speed_10m} km/s
+      Nem: %${current.relative_humidity_2m}
+      UV İndeksi: ${uvIndex}
+      Saat: ${new Date().toLocaleTimeString('tr-TR')}
+      Gelecek 6 Saat Trendi (Bilgi için): ${trendContext}
+
+      Görevin: Bu verilere dayanarak Türkçe bir JSON yanıtı oluştur.
+      Yanıt şu formatta OLMALI (başka metin ekleme, sadece JSON):
+      {
+        "mood": "Kısa, esprili veya motive edici bir başlık (maks 5 kelime)",
+        "advice": "Ne giymeli ve neye dikkat etmeli konusunda samimi, arkadaşça bir paragraf. Gelecek saatlerdeki değişimi de hesaba kat.",
+        "activities": ["Bu havada ve bu şehirde yapılabilecek spesifik aktivite 1", "Aktivite 2", "Aktivite 3"]
+      }
+    `;
+
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: prompt,
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            mood: { type: Type.STRING },
+            advice: { type: Type.STRING },
+            activities: {
+              type: Type.ARRAY,
+              items: { type: Type.STRING }
+            }
+          },
+          required: ["mood", "advice", "activities"]
+        }
+      }
+    });
+
+    const text = response.text;
+    if (!text) throw new Error("AI boş yanıt döndürdü.");
+
+    // JSON formatında olduğundan emin olalım (SDK parse etse bile)
+    const result = JSON.parse(text) as AdviceResponse;
+    return result;
+
+  } catch (error: any) {
+    console.error("Gemini AI Error:", error);
+    // Hata durumunda fallback yapısına uygun boş bir cevap dönülür, 
+    // UI tarafında bu yakalanıp statik mesaj gösterilebilir veya throw edilebilir.
+    throw error; 
+  }
+};

@@ -1,0 +1,7 @@
+{
+  "name": "Atmosfer AI",
+  "description": "Sinematik, mobil öncelikli ve akıllı tavsiyeler sunan hava durumu deneyimi.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
