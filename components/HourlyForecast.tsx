@@ -35,13 +35,13 @@ const HourlyForecast: React.FC<HourlyForecastProps> = ({ weather }) => {
 
   return (
     <div className="w-full mb-8">
-      <div className="flex items-center justify-between mb-4 px-1">
+      <div className="flex items-center justify-between mb-0 px-1">
         <h3 className="text-slate-400 text-xs font-semibold uppercase tracking-wider">Saatlik Akış</h3>
         <span className="text-[10px] text-slate-500">Rüzgar & Yağış Detaylı</span>
       </div>
       
-      {/* Scrollable Container */}
-      <div className="overflow-x-auto no-scrollbar pb-2">
+      {/* Scrollable Container with Extra Padding for Scaling */}
+      <div className="overflow-x-auto no-scrollbar py-4">
         <div className="flex space-x-3 px-1 min-w-max">
           {hours.map((time, index) => {
             const temp = temps[index];

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Sparkles, Loader2, Bot, MessageSquareQuote, Compass, Activity } from 'lucide-react';
+import { Sparkles, Loader2, Bot, MessageSquareQuote, Activity } from 'lucide-react';
 import { WeatherData, AdviceResponse } from '../types';
 import { getGeminiAdvice } from '../services/geminiService';
 import { generateFallbackAdvice } from '../utils/helpers';
@@ -15,30 +15,30 @@ const AdviceCard: React.FC<AdviceCardProps> = ({ weather, cityName }) => {
   const [isAiAnalysis, setIsAiAnalysis] = useState<boolean>(false);
 
   useEffect(() => {
-    // Varsayılan veriyi yükle
+    // 1. Önce hızlıca varsayılan (fallback) datayı göster
     const fallback = generateFallbackAdvice(weather.current);
     setData(fallback);
     setIsAiAnalysis(false);
-    setLoading(false);
-  }, [weather, cityName]);
+    
+    // 2. Ardından otomatik olarak AI analizini başlat
+    const fetchAiAdvice = async () => {
+        setLoading(true);
+        try {
+            const aiResponse = await getGeminiAdvice(weather, cityName);
+            if (aiResponse) {
+                setData(aiResponse);
+                setIsAiAnalysis(true);
+            }
+        } catch (error) {
+            console.warn("AI analiz hatası, fallback gösteriliyor:", error);
+            // Hata olsa bile kullanıcıya bir şey göstermeye gerek yok, fallback zaten ekranda.
+        } finally {
+            setLoading(false);
+        }
+    };
 
-  const handleAiAnalysis = async () => {
-    setLoading(true);
-    try {
-      const aiResponse = await getGeminiAdvice(weather, cityName);
-      if (aiResponse) {
-        setData(aiResponse);
-        setIsAiAnalysis(true);
-      }
-    } catch (error) {
-      console.error("AI tavsiyesi alınamadı", error);
-      // Hata olsa bile mevcut data (fallback) kalır, sadece uyarı verilebilir
-      // Ancak kullanıcıya hata olduğunu hissettirmek için basit bir alert veya toast kullanılabilir
-      // Şimdilik sessizce logluyoruz.
-    } finally {
-      setLoading(false);
-    }
-  };
+    fetchAiAdvice();
+  }, [weather, cityName]);
 
   if (!data) return null;
 
@@ -64,29 +64,19 @@ const AdviceCard: React.FC<AdviceCardProps> = ({ weather, cityName }) => {
           </div>
           <div>
             <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
-              {isAiAnalysis ? 'Atmosfer AI' : 'Hava Durumu Özeti'}
+              {loading ? 'AI Düşünüyor...' : (isAiAnalysis ? 'Atmosfer AI' : 'Hava Durumu Özeti')}
             </h3>
             <p className={`text-sm font-bold transition-colors duration-300 ${isAiAnalysis ? 'text-indigo-300' : 'text-slate-200'}`}>
               {data.mood}
             </p>
           </div>
         </div>
-
-        {!isAiAnalysis && !loading && (
-          <button 
-            onClick={handleAiAnalysis}
-            className="flex items-center gap-2 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white text-xs font-bold rounded-lg transition-all shadow-md hover:shadow-indigo-500/25 animate-pulse-slow"
-          >
-            <Bot size={14} />
-            AI Analiz
-          </button>
-        )}
       </div>
       
       {/* Content Section */}
       <div className="relative z-10 space-y-4">
         {/* Advice Text */}
-        <p className={`text-slate-100 text-sm leading-relaxed font-medium transition-all duration-500 ${loading ? 'opacity-50 blur-[1px]' : 'opacity-100 blur-0'}`}>
+        <p className={`text-slate-100 text-sm leading-relaxed font-medium transition-all duration-500 ${loading ? 'opacity-70' : 'opacity-100'}`}>
           {data.advice}
         </p>
 
