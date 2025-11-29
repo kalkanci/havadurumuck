@@ -1,5 +1,5 @@
 
-import { CurrentWeather, AdviceResponse, WeatherData, WeatherAlert } from '../types';
+import { CurrentWeather, AdviceResponse, WeatherData, WeatherAlert, DailyForecast, AirQuality } from '../types';
 
 // Haversine formula for distance
 export const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
@@ -14,24 +14,78 @@ export const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2
   return Math.round(R * c * 10) / 10;
 };
 
-// Basit statik tavsiye
-export const generateFallbackAdvice = (current: CurrentWeather): AdviceResponse => {
+// Akıllı Tavsiye Motoru (Local Logic)
+export const generateSmartAdvice = (weather: WeatherData): AdviceResponse => {
+  const { current, daily, air_quality } = weather;
   const temp = current.temperature_2m;
-  let mood = "Hava Normal";
-  let advice = "Hava koşulları mevsim normallerinde, keyfini çıkarın.";
-  let activities = ["Yürüyüş", "Fotoğraf Çekimi"];
+  const code = current.weather_code;
+  const wind = current.wind_speed_10m;
+  const uv = daily.uv_index_max[0] || 0;
+  const rainProb = daily.precipitation_probability_max[0] || 0;
+  
+  let mood = "Dengeli";
+  let advice = "Hava koşulları mevsim normallerinde seyrediyor.";
+  let activities: string[] = ["Yürüyüş", "Kitap Okuma", "Müzik Dinleme"];
 
-  if (temp < 10) {
-    mood = "Soğuk ve Dinç";
-    advice = "Hava oldukça soğuk, sıkı giyinmeyi ihmal etmeyin.";
-    activities = ["Sıcak Kahve", "Kitap Okuma", "Sinema"];
-  } else if (temp > 30) {
-    mood = "Sıcak ve Enerjik";
-    advice = "Hava çok sıcak, bol su tüketin ve gölgede kalın.";
-    activities = ["Yüzme", "AVM Gezisi", "Dondurma Keyfi"];
+  // Logic Tree for Weather Conditions
+  if (code >= 95) { // Thunderstorm
+     mood = "Fırtınalı";
+     advice = "Dışarıda fırtına riski var. Mecbur kalmadıkça dışarı çıkmaman ve güvenli alanlarda kalman en iyisi.";
+     activities = ["Film Maratonu", "Ev Düzenleme", "Yemek Yapma"];
+  } 
+  else if (code >= 71) { // Snow
+     mood = "Büyülü Beyaz";
+     advice = "Hava karlı ve soğuk. Dışarı çıkacaksan sıkı giyin ve kaygan zeminlere dikkat et. Manzaranın tadını çıkar!";
+     activities = ["Kardan Adam Yapma", "Sıcak Çikolata", "Manzara İzleme"];
+  } 
+  else if (code >= 51 || rainProb > 80) { // Rain
+     mood = "Yağmurlu";
+     advice = "Şemsiyeni almadan çıkma. Islanmak istemiyorsan kapalı mekan aktivitelerini tercih edebilirsin.";
+     activities = ["Kahve Keyfi", "Müze Gezisi", "Kapalı Sporlar"];
+  } 
+  else if (temp > 32) { // Extreme Hot
+     mood = "Kavurucu";
+     advice = "Hava çok sıcak! Güneş çarpmasına karşı dikkatli ol, bol su tüket ve gölgede kalmaya çalış.";
+     activities = ["Yüzme", "Dondurma Keyfi", "Kliması Olan Yerler"];
+  } 
+  else if (temp < 0) { // Freezing
+     mood = "Dondurucu";
+     advice = "Hava ısırıyor! Atkı, bere ve eldivenlerini takmadan dışarı adım atma.";
+     activities = ["Sıcak Kafe", "Sinema", "Evde Oyun Gecesi"];
+  } 
+  else if (wind > 35) { // Windy
+     mood = "Rüzgarlı";
+     advice = "Rüzgar oldukça sert esiyor. Şapkam uçmasın diyorsan dikkatli ol, saçların dağılabilir!";
+     activities = ["Uçurtma Uçurma", "Hızlı Yürüyüş", "Fotoğrafçılık"];
+  } 
+  else if (code <= 1 && uv > 6) { // Clear & High UV
+     mood = "Güneşli";
+     advice = "Harika bir gün ama UV indeksi yüksek. Dışarı çıkarken güneş kremi sürmeyi ve gözlük takmayı unutma.";
+     activities = ["Piknik", "Bisiklet Turu", "Doğa Yürüyüşü"];
+  } 
+  else if (temp >= 15 && temp <= 25 && code <= 2) { // Perfect
+     mood = "Mükemmel";
+     advice = "Hava tam gezmelik! Ne çok sıcak ne çok soğuk. Bu güzel havanın tadını mutlaka çıkar.";
+     activities = ["Şehir Turu", "Park Gezisi", "Arkadaş Buluşması"];
+  }
+
+  // Air Quality Override
+  if (air_quality && air_quality.european_aqi > 80) {
+      advice += " Ayrıca hava kalitesi biraz düşük, hassasiyetin varsa maske takmayı düşünebilirsin.";
   }
 
   return { mood, advice, activities };
+};
+
+// Fallback is simply calling the smart advice now
+export const generateFallbackAdvice = (current: CurrentWeather): AdviceResponse => {
+    // Mock weather data structure for simple fallback
+    return generateSmartAdvice({
+        current,
+        daily: { uv_index_max: [0], precipitation_probability_max: [0] } as any,
+        hourly: {} as any,
+        latitude: 0, longitude: 0, generationtime_ms: 0, utc_offset_seconds: 0, elevation: 0, current_units: {}
+    });
 };
 
 // 24 Saatlik Format (HH:mm)

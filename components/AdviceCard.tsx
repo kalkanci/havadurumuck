@@ -3,8 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Sparkles, Loader2, Bot, MessageSquareQuote, Activity, X, Quote } from 'lucide-react';
 import { WeatherData, AdviceResponse } from '../types';
-import { getGeminiAdvice } from '../services/geminiService';
-import { generateFallbackAdvice } from '../utils/helpers';
+import { generateSmartAdvice } from '../utils/helpers';
 
 interface AdviceCardProps {
   weather: WeatherData;
@@ -13,43 +12,18 @@ interface AdviceCardProps {
 
 const AdviceCard: React.FC<AdviceCardProps> = ({ weather, cityName }) => {
   const [data, setData] = useState<AdviceResponse | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [isAiAnalysis, setIsAiAnalysis] = useState<boolean>(false);
-  
-  // Modal States
   const [isOpen, setIsOpen] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
 
   useEffect(() => {
-    // 1. Önce hızlıca varsayılan (fallback) datayı göster
-    const fallback = generateFallbackAdvice(weather.current);
-    setData(fallback);
-    setIsAiAnalysis(false);
-    
-    // 2. Ardından otomatik olarak AI analizini başlat
-    const fetchAiAdvice = async () => {
-        setLoading(true);
-        try {
-            const aiResponse = await getGeminiAdvice(weather, cityName);
-            if (aiResponse) {
-                setData(aiResponse);
-                setIsAiAnalysis(true);
-            }
-        } catch (error) {
-            console.warn("AI analiz hatası, fallback gösteriliyor:", error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    fetchAiAdvice();
+    // Use the smart local advice generator immediately
+    const advice = generateSmartAdvice(weather);
+    setData(advice);
   }, [weather, cityName]);
 
   const handleOpen = () => {
-    if (!loading) {
-        setIsOpen(true);
-        setIsClosing(false);
-    }
+    setIsOpen(true);
+    setIsClosing(false);
   };
 
   const handleClose = (e?: React.MouseEvent) => {
@@ -76,13 +50,13 @@ const AdviceCard: React.FC<AdviceCardProps> = ({ weather, cityName }) => {
 
                 {/* Header */}
                 <div className="flex flex-col items-center text-center mb-6">
-                    <div className={`p-4 rounded-full shadow-lg mb-3 ${isAiAnalysis ? 'bg-gradient-to-br from-indigo-500 to-purple-600' : 'bg-slate-700'}`}>
-                        {isAiAnalysis ? <Bot size={32} className="text-white" /> : <MessageSquareQuote size={32} className="text-slate-300" />}
+                    <div className="p-4 rounded-full shadow-lg mb-3 bg-gradient-to-br from-indigo-500 to-purple-600">
+                         <Sparkles size={32} className="text-white" />
                     </div>
                     <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">
-                        {isAiAnalysis ? 'Atmosfer AI Asistanı' : 'Hava Durumu Özeti'}
+                        Atmosfer Akıllı Asistan
                     </span>
-                    <h2 className={`text-2xl font-bold ${isAiAnalysis ? 'text-indigo-300' : 'text-slate-200'}`}>
+                    <h2 className="text-2xl font-bold text-indigo-300">
                         "{data.mood}"
                     </h2>
                 </div>
@@ -126,25 +100,14 @@ const AdviceCard: React.FC<AdviceCardProps> = ({ weather, cityName }) => {
     <>
     <button 
       onClick={handleOpen}
-      className={`w-full glass-card rounded-2xl p-5 my-5 flex flex-col relative group overflow-hidden border transition-all duration-500 text-left active:scale-[0.98] ${isAiAnalysis ? 'border-indigo-500/30' : 'border-white/10'}`}
+      className="w-full glass-card rounded-2xl p-5 my-5 flex flex-col relative group overflow-hidden border transition-all duration-500 text-left active:scale-[0.98] border-indigo-500/30"
     >
       
-      {/* Loading Overlay inside card */}
-      {loading && (
-        <div className="absolute top-3 right-3">
-             <Loader2 size={16} className="text-indigo-400 animate-spin" />
-        </div>
-      )}
-
       {/* Header */}
       <div className="flex items-center gap-2 mb-3 z-10">
-        {isAiAnalysis ? (
            <Sparkles size={16} className="text-indigo-400 animate-pulse" />
-        ) : (
-           <MessageSquareQuote size={16} className="text-slate-400" />
-        )}
-        <span className={`text-xs font-bold uppercase tracking-widest ${isAiAnalysis ? 'text-indigo-300' : 'text-slate-400'}`}>
-            {isAiAnalysis ? 'Atmosfer AI' : 'Özet'}
+        <span className="text-xs font-bold uppercase tracking-widest text-indigo-300">
+            Günün Tavsiyesi
         </span>
       </div>
 
@@ -162,9 +125,7 @@ const AdviceCard: React.FC<AdviceCardProps> = ({ weather, cityName }) => {
       </div>
 
       {/* Decorative Gradient */}
-      {isAiAnalysis && (
-        <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none"></div>
-      )}
+      <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none"></div>
     </button>
     {renderModal()}
     </>

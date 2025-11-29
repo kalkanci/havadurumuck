@@ -5,6 +5,7 @@ export interface GeoLocation {
   latitude: number;
   longitude: number;
   country: string;
+  countryCode?: string; // ISO 3166-1 alpha-2 (TR, US, DE etc.)
   admin1?: string; // Province/State
   subtext?: string; // Sokak, Mahalle vb. detaylı adres
 }
@@ -19,6 +20,7 @@ export interface CurrentWeather {
   weather_code: number;
   wind_speed_10m: number;
   surface_pressure: number;
+  pressure_msl?: number;
   cloud_cover: number;
   wind_direction_10m: number;
   dew_point_2m: number;
@@ -35,7 +37,8 @@ export interface HourlyForecast {
   uv_index?: number[]; 
   relative_humidity_2m?: number[]; 
   apparent_temperature?: number[]; 
-  surface_pressure?: number[]; 
+  surface_pressure?: number[];
+  pressure_msl?: number[];
 }
 
 export interface DailyForecast {
@@ -91,4 +94,15 @@ export interface WeatherAlert {
     level: 'warning' | 'critical' | 'info';
     title: string;
     message: string;
+}
+
+export interface PublicHoliday {
+  date: string;
+  localName: string;
+  name: string;
+  countryCode: string;
+  fixed: boolean;
+  global: boolean;
+  launchYear: number | null;
+  types: string[];
 }

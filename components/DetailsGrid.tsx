@@ -2,14 +2,14 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { WeatherData } from '../types';
-import { Droplets, Wind, Sun, Gauge, Thermometer, Navigation, X, Clock, Sunrise, Sunset } from 'lucide-react';
+import { Droplets, Wind, Sun, Gauge, Thermometer, Navigation, X, Clock, Sunrise, Sunset, ArrowUpRight, ArrowDownRight, Minus, Moon, CloudSun, CloudMoon } from 'lucide-react';
 import { formatTime, getWindDirection } from '../utils/helpers';
 
 interface DetailsGridProps {
   weather: WeatherData;
 }
 
-type DetailType = 'feels_like' | 'wind' | 'humidity' | 'dew_point' | 'uv' | 'pressure' | 'sun' | null;
+type DetailType = 'feels_like' | 'wind' | 'humidity' | 'dew_point' | 'uv' | 'pressure' | 'sunrise' | 'sunset' | null;
 
 const DetailsGrid: React.FC<DetailsGridProps> = ({ weather }) => {
   const { current, daily, hourly } = weather;
@@ -33,18 +33,30 @@ const DetailsGrid: React.FC<DetailsGridProps> = ({ weather }) => {
     return "Bunaltıcı";
   };
 
-  // Helper: Safe access to hourly data (next 24 hours)
+  // Helper: Safe access to hourly data (next 24 hours from NOW)
   const getNext24Hours = () => {
-      return hourly.time.slice(0, 24).map((t, i) => ({
-          time: t,
-          temp: hourly.temperature_2m[i],
-          windSpeed: hourly.wind_speed_10m[i],
-          windDir: hourly.wind_direction_10m[i],
-          humidity: hourly.relative_humidity_2m ? hourly.relative_humidity_2m[i] : 0,
-          uv: hourly.uv_index ? hourly.uv_index[i] : 0,
-          pressure: hourly.surface_pressure ? hourly.surface_pressure[i] : 0,
-          feelsLike: hourly.apparent_temperature ? hourly.apparent_temperature[i] : 0,
-      }));
+      const now = new Date();
+      // Find the index of the current hour
+      const currentHourIndex = hourly.time.findIndex(t => {
+          const d = new Date(t);
+          return d.getHours() === now.getHours() && d.getDate() === now.getDate();
+      });
+      
+      const startIndex = currentHourIndex !== -1 ? currentHourIndex : 0;
+      
+      return hourly.time.slice(startIndex, startIndex + 24).map((t, i) => {
+          const idx = startIndex + i;
+          return {
+            time: t,
+            temp: hourly.temperature_2m[idx],
+            windSpeed: hourly.wind_speed_10m[idx],
+            windDir: hourly.wind_direction_10m[idx],
+            humidity: hourly.relative_humidity_2m ? hourly.relative_humidity_2m[idx] : 0,
+            uv: hourly.uv_index ? hourly.uv_index[idx] : 0,
+            pressure: (hourly.pressure_msl && hourly.pressure_msl[idx]) || (hourly.surface_pressure && hourly.surface_pressure[idx]) || 0,
+            feelsLike: hourly.apparent_temperature ? hourly.apparent_temperature[idx] : 0,
+          };
+      });
   };
 
   const hourlyData = getNext24Hours();
@@ -52,47 +64,48 @@ const DetailsGrid: React.FC<DetailsGridProps> = ({ weather }) => {
   // --- Modal Content Renderers ---
 
   const renderWindContent = () => (
-      <div className="space-y-6">
-          <div className="flex flex-col items-center justify-center py-6">
-               <div className="relative w-48 h-48 rounded-full border-4 border-slate-300 dark:border-slate-700 flex items-center justify-center shadow-lg bg-slate-100/50 dark:bg-slate-800/50">
+      <div className="flex flex-col h-full">
+          <div className="flex flex-col items-center justify-center py-4 shrink-0">
+               {/* Compact Compass */}
+               <div className="relative w-32 h-32 rounded-full border-4 border-slate-300 dark:border-slate-700 flex items-center justify-center shadow-lg bg-slate-100/50 dark:bg-slate-800/50">
                    {/* Cardinal Points */}
-                   <span className="absolute top-2 text-xs font-bold text-slate-500">K</span>
-                   <span className="absolute bottom-2 text-xs font-bold text-slate-500">G</span>
-                   <span className="absolute left-2 text-xs font-bold text-slate-500">B</span>
-                   <span className="absolute right-2 text-xs font-bold text-slate-500">D</span>
+                   <span className="absolute top-1 text-[10px] font-bold text-slate-500">K</span>
+                   <span className="absolute bottom-1 text-[10px] font-bold text-slate-500">G</span>
+                   <span className="absolute left-1 text-[10px] font-bold text-slate-500">B</span>
+                   <span className="absolute right-1 text-[10px] font-bold text-slate-500">D</span>
                    
                    {/* Arrow */}
                    <div 
                      className="absolute inset-0 flex items-center justify-center transition-transform duration-1000 ease-out"
                      style={{ transform: `rotate(${current.wind_direction_10m}deg)` }}
                    >
-                       <div className="w-1.5 h-20 bg-gradient-to-t from-teal-500 to-transparent rounded-full -mt-20 relative">
+                       <div className="w-1.5 h-14 bg-gradient-to-t from-teal-500 to-transparent rounded-full -mt-14 relative">
                           <div className="absolute -top-1 -left-1.5 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-b-[12px] border-b-teal-400"></div>
                        </div>
                    </div>
 
-                   <div className="text-center z-10 bg-white/80 dark:bg-slate-900/80 p-3 rounded-full backdrop-blur-sm">
-                       <span className="block text-3xl font-bold text-slate-900 dark:text-white">{current.wind_speed_10m}</span>
-                       <span className="block text-xs text-slate-500 dark:text-slate-400">km/s</span>
+                   <div className="text-center z-10 bg-white/80 dark:bg-slate-900/80 p-2 rounded-full backdrop-blur-sm shadow-sm">
+                       <span className="block text-xl font-bold text-slate-900 dark:text-white leading-none">{current.wind_speed_10m}</span>
+                       <span className="block text-[9px] text-slate-500 dark:text-slate-400">km/s</span>
                    </div>
                </div>
-               <p className="mt-4 text-teal-600 dark:text-teal-300 font-bold">{getWindDirection(current.wind_direction_10m)} Yönünden</p>
+               <p className="mt-3 text-teal-600 dark:text-teal-300 font-bold text-sm">{getWindDirection(current.wind_direction_10m)} Yönünden</p>
           </div>
 
-          <div className="glass-card rounded-2xl p-4">
-              <h4 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-3 flex items-center gap-2">
+          <div className="glass-card rounded-2xl p-4 flex-1 overflow-hidden flex flex-col min-h-0">
+              <h4 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-2 flex items-center gap-2 shrink-0">
                   <Clock size={14} /> Saatlik Rüzgar
               </h4>
-              <div className="space-y-3 max-h-48 overflow-y-auto no-scrollbar">
+              <div className="space-y-2 overflow-y-auto no-scrollbar pr-1">
                   {hourlyData.map((h, i) => (
-                      <div key={i} className="flex items-center justify-between py-1 border-b border-black/5 dark:border-white/5 last:border-0">
-                          <span className="text-sm font-medium text-slate-500 dark:text-slate-300 w-12">{formatTime(h.time)}</span>
-                          <div className="flex-1 px-4">
-                               <div className="w-full h-1.5 bg-slate-300 dark:bg-slate-700 rounded-full overflow-hidden">
+                      <div key={i} className="flex items-center justify-between py-1.5 border-b border-black/5 dark:border-white/5 last:border-0">
+                          <span className="text-xs font-medium text-slate-500 dark:text-slate-300 w-10">{formatTime(h.time)}</span>
+                          <div className="flex-1 px-3">
+                               <div className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
                                    <div className="h-full bg-teal-500/50" style={{ width: `${Math.min(h.windSpeed * 3, 100)}%` }}></div>
                                </div>
                           </div>
-                          <span className="text-sm font-bold text-slate-800 dark:text-white w-16 text-right">{h.windSpeed} <span className="text-[10px] font-normal text-slate-500">km/s</span></span>
+                          <span className="text-xs font-bold text-slate-800 dark:text-white w-14 text-right">{h.windSpeed} <span className="text-[9px] font-normal text-slate-500">km/s</span></span>
                       </div>
                   ))}
               </div>
@@ -100,8 +113,93 @@ const DetailsGrid: React.FC<DetailsGridProps> = ({ weather }) => {
       </div>
   );
 
+  const renderHumidityContent = () => (
+      <div className="flex flex-col h-full gap-4">
+          <div className="flex items-center justify-center gap-6 py-2 shrink-0">
+              <div className="text-center">
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400 uppercase font-bold mb-1">Bağıl Nem</p>
+                  <p className="text-3xl font-bold text-blue-500 dark:text-blue-400">%{current.relative_humidity_2m}</p>
+              </div>
+              <div className="w-[1px] h-10 bg-black/10 dark:bg-white/10"></div>
+              <div className="text-center">
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400 uppercase font-bold mb-1">Çiy Noktası</p>
+                  <p className="text-3xl font-bold text-cyan-600 dark:text-cyan-400">{Math.round(current.dew_point_2m)}°</p>
+              </div>
+          </div>
+          
+          <div className="bg-blue-500/10 p-3 rounded-2xl border border-blue-500/20 text-center shrink-0">
+              <p className="text-blue-700 dark:text-blue-200 text-xs font-medium leading-relaxed">
+                  Çiy noktası {Math.round(current.dew_point_2m)}°C. Hissedilen hava: <span className="font-bold text-slate-900 dark:text-white">{getDewPointDesc(current.dew_point_2m)}</span>.
+              </p>
+          </div>
+
+          <div className="glass-card rounded-2xl p-4 flex-1 overflow-hidden flex flex-col min-h-0">
+              <h4 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-2 flex items-center gap-2 shrink-0">
+                  <Droplets size={14} /> Saatlik Nem
+              </h4>
+              <div className="space-y-2 overflow-y-auto no-scrollbar pr-1">
+                  {hourlyData.map((h, i) => (
+                      <div key={i} className="flex items-center justify-between text-xs py-1">
+                          <span className="text-slate-500 dark:text-slate-400 w-10">{formatTime(h.time)}</span>
+                          <div className="flex-1 mx-3 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                              <div className="h-full bg-blue-500" style={{ width: `${h.humidity}%` }}></div>
+                          </div>
+                          <span className="font-bold text-slate-800 dark:text-white w-8 text-right">%{h.humidity || '-'}</span>
+                      </div>
+                  ))}
+              </div>
+          </div>
+      </div>
+  );
+
+  const renderPressureContent = () => {
+    // Current Pressure Check
+    let currentP = current.pressure_msl || current.surface_pressure || 0;
+    // Fallback if API returns 0
+    if (currentP === 0) currentP = 1013;
+
+    const isMSL = current.pressure_msl !== undefined && current.pressure_msl !== null && current.pressure_msl > 0;
+    
+    // Trend calculation
+    const nowP = hourlyData[0]?.pressure || currentP;
+    const futureP = hourlyData.length > 3 ? hourlyData[3].pressure : nowP;
+    
+    let trendIcon = <Minus size={32} className="text-slate-400" />;
+    let trendText = "Dengeli";
+    let trendDesc = "Basınç seviyesi stabil seyrediyor.";
+
+    if (futureP > nowP + 0.5) {
+        trendIcon = <ArrowUpRight size={32} className="text-emerald-500" />;
+        trendText = "Yükseliyor";
+        trendDesc = "Yüksek basınç genellikle açık ve durgun havayı işaret eder.";
+    } else if (futureP < nowP - 0.5) {
+        trendIcon = <ArrowDownRight size={32} className="text-amber-500" />;
+        trendText = "Düşüyor";
+        trendDesc = "Düşen basınç bulutlanma ve yağış ihtimalini artırabilir.";
+    }
+
+    return (
+        <div className="flex flex-col h-full items-center justify-center space-y-6">
+            <div className="flex flex-col items-center justify-center text-center">
+                 <div className="text-6xl font-bold tracking-tighter text-slate-900 dark:text-white drop-shadow-sm mb-2">
+                    {Math.round(currentP)}
+                 </div>
+                 <span className="text-xl font-medium text-slate-400">hPa <span className="text-xs bg-slate-100 dark:bg-white/10 px-2 py-0.5 rounded ml-1 align-middle">{isMSL ? 'MSL' : 'Yüzey'}</span></span>
+            </div>
+
+            <div className="flex flex-col items-center bg-slate-100 dark:bg-white/5 px-6 py-4 rounded-2xl w-full">
+                <div className="p-3 bg-white dark:bg-slate-800/50 rounded-full mb-3 shadow-sm">
+                    {trendIcon}
+                </div>
+                <span className="block text-lg font-bold text-slate-900 dark:text-white mb-1">{trendText}</span>
+                <span className="block text-xs text-center text-slate-500 dark:text-slate-400 leading-relaxed max-w-[200px]">{trendDesc}</span>
+            </div>
+        </div>
+    );
+  };
+
   const renderUVContent = () => {
-    const uv = current.weather_code === 0 && daily.uv_index_max[0] ? daily.uv_index_max[0] : 0; // Fallback logic
+    const uv = current.weather_code === 0 && daily.uv_index_max[0] ? daily.uv_index_max[0] : 0; 
     const percentage = Math.min((uv / 11) * 100, 100);
     
     let advice = "Güneş kremi gerekmez.";
@@ -111,7 +209,6 @@ const DetailsGrid: React.FC<DetailsGridProps> = ({ weather }) => {
 
     return (
       <div className="space-y-6">
-           {/* Gauge */}
            <div className="relative pt-6 pb-2">
                <div className="h-4 w-full bg-gradient-to-r from-green-500 via-yellow-400 to-red-500 rounded-full opacity-30"></div>
                <div 
@@ -153,88 +250,91 @@ const DetailsGrid: React.FC<DetailsGridProps> = ({ weather }) => {
     );
   };
 
-  const renderHumidityContent = () => (
-      <div className="space-y-6">
-          <div className="flex items-center justify-center gap-8 py-4">
-              <div className="text-center">
-                  <p className="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold mb-1">Bağıl Nem</p>
-                  <p className="text-4xl font-bold text-blue-500 dark:text-blue-400">%{current.relative_humidity_2m}</p>
-              </div>
-              <div className="w-[1px] h-12 bg-black/10 dark:bg-white/10"></div>
-              <div className="text-center">
-                  <p className="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold mb-1">Çiy Noktası</p>
-                  <p className="text-4xl font-bold text-cyan-600 dark:text-cyan-400">{Math.round(current.dew_point_2m)}°</p>
-              </div>
-          </div>
-          
-          <div className="bg-blue-500/10 p-4 rounded-2xl border border-blue-500/20 text-center">
-              <p className="text-blue-700 dark:text-blue-200 text-sm font-medium">
-                  Çiy noktası {Math.round(current.dew_point_2m)}°C. Hissedilen hava: <span className="font-bold text-slate-900 dark:text-white">{getDewPointDesc(current.dew_point_2m)}</span>.
-              </p>
+  // --- Specific Renderers for Sunrise vs Sunset ---
+
+  const renderSunriseContent = () => (
+      <div className="flex flex-col h-full">
+          {/* Dawn Visual */}
+          <div className="relative w-full aspect-[2/1] rounded-t-3xl overflow-hidden bg-gradient-to-t from-orange-300 via-indigo-500 to-slate-900 mb-4 shrink-0 shadow-inner">
+               <div className="absolute inset-0 flex items-end justify-center pb-2">
+                   <div className="w-24 h-24 bg-orange-400 rounded-full blur-[40px] opacity-80 animate-pulse"></div>
+               </div>
+               
+               {/* Rising Animation */}
+               <div className="absolute bottom-[-20px] left-1/2 -translate-x-1/2 animate-fade-in-up">
+                   <Sun size={64} className="text-yellow-100 drop-shadow-[0_0_25px_rgba(253,186,116,0.8)]" />
+               </div>
+
+               <div className="absolute bottom-0 w-full h-1 bg-white/20"></div>
           </div>
 
-          <div className="glass-card rounded-2xl p-4">
-              <h4 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-3 flex items-center gap-2">
-                  <Droplets size={14} /> Saatlik Nem
-              </h4>
-              <div className="space-y-2 max-h-48 overflow-y-auto no-scrollbar">
-                  {hourlyData.map((h, i) => (
-                      <div key={i} className="flex items-center justify-between text-sm">
-                          <span className="text-slate-500 dark:text-slate-400 w-12">{formatTime(h.time)}</span>
-                          <div className="flex-1 mx-3 h-2 bg-slate-300 dark:bg-slate-700 rounded-full overflow-hidden">
-                              <div className="h-full bg-blue-500" style={{ width: `${h.humidity}%` }}></div>
-                          </div>
-                          <span className="font-bold text-slate-800 dark:text-white w-8 text-right">%{h.humidity || '-'}</span>
-                      </div>
-                  ))}
-              </div>
+          <div className="space-y-6 px-2">
+               <div className="text-center">
+                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Gün Doğumu</p>
+                    <p className="text-5xl font-bold text-slate-900 dark:text-white tracking-tight">{formatTime(daily.sunrise[0])}</p>
+                    <p className="text-sm text-slate-500 mt-2">Yeni bir gün başlıyor.</p>
+               </div>
+
+               <div className="bg-orange-500/10 p-4 rounded-2xl border border-orange-500/20 flex items-center justify-between">
+                   <div className="flex items-center gap-3">
+                       <CloudSun size={20} className="text-orange-500" />
+                       <div>
+                           <p className="text-[10px] font-bold text-orange-700 dark:text-orange-200 uppercase">Şafak Vakti</p>
+                           <p className="text-sm font-bold text-slate-800 dark:text-white">
+                               {/* Yaklaşık 30dk önce */}
+                               {formatTime(new Date(new Date(daily.sunrise[0]).getTime() - 30*60000).toISOString())}
+                           </p>
+                       </div>
+                   </div>
+                   <div className="text-right">
+                       <p className="text-[10px] text-slate-400 font-bold uppercase">Işık</p>
+                       <p className="text-xs font-bold text-slate-600 dark:text-slate-300">%0 &rarr; %100</p>
+                   </div>
+               </div>
           </div>
       </div>
   );
 
-  const renderSunContent = () => (
-      <div className="space-y-8 py-4">
-          <div className="relative h-32 border-b border-black/10 dark:border-white/10">
-              {/* Arc for sun path */}
-              <div className="absolute inset-x-4 bottom-0 h-28 border-t-2 border-dashed border-orange-300/50 rounded-t-[100px]"></div>
-              
-              {/* Sun Icon positioned roughly based on time (static for now, could be dynamic) */}
-              <div className="absolute left-1/2 -translate-x-1/2 top-4 bg-orange-500 text-white p-2 rounded-full shadow-[0_0_20px_orange]">
-                  <Sun size={32} />
-              </div>
-          </div>
+  const renderSunsetContent = () => (
+      <div className="flex flex-col h-full">
+          {/* Dusk Visual */}
+          <div className="relative w-full aspect-[2/1] rounded-t-3xl overflow-hidden bg-gradient-to-b from-indigo-900 via-purple-800 to-orange-500 mb-4 shrink-0 shadow-inner">
+               <div className="absolute inset-0 flex items-end justify-center">
+                    {/* Darker horizon overlay */}
+                   <div className="w-full h-1/2 bg-gradient-to-t from-black/40 to-transparent absolute bottom-0"></div>
+               </div>
 
-          <div className="grid grid-cols-2 gap-4">
-               <div className="bg-yellow-500/10 p-4 rounded-2xl border border-yellow-500/20 flex items-center gap-4">
-                   <div className="p-3 bg-yellow-500/20 rounded-full text-yellow-600 dark:text-yellow-400">
-                       <Sunrise size={24} />
-                   </div>
-                   <div>
-                       <p className="text-xs text-yellow-700/70 dark:text-yellow-200/70 font-bold uppercase">Gün Doğumu</p>
-                       <p className="text-2xl font-bold text-slate-800 dark:text-white">{formatTime(daily.sunrise[0])}</p>
-                   </div>
+               {/* Setting Animation */}
+               <div className="absolute bottom-[-10px] left-1/2 -translate-x-1/2 transition-all duration-1000 transform translate-y-2 opacity-80">
+                   <Sun size={64} className="text-orange-200 drop-shadow-[0_0_30px_rgba(249,115,22,0.9)]" />
                </div>
                
-               <div className="bg-indigo-500/10 p-4 rounded-2xl border border-indigo-500/20 flex items-center gap-4">
-                   <div className="p-3 bg-indigo-500/20 rounded-full text-indigo-600 dark:text-indigo-400">
-                       <Sunset size={24} />
+               <div className="absolute bottom-0 w-full h-1 bg-black/20"></div>
+          </div>
+
+          <div className="space-y-6 px-2">
+               <div className="text-center">
+                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Gün Batımı</p>
+                    <p className="text-5xl font-bold text-slate-900 dark:text-white tracking-tight">{formatTime(daily.sunset[0])}</p>
+                    <p className="text-sm text-slate-500 mt-2">Hava kararıyor.</p>
+               </div>
+
+               <div className="bg-indigo-500/10 p-4 rounded-2xl border border-indigo-500/20 flex items-center justify-between">
+                   <div className="flex items-center gap-3">
+                       <CloudMoon size={20} className="text-indigo-500" />
+                       <div>
+                           <p className="text-[10px] font-bold text-indigo-700 dark:text-indigo-200 uppercase">Alacakaranlık</p>
+                           <p className="text-sm font-bold text-slate-800 dark:text-white">
+                               {/* Yaklaşık 30dk sonra */}
+                               {formatTime(new Date(new Date(daily.sunset[0]).getTime() + 30*60000).toISOString())}
+                           </p>
+                       </div>
                    </div>
-                   <div>
-                       <p className="text-xs text-indigo-700/70 dark:text-indigo-200/70 font-bold uppercase">Gün Batımı</p>
-                       <p className="text-2xl font-bold text-slate-800 dark:text-white">{formatTime(daily.sunset[0])}</p>
+                   <div className="text-right">
+                       <p className="text-[10px] text-slate-400 font-bold uppercase">Işık</p>
+                       <p className="text-xs font-bold text-slate-600 dark:text-slate-300">%100 &rarr; %0</p>
                    </div>
                </div>
-          </div>
-          
-          <div className="text-center text-sm text-slate-500 dark:text-slate-400">
-              Bugün gün süresi yaklaşık <span className="text-slate-900 dark:text-white font-bold">{
-                (() => {
-                    const start = new Date(daily.sunrise[0]).getTime();
-                    const end = new Date(daily.sunset[0]).getTime();
-                    const hours = Math.floor((end - start) / (1000 * 60 * 60));
-                    return `${hours} saat`;
-                })()
-              }</span>.
           </div>
       </div>
   );
@@ -309,34 +409,32 @@ const DetailsGrid: React.FC<DetailsGridProps> = ({ weather }) => {
     {
       id: 'pressure',
       label: 'Basınç',
-      value: current.surface_pressure,
+      // Strict undefined check to allow 0 or valid numbers
+      value: Math.round(
+          (current.pressure_msl || current.surface_pressure || 1013)
+      ),
       unit: ' hPa',
       icon: <Gauge size={24} className="text-purple-500 dark:text-purple-400" />,
       subtext: null,
-      render: () => renderBasicContent(
-          current.surface_pressure, 
-          ' hPa', 
-          'Atmosfer Basıncı',
-          'Yüksek basınç genellikle açık havayı, alçak basınç ise bulutlu ve yağışlı havayı işaret eder.'
-      )
+      render: renderPressureContent
     },
     {
-      id: 'sun',
+      id: 'sunrise',
       label: 'Gün Doğumu',
       value: formatTime(daily.sunrise[0]),
       unit: '',
-      icon: <Sun size={24} className="text-yellow-500 dark:text-yellow-400" />,
+      icon: <Sunrise size={24} className="text-yellow-500 dark:text-yellow-400" />,
       subtext: null,
-      render: renderSunContent
+      render: renderSunriseContent
     },
     {
-      id: 'sun', 
+      id: 'sunset', 
       label: 'Gün Batımı',
       value: formatTime(daily.sunset[0]),
       unit: '',
-      icon: <Sun size={24} className="text-indigo-500 dark:text-indigo-400" />,
+      icon: <Sunset size={24} className="text-indigo-500 dark:text-indigo-400" />,
       subtext: null,
-      render: renderSunContent
+      render: renderSunsetContent
     }
   ];
 
@@ -345,7 +443,8 @@ const DetailsGrid: React.FC<DetailsGridProps> = ({ weather }) => {
   return (
     <>
         <div className="grid grid-cols-2 gap-3 mb-6">
-        {items.map((item, idx) => (
+        {items.map((item, idx) => {
+            return (
             <button 
                 key={idx} 
                 onClick={() => setSelectedDetail(item.id as DetailType)}
@@ -368,7 +467,8 @@ const DetailsGrid: React.FC<DetailsGridProps> = ({ weather }) => {
                     {item.subtext && item.subtext}
                 </div>
             </button>
-        ))}
+            )
+        })}
         </div>
 
         {/* Modal - Center Pop-in Animation */}
@@ -384,13 +484,13 @@ const DetailsGrid: React.FC<DetailsGridProps> = ({ weather }) => {
                 <div 
                     className={`
                         relative w-full max-w-sm bg-white dark:bg-slate-900/95 border border-slate-200 dark:border-white/10
-                        rounded-3xl shadow-2xl overflow-hidden flex flex-col 
-                        max-h-[85vh] transform transition-all duration-300 cubic-bezier(0.32, 0.72, 0, 1)
+                        rounded-3xl shadow-2xl overflow-hidden flex flex-col h-[70vh]
+                        transform transition-all duration-300 cubic-bezier(0.32, 0.72, 0, 1)
                         ${isClosing ? 'animate-pop-out' : 'animate-pop-in'}
                     `}
                 >
                     {/* Handle & Header */}
-                    <div className="pt-4 pb-2 px-6 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl z-50 sticky top-0">
+                    <div className="pt-4 pb-2 px-6 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl z-50 sticky top-0 shrink-0">
                         <div className="flex items-center justify-between mb-2">
                             <div className="flex items-center gap-3">
                                 <div className="p-2 bg-slate-100 dark:bg-slate-800 rounded-full shadow-inner border border-black/5 dark:border-white/5">

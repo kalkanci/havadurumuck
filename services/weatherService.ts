@@ -1,12 +1,13 @@
 
-import { WeatherData, GeoLocation, AirQuality } from '../types';
+import { WeatherData, GeoLocation, AirQuality, PublicHoliday } from '../types';
 
 const GEO_API_URL = 'https://geocoding-api.open-meteo.com/v1/search';
 const WEATHER_API_URL = 'https://api.open-meteo.com/v1/forecast';
 const AIR_QUALITY_API_URL = 'https://air-quality-api.open-meteo.com/v1/air-quality';
+const HOLIDAY_API_URL = 'https://date.nager.at/api/v3/PublicHolidays';
 
 // Sokak/Mahalle detayını bulmak için Nominatim servisi (OpenStreetMap)
-export const getDetailedAddress = async (lat: number, lon: number): Promise<{ city: string, address: string, country: string }> => {
+export const getDetailedAddress = async (lat: number, lon: number): Promise<{ city: string, address: string, country: string, countryCode: string }> => {
   try {
     const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1`, {
       headers: {
@@ -41,6 +42,7 @@ export const getDetailedAddress = async (lat: number, lon: number): Promise<{ ci
 
     // Ülke
     const country = addr.country || 'Dünya';
+    const countryCode = addr.country_code ? addr.country_code.toUpperCase() : '';
 
     let mainName = '';
     let subText = '';
@@ -76,10 +78,10 @@ export const getDetailedAddress = async (lat: number, lon: number): Promise<{ ci
         subText = addr.country || '';
     }
 
-    return { city: mainName, address: subText, country: country };
+    return { city: mainName, address: subText, country: country, countryCode };
   } catch (error) {
     console.warn("Reverse geocoding failed", error);
-    return { city: 'Konum Bulunamadı', address: '', country: '' };
+    return { city: 'Konum Bulunamadı', address: '', country: '', countryCode: '' };
   }
 };
 
@@ -88,7 +90,19 @@ export const searchCity = async (query: string): Promise<GeoLocation[]> => {
   try {
     const res = await fetch(`${GEO_API_URL}?name=${encodeURIComponent(query)}&count=5&language=en&format=json`);
     const data = await res.json();
-    return data.results || [];
+    
+    if (!data.results) return [];
+
+    return data.results.map((item: any) => ({
+        id: item.id,
+        name: item.name,
+        latitude: item.latitude,
+        longitude: item.longitude,
+        country: item.country,
+        countryCode: item.country_code, // Open-Meteo returns country_code
+        admin1: item.admin1
+    }));
+
   } catch (error) {
     console.error("Geocoding error:", error);
     return [];
@@ -102,7 +116,7 @@ export const fetchWeather = async (lat: number, lon: number): Promise<WeatherDat
     longitude: lon.toString(),
     current: 'temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,cloud_cover,pressure_msl,surface_pressure,wind_speed_10m,wind_direction_10m,dew_point_2m',
     // Detailed hourly data for popups:
-    hourly: 'temperature_2m,weather_code,is_day,wind_speed_10m,wind_direction_10m,precipitation_probability,uv_index,relative_humidity_2m,apparent_temperature,surface_pressure',
+    hourly: 'temperature_2m,weather_code,is_day,wind_speed_10m,wind_direction_10m,precipitation_probability,uv_index,relative_humidity_2m,apparent_temperature,surface_pressure,pressure_msl',
     daily: 'weather_code,temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,sunrise,sunset,uv_index_max,precipitation_probability_max,precipitation_sum,precipitation_hours,wind_speed_10m_max,wind_gusts_10m_max,wind_direction_10m_dominant',
     timezone: 'auto',
     forecast_days: '16'
@@ -147,4 +161,17 @@ export const fetchWeather = async (lat: number, lon: number): Promise<WeatherDat
     console.error("API Error:", error);
     throw error;
   }
+};
+
+export const fetchHolidays = async (year: number, countryCode: string): Promise<PublicHoliday[]> => {
+    if (!countryCode) return [];
+    try {
+        const res = await fetch(`${HOLIDAY_API_URL}/${year}/${countryCode}`);
+        if (!res.ok) return [];
+        const data = await res.json();
+        return data || [];
+    } catch (error) {
+        console.warn("Holiday fetch error:", error);
+        return [];
+    }
 };

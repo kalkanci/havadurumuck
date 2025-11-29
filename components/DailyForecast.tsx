@@ -5,7 +5,7 @@ import { WeatherData } from '../types';
 import { getWeatherIcon, getWeatherLabel } from '../constants';
 import { 
     Wind, Sun, Umbrella, ChevronRight, X, 
-    Sunrise, Sunset, Droplets, Thermometer, Calendar
+    Sunrise, Sunset, Droplets, Thermometer, Calendar, TrendingUp, ArrowUp, ArrowDown
 } from 'lucide-react';
 import { getWindDirection, formatTime } from '../utils/helpers';
 
@@ -31,10 +31,14 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ weather }) => {
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
   const [isDetailClosing, setIsDetailClosing] = useState(false);
 
-  // Global Min/Max for the bar visualization
+  // Global Min/Max for calculations
   const globalMin = Math.min(...temperature_2m_min);
   const globalMax = Math.max(...temperature_2m_max);
-  const globalRange = globalMax - globalMin;
+  
+  // Stats
+  const hottestTemp = globalMax;
+  const coldestTemp = globalMin;
+  const rainyDays = precipitation_probability_max.filter(p => p > 50).length;
 
   // --- Handlers ---
   const openDayDetail = (index: number) => {
@@ -50,15 +54,49 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ weather }) => {
     }, 200);
   };
 
-  // --- Helpers for Visuals ---
-  const getGradient = (temp: number) => {
-      if (temp >= 30) return 'from-orange-500 to-red-600';
-      if (temp >= 20) return 'from-yellow-400 to-orange-500';
-      if (temp >= 10) return 'from-cyan-400 to-blue-500';
-      return 'from-blue-600 to-indigo-600';
+  // --- Chart Generator ---
+  const generateChartPath = (width: number, height: number, data: number[], min: number, max: number) => {
+      if (data.length < 2) return "";
+      const stepX = width / (data.length - 1);
+      const range = max - min;
+      
+      const points = data.map((val, i) => {
+          const x = i * stepX;
+          const y = height - ((val - min) / range) * height; // Invert Y because SVG 0 is top
+          return `${x},${y}`;
+      });
+
+      // Create area path
+      return `M0,${height} L${points.join(' L')} L${width},${height} Z`;
   };
 
-  // --- Render Detail Modal (Center Pop-in) ---
+  const generateLinePath = (width: number, height: number, data: number[], min: number, max: number) => {
+      if (data.length < 2) return "";
+      const stepX = width / (data.length - 1);
+      const range = max - min;
+      
+      const points = data.map((val, i) => {
+          const x = i * stepX;
+          const y = height - ((val - min) / range) * height; 
+          return `${x},${y}`;
+      });
+
+      return `M${points.join(' L')}`;
+  };
+
+  // Chart config
+  const chartHeight = 80;
+  const chartWidth = 300; // arbitrary unit for SVG viewbox
+  
+  // Padding for chart visual limits so lines don't touch edges perfectly
+  const chartMin = globalMin - 2;
+  const chartMax = globalMax + 2;
+
+  const maxLinePath = generateLinePath(chartWidth, chartHeight, temperature_2m_max, chartMin, chartMax);
+  const minLinePath = generateLinePath(chartWidth, chartHeight, temperature_2m_min, chartMin, chartMax);
+  const areaPath = generateChartPath(chartWidth, chartHeight, temperature_2m_max, chartMin, chartMax);
+
+  // --- Render Detail Modal ---
   const renderDetailModal = () => {
       if (selectedDay === null) return null;
       
@@ -181,12 +219,73 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ weather }) => {
                 <Calendar size={24} />
             </div>
             <div>
-                <h2 className="text-2xl font-bold text-slate-900 dark:text-white">15 Günlük Plan</h2>
-                <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Uzun Vadeli Tahmin Raporu</p>
+                <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Uzun Vadeli Tahmin</h2>
+                <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">16 Günlük Trend ve Analiz</p>
             </div>
         </div>
 
-        {/* List */}
+        {/* 1. Trend Chart */}
+        <div className="glass-card rounded-3xl p-5 mb-6 bg-gradient-to-b from-white/10 to-transparent relative overflow-hidden">
+             <div className="flex items-center justify-between mb-4">
+                 <h3 className="text-xs font-bold text-slate-300 uppercase tracking-widest flex items-center gap-2">
+                    <TrendingUp size={14} /> Sıcaklık Trendi
+                 </h3>
+                 <span className="text-[10px] bg-white/10 px-2 py-0.5 rounded text-slate-300">Maks / Min</span>
+             </div>
+             
+             <div className="h-28 w-full relative">
+                 <svg viewBox={`0 0 ${chartWidth} ${chartHeight}`} className="w-full h-full overflow-visible" preserveAspectRatio="none">
+                     <defs>
+                         <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
+                             <stop offset="0%" stopColor="rgba(249, 115, 22, 0.3)" />
+                             <stop offset="100%" stopColor="rgba(249, 115, 22, 0)" />
+                         </linearGradient>
+                     </defs>
+                     
+                     {/* Area */}
+                     {/* <path d={areaPath} fill="url(#chartGradient)" /> */}
+                     
+                     {/* Min Line */}
+                     <path d={minLinePath} fill="none" stroke="rgba(56, 189, 248, 0.6)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                     
+                     {/* Max Line */}
+                     <path d={maxLinePath} fill="none" stroke="rgba(251, 146, 60, 0.9)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                 </svg>
+
+                 {/* Labels (Min/Max overlay) */}
+                 <div className="absolute top-0 left-0 w-full h-full pointer-events-none flex justify-between items-end pb-1 text-[10px] text-slate-400 opacity-50 font-mono">
+                     <span>Bugün</span>
+                     <span>16 Gün</span>
+                 </div>
+             </div>
+        </div>
+
+        {/* 2. Summary Cards */}
+        <div className="grid grid-cols-3 gap-3 mb-6">
+            <div className="glass-card p-3 rounded-2xl flex flex-col items-center justify-center text-center">
+                 <span className="text-[10px] text-slate-400 font-bold uppercase mb-1">En Sıcak</span>
+                 <div className="flex items-center gap-1">
+                     <ArrowUp size={14} className="text-red-500" />
+                     <span className="text-xl font-bold text-white">{Math.round(hottestTemp)}°</span>
+                 </div>
+            </div>
+            <div className="glass-card p-3 rounded-2xl flex flex-col items-center justify-center text-center">
+                 <span className="text-[10px] text-slate-400 font-bold uppercase mb-1">En Soğuk</span>
+                 <div className="flex items-center gap-1">
+                     <ArrowDown size={14} className="text-blue-500" />
+                     <span className="text-xl font-bold text-white">{Math.round(coldestTemp)}°</span>
+                 </div>
+            </div>
+            <div className="glass-card p-3 rounded-2xl flex flex-col items-center justify-center text-center">
+                 <span className="text-[10px] text-slate-400 font-bold uppercase mb-1">Yağışlı Gün</span>
+                 <div className="flex items-center gap-1">
+                     <Droplets size={14} className="text-blue-400" />
+                     <span className="text-xl font-bold text-white">{rainyDays}</span>
+                 </div>
+            </div>
+        </div>
+
+        {/* 3. Detailed List */}
         <div className="space-y-3">
             {time.map((dateStr, index) => {
                 const date = new Date(dateStr);
@@ -197,57 +296,51 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ weather }) => {
                 const min = Math.round(temperature_2m_min[index]);
                 const max = Math.round(temperature_2m_max[index]);
                 const rainProb = precipitation_probability_max ? precipitation_probability_max[index] : 0;
+                const windMax = wind_speed_10m_max ? Math.round(wind_speed_10m_max[index]) : 0;
                 
-                // Bar Calculation
-                const leftPos = ((min - globalMin) / globalRange) * 100;
-                const widthPos = ((max - min) / globalRange) * 100;
-                const barColor = getGradient(max);
-
                 return (
                     <div 
                         key={dateStr}
                         onClick={() => openDayDetail(index)}
-                        className="group flex items-center justify-between p-4 rounded-3xl bg-white/90 dark:bg-slate-800/60 backdrop-blur-md border border-slate-200 dark:border-white/5 hover:bg-white dark:hover:bg-slate-700/60 active:scale-[0.98] transition-all cursor-pointer shadow-none dark:shadow-lg"
+                        className={`group flex items-center justify-between p-4 rounded-3xl backdrop-blur-md border hover:bg-white dark:hover:bg-slate-700/60 active:scale-[0.98] transition-all cursor-pointer shadow-none dark:shadow-lg ${isWeekend ? 'bg-indigo-500/10 border-indigo-500/20' : 'bg-white/90 dark:bg-slate-800/60 border-slate-200 dark:border-white/5'}`}
                     >
                         {/* Left: Date */}
                         <div className="flex flex-col w-20 flex-shrink-0">
-                            <span className={`text-sm font-bold ${isWeekend ? 'text-indigo-600 dark:text-indigo-300' : 'text-slate-900 dark:text-white'}`}>{dayName}</span>
-                            <span className="text-xs text-slate-500 font-medium">{dateNum}</span>
+                            <span className={`text-sm font-bold ${isWeekend ? 'text-indigo-400 dark:text-indigo-300' : 'text-slate-900 dark:text-white'}`}>{dayName}</span>
+                            <span className="text-xs text-slate-500 font-medium opacity-70">{dateNum}</span>
                         </div>
 
-                        {/* Middle: Icon & Rain */}
-                        <div className="flex flex-col items-center justify-center w-12 flex-shrink-0 gap-1">
-                            <div className="w-8 h-8 drop-shadow-md">
+                        {/* Middle: Icon & Conditions */}
+                        <div className="flex items-center gap-4 flex-1 justify-center">
+                            <div className="w-10 h-10 drop-shadow-md">
                                 {getWeatherIcon(weather_code[index])}
                             </div>
-                            {rainProb > 0 && (
-                                <div className="flex items-center gap-0.5">
-                                    <Umbrella size={10} className="text-blue-500 dark:text-blue-400" />
-                                    <span className="text-[10px] font-bold text-blue-600 dark:text-blue-300">%{rainProb}</span>
-                                </div>
-                            )}
+                            
+                            {/* Mini Condition Pills */}
+                            <div className="flex flex-col gap-1">
+                                {rainProb > 20 && (
+                                    <div className="flex items-center gap-1 bg-blue-500/10 px-1.5 py-0.5 rounded-md">
+                                        <Umbrella size={10} className="text-blue-500" />
+                                        <span className="text-[10px] font-bold text-blue-600 dark:text-blue-300">%{rainProb}</span>
+                                    </div>
+                                )}
+                                {windMax > 20 && (
+                                     <div className="flex items-center gap-1 bg-teal-500/10 px-1.5 py-0.5 rounded-md">
+                                        <Wind size={10} className="text-teal-500" />
+                                        <span className="text-[10px] font-bold text-teal-600 dark:text-teal-300">{windMax}km</span>
+                                    </div>
+                                )}
+                            </div>
                         </div>
 
-                        {/* Right: Temp Bar & Values */}
-                        <div className="flex-1 flex items-center gap-3 pl-2">
-                            <span className="text-xs font-medium text-slate-500 dark:text-slate-400 w-6 text-right">{min}°</span>
-                            
-                            {/* Visual Range Bar */}
-                            <div className="h-1.5 flex-1 bg-slate-200 dark:bg-slate-700/30 rounded-full relative overflow-hidden">
-                                    <div 
-                                    className={`absolute h-full rounded-full bg-gradient-to-r ${barColor} opacity-90`}
-                                    style={{ 
-                                        left: `${leftPos}%`, 
-                                        width: `${Math.max(widthPos, 10)}%` 
-                                    }} 
-                                />
-                            </div>
-
-                            <span className="text-sm font-bold text-slate-800 dark:text-white w-6">{max}°</span>
+                        {/* Right: Temp */}
+                        <div className="flex flex-col items-end w-16">
+                            <span className="text-lg font-bold text-slate-800 dark:text-white">{max}°</span>
+                            <span className="text-sm font-medium text-slate-500 dark:text-slate-400">{min}°</span>
                         </div>
 
                         {/* Arrow */}
-                        <ChevronRight size={16} className="text-slate-400 group-hover:text-slate-600 dark:group-hover:text-white transition-colors ml-2" />
+                        <ChevronRight size={16} className="text-slate-400 group-hover:text-slate-600 dark:group-hover:text-white transition-colors ml-1" />
                     </div>
                 );
             })}
