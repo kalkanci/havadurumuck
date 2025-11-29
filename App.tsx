@@ -163,6 +163,7 @@ const App: React.FC = () => {
       {/* Dynamic Slideshow Background */}
       <Background 
         city={location.name} 
+        country={location.country}
         weatherCode={weather?.current.weather_code}
         isDay={weather?.current.is_day}
       />
