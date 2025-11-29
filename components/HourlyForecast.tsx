@@ -9,24 +9,13 @@ interface HourlyForecastProps {
   weather: WeatherData;
 }
 
-// Sıcaklığa göre arka plan rengi
-const getTempGradient = (temp: number, isDay: number) => {
-    // Gece ise biraz daha koyu tonlar
-    if (isDay === 0) {
-        if (temp < 0) return "bg-gradient-to-br from-indigo-950 to-slate-900 border-indigo-500/30";
-        if (temp < 10) return "bg-gradient-to-br from-blue-950 to-indigo-950 border-blue-500/30";
-        return "bg-gradient-to-br from-slate-900 to-black border-slate-600/30";
-    }
-
-    // Gündüz Tonları (Okunabilirlik için koyulaştırıldı)
-    if (temp < 0) return "bg-gradient-to-br from-blue-800 to-indigo-900 border-blue-400/30";
-    if (temp < 10) return "bg-gradient-to-br from-sky-800 to-blue-900 border-sky-400/30";
-    // Yeşil/Turkuaz alanı - Önceden çok parlaktı, şimdi koyu zümrüt
-    if (temp < 20) return "bg-gradient-to-br from-teal-800 to-emerald-900 border-teal-500/30";
-    // Sarı/Turuncu alanı - Şimdi koyu amber/turuncu
-    if (temp < 28) return "bg-gradient-to-br from-amber-700 to-orange-800 border-amber-500/30";
-    // Sıcak kırmızı alanı - Koyu kırmızı
-    return "bg-gradient-to-br from-red-800 to-rose-900 border-red-500/30";
+// Sıcaklığa göre arka plan rengi (Daha yumuşak geçişler)
+const getTempColor = (temp: number, isDay: number) => {
+    if (isDay === 0) return "text-indigo-200";
+    if (temp < 10) return "text-sky-300";
+    if (temp < 20) return "text-teal-300";
+    if (temp < 30) return "text-amber-300";
+    return "text-rose-300";
 };
 
 const HourlyForecast: React.FC<HourlyForecastProps> = ({ weather }) => {
@@ -39,66 +28,82 @@ const HourlyForecast: React.FC<HourlyForecastProps> = ({ weather }) => {
   const windDirs = weather.hourly.wind_direction_10m?.slice(0, hoursCount) || new Array(hoursCount).fill(0);
 
   return (
-    <div className="w-full mb-8">
-      <div className="flex items-center justify-between mb-0 px-1">
+    <div className="w-full mb-6">
+      <div className="flex items-center justify-between mb-2 px-1">
         <h3 className="text-slate-400 text-xs font-semibold uppercase tracking-wider">Saatlik Akış</h3>
-        <span className="text-[10px] text-slate-500">Rüzgar & Yağış Detaylı</span>
+        <div className="flex items-center gap-1.5">
+             <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
+             <span className="text-[10px] text-slate-500 font-medium">Yağış İhtimali</span>
+        </div>
       </div>
       
-      {/* Scrollable Container with Extra Padding for Scaling */}
-      <div className="overflow-x-auto no-scrollbar py-4">
-        <div className="flex space-x-2 px-1 min-w-max">
+      {/* Scrollable Container */}
+      <div className="overflow-x-auto no-scrollbar py-4 -my-4 px-1">
+        <div className="flex space-x-3 min-w-max pb-2">
           {hours.map((time, index) => {
             const temp = temps[index];
             const code = codes[index];
             const isDay = isDayList[index];
             const formattedTime = formatTime(time);
             const isNow = index === 0;
-            const bgGradient = getTempGradient(temp, isDay);
             const rainProb = rainProbs[index];
             const windDir = windDirs[index];
+            const tempColor = getTempColor(temp, isDay);
 
             return (
               <div 
                 key={time} 
                 className={`
                   relative flex flex-col items-center justify-between 
-                  w-20 h-28 p-2 rounded-3xl transition-all duration-300 border
-                  ${isNow ? 'scale-105 z-10 shadow-2xl ring-1 ring-white/30' : 'scale-100 shadow-md opacity-90'}
-                  ${bgGradient}
+                  w-[4.5rem] h-32 p-2 rounded-[1.25rem] transition-all duration-300
+                  ${isNow 
+                    ? 'bg-slate-800/80 ring-1 ring-white/20 shadow-xl scale-105 z-10' 
+                    : 'bg-white/5 hover:bg-white/10 border border-white/5'}
                 `}
               >
                 {/* Time */}
-                <span className="text-[10px] font-bold text-white/90 drop-shadow-md tracking-wide">
+                <span className={`text-[10px] font-bold tracking-wide ${isNow ? 'text-white' : 'text-slate-400'}`}>
                     {isNow ? 'ŞİMDİ' : formattedTime}
                 </span>
 
+                {/* Rain Bar Visual (Behind Icon) */}
+                {rainProb > 0 && (
+                    <div className="absolute bottom-0 left-0 right-0 h-full w-full rounded-[1.25rem] overflow-hidden pointer-events-none z-0">
+                        <div 
+                            className="absolute bottom-0 w-full bg-blue-500/10 transition-all duration-500" 
+                            style={{ height: `${rainProb}%` }}
+                        />
+                         <div 
+                            className="absolute bottom-0 w-full h-1 bg-blue-500/30 blur-[2px]" 
+                            style={{ bottom: `${rainProb}%` }} 
+                        />
+                    </div>
+                )}
+
                 {/* Icon */}
-                <div className="w-8 h-8 drop-shadow-lg filter transform transition-transform group-hover:scale-110">
+                <div className="w-9 h-9 drop-shadow-lg z-10 transform transition-transform group-hover:scale-110 my-1">
                      {getWeatherIcon(code, isDay)}
                 </div>
 
-                {/* Info Row: Wind or Rain */}
-                <div className="w-full flex justify-center items-center h-4">
-                     {rainProb > 15 ? (
-                        <div className="flex items-center gap-0.5 bg-black/20 px-1.5 py-0.5 rounded-full">
-                            <Droplets size={8} className="text-blue-100" />
-                            <span className="text-[9px] font-bold text-blue-50">%{rainProb}</span>
-                        </div>
-                     ) : (
-                        <div className="flex items-center gap-1" title="Rüzgar Yönü">
-                            {/* Rüzgar okunu döndür */}
+                {/* Info (Rain % or Wind) */}
+                <div className="z-10 h-4 flex items-center justify-center">
+                    {rainProb >= 10 ? (
+                         <div className="flex flex-col items-center">
+                             <span className="text-[9px] font-bold text-blue-300">%{rainProb}</span>
+                         </div>
+                    ) : (
+                         <div className="flex items-center justify-center opacity-60" title="Rüzgar Yönü">
                             <Navigation 
-                                size={10} 
-                                className="text-white/70" 
+                                size={12} 
+                                className="text-slate-300" 
                                 style={{ transform: `rotate(${windDir}deg)` }} 
                             />
                         </div>
-                     )}
+                    )}
                 </div>
 
                 {/* Temp */}
-                <span className="text-lg font-bold text-white tracking-tighter drop-shadow-md">
+                <span className={`text-lg font-bold tracking-tight z-10 ${tempColor}`}>
                     {Math.round(temp)}°
                 </span>
               </div>
