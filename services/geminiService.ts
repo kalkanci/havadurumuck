@@ -3,23 +3,14 @@ import { GoogleGenAI, Type } from "@google/genai";
 import { WeatherData, AdviceResponse } from "../types";
 import { getWeatherLabel } from "../constants";
 
-// Vite/Vercel ortamında API anahtarını güvenli bir şekilde alma
-const getApiKey = (): string | undefined => {
-  try {
-    // @ts-ignore
-    return import.meta.env.VITE_API_KEY;
-  } catch (e) {
-    return undefined;
-  }
-};
-
-const apiKey = getApiKey();
-// Eğer API key yoksa null dönüyoruz, uygulama çökmesin
-const ai = apiKey ? new GoogleGenAI({ apiKey }) : null;
+// Talimatlara uygun olarak API anahtarını doğrudan process.env'den alıyoruz.
+// Bu değişkenin ortamda tanımlı olduğu varsayılmaktadır.
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 export const getGeminiAdvice = async (weather: WeatherData, locationName: string): Promise<AdviceResponse> => {
-  if (!ai) {
-    throw new Error("API Key Eksik");
+  // Ekstra güvenlik kontrolü: Anahtar boşsa işlemi durdur
+  if (!process.env.API_KEY) {
+    throw new Error("API Key (process.env.API_KEY) bulunamadı.");
   }
 
   try {
@@ -93,26 +84,36 @@ export const getGeminiAdvice = async (weather: WeatherData, locationName: string
 };
 
 export const generateCityImage = async (city: string, weatherCode: number, isDay: boolean): Promise<string | null> => {
-  if (!ai) {
+  if (!process.env.API_KEY) {
     console.warn("API Key missing, skipping image generation.");
     return null;
   }
 
   try {
     const condition = getWeatherLabel(weatherCode);
-    const timeOfDay = isDay ? "daytime" : "night";
+    const timeOfDay = isDay ? "daytime with natural sunlight" : "night time with cinematic city lights";
     
-    // Nano Banana Pro Prompt Mühendisliği
+    // 2-Step Logic & Improved Prompting
     const prompt = `
-      A hyper-realistic, 4K wide-angle vertical photograph of the most iconic landmark in ${city}. 
-      The weather is ${condition} and it is ${timeOfDay}. 
-      Cinematic lighting, high detailed texture, architectural photography style. 
-      Do not use blur, ensure sharp focus.
+      Internal Step 1 (Landmark Detection): Identify the single most iconic, globally recognized architectural landmark in ${city} (e.g., Eiffel Tower if Paris, Hagia Sophia if Istanbul, Colosseum if Rome, Burj Khalifa if Dubai). Do NOT explain this step, just use the identified landmark for the image generation.
+
+      Internal Step 2 (Image Generation):
+      Generate a breathtaking wide-angle architectural photograph of that specific landmark in ${city}.
+      The shot is taken from a cinematic viewpoint (eye-level or low-angle, looking up at the grandeur).
+      The weather is ${condition} and lighting is ${timeOfDay}.
       
-      Weather Details:
-      - If rain: Wet pavement reflections, overcast dramatic sky.
-      - If snow: Crisp white snow, visible snowflakes.
-      - If clear: Deep blue sky, high contrast sun/moon.
+      Style: High-end travel photography, 8k resolution, National Geographic style, hyper-realistic, highly detailed textures.
+      
+      Weather Context:
+      - If rain: Wet pavement reflections, overcast dramatic sky, raindrops.
+      - If snow: Crisp white snow, visible snowflakes, cold atmosphere.
+      - If clear: Deep blue sky, high contrast.
+
+      NEGATIVE CONSTRAINTS (STRICTLY AVOID):
+      - map, chart, text, ui elements, blurry, distorted.
+      - satellite view, aerial map view, drone top-down view.
+      - cartoon, illustration, painting, sketch, low quality.
+      - flags flying predominantly (unless part of the building), random street signs.
     `;
 
     // Gemini 3 Pro Image (Nano Banana Pro) kullanımı
@@ -127,7 +128,7 @@ export const generateCityImage = async (city: string, weatherCode: number, isDay
         // Nano Banana modelleri için özel imageConfig
         imageConfig: {
           aspectRatio: "9:16", // Mobil öncelikli dikey format
-          imageSize: "1K" // Hız ve kalite dengesi için 1K (Preview modellerde bazen 4K kısıtlı olabilir)
+          imageSize: "1K" // Hız ve kalite dengesi için 1K
         }
       }
     });
