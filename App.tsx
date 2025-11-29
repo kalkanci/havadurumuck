@@ -15,6 +15,7 @@ import WeatherOverlay from './components/WeatherOverlay';
 import SkeletonLoader from './components/SkeletonLoader';
 import GoldenHourCard from './components/GoldenHourCard';
 import ActivityScore from './components/ActivityScore';
+import WidgetView from './components/WidgetView';
 import { getWeatherLabel } from './constants';
 
 const App: React.FC = () => {
@@ -35,6 +36,9 @@ const App: React.FC = () => {
   
   const [error, setError] = useState<string | null>(null);
   const [gpsError, setGpsError] = useState<boolean>(false);
+
+  // Widget Mode Detection
+  const isWidgetMode = new URLSearchParams(window.location.search).get('mode') === 'widget';
 
   // Pull to refresh refs
   const startY = useRef(0);
@@ -101,7 +105,7 @@ const App: React.FC = () => {
         setLoading(false);
       },
       {
-        enableHighAccuracy: true, // Settings removed, defaulting to true
+        enableHighAccuracy: true,
         timeout: 10000,
         maximumAge: 0
       }
@@ -144,6 +148,19 @@ const App: React.FC = () => {
     pullDistance.current = 0;
   };
 
+  // RENDER WIDGET MODE
+  if (isWidgetMode) {
+    return (
+        <WidgetView 
+            weather={weather} 
+            locationName={location.name} 
+            loading={loading}
+            onRefresh={() => loadWeather(true)}
+        />
+    );
+  }
+
+  // NORMAL APP RENDER
   const isFav = favorites.some(f => f.id === location.id);
   const distanceToStation = weather 
     ? calculateDistance(location.latitude, location.longitude, weather.latitude, weather.longitude)
@@ -224,7 +241,7 @@ const App: React.FC = () => {
           {/* Heart / Favorites Button */}
           <button 
             onClick={() => setIsFavoritesOpen(true)} 
-            className={`p-3 glass-card rounded-2xl transition-all active:scale-95 duration-200 border border-white/10 ${isFav ? 'bg-red-500/20 border-red-500/30' : 'hover:bg-white/10'}`}
+            className={`p-3 glass-card rounded-2xl transition-all active:scale-95 duration-200 border border-white/10 ${isFav ? 'bg-red-500/20 border-red-500/30' : 'hover:bg-slate-800/80'}`}
           >
             <Heart 
                 size={22} 
@@ -299,7 +316,7 @@ const App: React.FC = () => {
               {/* 15-Day Forecast Trigger Button */}
               <button 
                 onClick={() => setShowDailyForecast(true)}
-                className="w-full mb-6 py-4 glass-card rounded-2xl flex items-center justify-between px-5 group hover:bg-white/10 transition-all active:scale-[0.98]"
+                className="w-full mb-6 py-4 glass-card rounded-2xl flex items-center justify-between px-5 group hover:bg-slate-800/80 transition-all active:scale-[0.98]"
               >
                  <div className="flex items-center gap-3">
                      <div className="p-2 bg-blue-500/20 rounded-lg text-blue-300">
