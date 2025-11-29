@@ -1,8 +1,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { Wind, ShieldCheck, ShieldAlert, ShieldX, Activity, Info, X, HelpCircle } from 'lucide-react';
+import { ShieldCheck, ShieldAlert, ShieldX, Activity, Info, X, HelpCircle } from 'lucide-react';
 import { AirQuality } from '../types';
+import { triggerHapticFeedback } from '../utils/helpers';
 
 interface AirQualityCardProps {
   data?: AirQuality;
@@ -12,7 +13,6 @@ const AirQualityCard: React.FC<AirQualityCardProps> = ({ data }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
 
-  // Lock body scroll
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
@@ -30,61 +30,74 @@ const AirQualityCard: React.FC<AirQualityCardProps> = ({ data }) => {
   
   // AQI Durum Belirleme
   let status = "Mükemmel";
-  let colorClass = "text-emerald-600 dark:text-emerald-400";
+  let colorClass = "text-emerald-400";
+  let ringColor = "ring-emerald-500";
   let barColor = "bg-emerald-500";
-  let bgGradient = "from-emerald-100/50 via-emerald-50/30 to-transparent dark:from-emerald-500/20 dark:via-emerald-900/10 dark:to-transparent";
+  let bgGradient = "from-emerald-500/20 via-emerald-900/10 to-transparent";
+  let iconBg = "bg-emerald-500/20";
   let Icon = ShieldCheck;
   let advice = "Hava tertemiz! Pencereleri açabilir, dışarıda spor yapabilirsiniz.";
 
   if (aqi > 20 && aqi <= 40) {
     status = "İyi";
-    colorClass = "text-teal-600 dark:text-teal-400";
+    colorClass = "text-teal-400";
+    ringColor = "ring-teal-500";
     barColor = "bg-teal-500";
-    bgGradient = "from-teal-100/50 via-teal-50/30 to-transparent dark:from-teal-500/20 dark:via-teal-900/10 dark:to-transparent";
+    bgGradient = "from-teal-500/20 via-teal-900/10 to-transparent";
+    iconBg = "bg-teal-500/20";
     Icon = ShieldCheck;
     advice = "Hava kalitesi gayet iyi. Dışarıdaki aktiviteler için uygun.";
   } else if (aqi > 40 && aqi <= 60) {
     status = "Orta";
-    colorClass = "text-yellow-600 dark:text-yellow-400";
+    colorClass = "text-yellow-400";
+    ringColor = "ring-yellow-500";
     barColor = "bg-yellow-500";
-    bgGradient = "from-yellow-100/50 via-yellow-50/30 to-transparent dark:from-yellow-500/20 dark:via-yellow-900/10 dark:to-transparent";
+    bgGradient = "from-yellow-500/20 via-yellow-900/10 to-transparent";
+    iconBg = "bg-yellow-500/20";
     Icon = Activity;
     advice = "Hava kalitesi kabul edilebilir, ancak hassas bünyeler uzun süre dışarıda kalmamalı.";
   } else if (aqi > 60 && aqi <= 80) {
     status = "Hassas";
-    colorClass = "text-orange-600 dark:text-orange-400";
+    colorClass = "text-orange-400";
+    ringColor = "ring-orange-500";
     barColor = "bg-orange-500";
-    bgGradient = "from-orange-100/50 via-orange-50/30 to-transparent dark:from-orange-500/20 dark:via-orange-900/10 dark:to-transparent";
+    bgGradient = "from-orange-500/20 via-orange-900/10 to-transparent";
+    iconBg = "bg-orange-500/20";
     Icon = ShieldAlert;
     advice = "Hassas gruplar (çocuklar, yaşlılar) için riskli olabilir. Maske takılması önerilir.";
   } else if (aqi > 80) {
     status = "Kötü";
-    colorClass = "text-red-600 dark:text-red-500";
+    colorClass = "text-red-400";
+    ringColor = "ring-red-500";
     barColor = "bg-red-600";
-    bgGradient = "from-red-100/50 via-red-50/30 to-transparent dark:from-red-600/20 dark:via-red-900/10 dark:to-transparent";
+    bgGradient = "from-red-600/20 via-red-900/10 to-transparent";
+    iconBg = "bg-red-600/20";
     Icon = ShieldX;
     advice = "Hava kirliliği yüksek seviyede! Mecbur kalmadıkça dışarı çıkmayın.";
   }
 
   const getPollutantColor = (val: number, type: 'pm25' | 'pm10' | 'dust') => {
     if (type === 'pm25') {
-        if (val < 10) return 'bg-emerald-400';
-        if (val < 25) return 'bg-yellow-400';
-        return 'bg-red-400';
+        if (val < 10) return 'bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.5)]';
+        if (val < 25) return 'bg-yellow-400 shadow-[0_0_10px_rgba(250,204,21,0.5)]';
+        return 'bg-red-400 shadow-[0_0_10px_rgba(248,113,113,0.5)]';
     }
     if (type === 'pm10') {
-        if (val < 20) return 'bg-emerald-400';
-        if (val < 50) return 'bg-yellow-400';
-        return 'bg-red-400';
+        if (val < 20) return 'bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.5)]';
+        if (val < 50) return 'bg-yellow-400 shadow-[0_0_10px_rgba(250,204,21,0.5)]';
+        return 'bg-red-400 shadow-[0_0_10px_rgba(248,113,113,0.5)]';
     }
     return 'bg-slate-400';
   };
 
   const percentage = Math.min((aqi / 100) * 100, 100);
 
-  const handleOpen = () => {
-    setIsOpen(true);
-    setIsClosing(false);
+  const handleOpenWithDelay = () => {
+    triggerHapticFeedback(20);
+    setTimeout(() => {
+        setIsOpen(true);
+        setIsClosing(false);
+    }, 200);
   };
 
   const handleClose = (e?: React.MouseEvent) => {
@@ -101,65 +114,81 @@ const AirQualityCard: React.FC<AirQualityCardProps> = ({ data }) => {
 
     return createPortal(
         <div className="fixed inset-0 z-[500] flex items-center justify-center p-6">
-            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={handleClose} />
+            <div className="absolute inset-0 bg-black/80 backdrop-blur-md transition-opacity duration-300" onClick={handleClose} />
             
-            <div className={`relative w-full max-w-sm bg-white dark:bg-slate-900/95 backdrop-blur-xl border border-slate-200 dark:border-white/10 rounded-3xl p-6 shadow-2xl overflow-hidden flex flex-col max-h-[80vh] overflow-y-auto no-scrollbar ${isClosing ? 'animate-pop-out' : 'animate-pop-in'}`}>
-                <button onClick={handleClose} className="absolute top-4 right-4 p-2 bg-slate-100 dark:bg-white/5 rounded-full text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/10 z-10">
+            <div className={`relative w-full max-w-sm bg-slate-900 border border-white/10 rounded-[2rem] p-6 shadow-2xl overflow-hidden flex flex-col max-h-[85vh] overflow-y-auto no-scrollbar ${isClosing ? 'animate-pop-out' : 'animate-pop-in'}`}>
+                {/* Background Glow */}
+                <div className={`absolute top-0 left-0 w-full h-48 bg-gradient-to-b ${bgGradient} opacity-30 pointer-events-none`} />
+
+                <button onClick={handleClose} className="absolute top-4 right-4 p-2 bg-white/5 rounded-full text-white/60 hover:text-white z-20 transition-colors">
                     <X size={20} />
                 </button>
 
-                <div className="flex flex-col items-center mb-6 pt-2">
-                    <div className={`p-4 rounded-full bg-slate-50 dark:bg-white/5 shadow-xl ring-2 ring-black/5 dark:ring-white/10 ${colorClass} mb-2`}>
-                        <Icon size={32} />
+                <div className="relative z-10 flex flex-col items-center mb-8 pt-4">
+                    <div className={`p-5 rounded-full bg-slate-800/80 shadow-2xl ring-2 ${ringColor} ring-offset-2 ring-offset-slate-900 ${colorClass} mb-4 relative`}>
+                         <div className={`absolute inset-0 rounded-full ${colorClass} blur-xl opacity-20`}></div>
+                        <Icon size={40} />
                     </div>
-                    <span className={`text-3xl font-bold ${colorClass}`}>{status}</span>
-                    <span className="text-xs text-slate-500 dark:text-slate-500 uppercase tracking-widest font-bold mt-1">Hava Kalitesi İndeksi: {aqi}</span>
+                    <span className={`text-4xl font-black ${colorClass} drop-shadow-sm`}>{status}</span>
+                    <div className="flex items-center gap-2 mt-2 bg-white/5 px-3 py-1 rounded-full border border-white/5">
+                        <span className="text-xs text-slate-300 uppercase tracking-widest font-bold">AQI Skoru:</span>
+                        <span className="text-sm font-bold text-white">{aqi}</span>
+                    </div>
                 </div>
 
-                <div className="space-y-4">
-                    <div className="bg-slate-50 dark:bg-white/5 p-4 rounded-2xl border border-slate-100 dark:border-white/5">
-                        <div className="flex items-start gap-3">
-                            <Info size={18} className={`${colorClass} mt-0.5 flex-shrink-0`} />
-                            <p className="text-sm text-slate-700 dark:text-slate-200 leading-relaxed">{advice}</p>
+                <div className="space-y-5 relative z-10">
+                    <div className="bg-white/5 p-5 rounded-3xl border border-white/10 relative overflow-hidden">
+                        <div className="flex items-start gap-4">
+                            <div className={`p-2 rounded-xl ${iconBg} shrink-0`}>
+                                <Info size={20} className={colorClass} />
+                            </div>
+                            <p className="text-sm text-slate-200 leading-relaxed font-medium">{advice}</p>
                         </div>
                     </div>
 
                     <div className="space-y-3">
-                        <h4 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider ml-1">Kirletici Detayları</h4>
+                        <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-2 mb-1">Kirletici Seviyeleri</h4>
                         
                         {/* PM 2.5 Detail */}
-                        <div className="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl flex items-center justify-between border border-slate-100 dark:border-white/5">
-                            <div className="flex items-center gap-3">
-                                <div className={`w-2 h-10 rounded-full ${getPollutantColor(data.pm2_5, 'pm25')}`}></div>
+                        <div className="bg-slate-800/50 p-4 rounded-2xl flex items-center justify-between border border-white/5 hover:bg-slate-800 transition-colors">
+                            <div className="flex items-center gap-4">
+                                <div className={`w-1.5 h-10 rounded-full ${getPollutantColor(data.pm2_5, 'pm25')}`}></div>
                                 <div>
-                                    <div className="flex items-center gap-1">
-                                        <span className="text-sm font-bold text-slate-800 dark:text-white">PM 2.5</span>
+                                    <div className="flex items-center gap-1.5 mb-0.5">
+                                        <span className="text-sm font-bold text-white">PM 2.5</span>
                                         <HelpCircle size={12} className="text-slate-500" />
                                     </div>
-                                    <span className="text-[10px] text-slate-500 dark:text-slate-400">İnce Partikül Madde</span>
+                                    <span className="text-[10px] text-slate-400 font-medium">İnce Partikül</span>
                                 </div>
                             </div>
-                            <span className="text-lg font-bold text-slate-800 dark:text-white">{data.pm2_5.toFixed(1)} <span className="text-[10px] text-slate-500 font-normal">µg/m³</span></span>
+                            <div className="text-right">
+                                <span className="text-lg font-bold text-white block leading-none">{data.pm2_5.toFixed(1)}</span>
+                                <span className="text-[9px] text-slate-500">µg/m³</span>
+                            </div>
                         </div>
 
                          {/* PM 10 Detail */}
-                         <div className="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl flex items-center justify-between border border-slate-100 dark:border-white/5">
-                            <div className="flex items-center gap-3">
-                                <div className={`w-2 h-10 rounded-full ${getPollutantColor(data.pm10, 'pm10')}`}></div>
+                         <div className="bg-slate-800/50 p-4 rounded-2xl flex items-center justify-between border border-white/5 hover:bg-slate-800 transition-colors">
+                            <div className="flex items-center gap-4">
+                                <div className={`w-1.5 h-10 rounded-full ${getPollutantColor(data.pm10, 'pm10')}`}></div>
                                 <div>
-                                    <div className="flex items-center gap-1">
-                                        <span className="text-sm font-bold text-slate-800 dark:text-white">PM 10</span>
+                                    <div className="flex items-center gap-1.5 mb-0.5">
+                                        <span className="text-sm font-bold text-white">PM 10</span>
                                         <HelpCircle size={12} className="text-slate-500" />
                                     </div>
-                                    <span className="text-[10px] text-slate-500 dark:text-slate-400">Kalın Partikül Madde</span>
+                                    <span className="text-[10px] text-slate-400 font-medium">Kalın Partikül</span>
                                 </div>
                             </div>
-                            <span className="text-lg font-bold text-slate-800 dark:text-white">{data.pm10.toFixed(1)} <span className="text-[10px] text-slate-500 font-normal">µg/m³</span></span>
+                             <div className="text-right">
+                                <span className="text-lg font-bold text-white block leading-none">{data.pm10.toFixed(1)}</span>
+                                <span className="text-[9px] text-slate-500">µg/m³</span>
+                            </div>
                         </div>
                     </div>
 
-                    <div className="text-[10px] text-slate-600 dark:text-slate-500 bg-slate-200 dark:bg-black/20 p-3 rounded-lg leading-relaxed">
-                        <strong>PM 2.5 Nedir?</strong> Saç telinden çok daha ince olan bu partiküller, akciğerlerin derinliklerine ve kana karışabilir. 
+                    <div className="text-[10px] text-slate-400 bg-black/20 p-4 rounded-2xl leading-relaxed border border-white/5">
+                        <strong className="text-slate-300 block mb-1">Biliyor muydunuz?</strong> 
+                        PM 2.5 partikülleri saç telinden yaklaşık 30 kat daha incedir ve doğrudan kan dolaşımına karışabilir.
                     </div>
                 </div>
             </div>
@@ -171,66 +200,65 @@ const AirQualityCard: React.FC<AirQualityCardProps> = ({ data }) => {
   return (
     <>
     <button 
-      onClick={handleOpen}
-      className="w-full glass-card rounded-2xl p-5 mb-6 relative overflow-hidden group text-left transition-transform active:scale-[0.98]"
+      onClick={handleOpenWithDelay}
+      className="w-full glass-card rounded-[2rem] p-6 mb-6 relative overflow-hidden group text-left transition-all duration-300 transform active:scale-[0.97] active:brightness-90 active:border-white/10 hover:shadow-2xl"
     >
       {/* Dynamic Background Gradient */}
-      <div className={`absolute inset-0 bg-gradient-to-br ${bgGradient} transition-colors duration-500 opacity-60`} />
+      <div className={`absolute inset-0 bg-gradient-to-br ${bgGradient} opacity-60 group-hover:opacity-80 transition-opacity duration-500`} />
       
       <div className="relative z-10">
         
         {/* Header & Main Gauge */}
         <div className="flex items-start justify-between mb-6">
-             <div className="flex items-center gap-3">
-                 <div className={`p-3 rounded-2xl bg-white/40 dark:bg-white/5 backdrop-blur-md shadow-inner ring-1 ring-black/5 dark:ring-white/10 ${colorClass}`}>
+             <div className="flex items-center gap-4">
+                 <div className={`p-3.5 rounded-2xl bg-white/10 backdrop-blur-md shadow-inner ring-1 ring-white/10 ${colorClass}`}>
                      <Icon size={28} />
                  </div>
                  <div>
-                     <h3 className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-0.5 flex items-center gap-1">
-                         Hava Kalitesi <Info size={10} />
+                     <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 flex items-center gap-1">
+                         Hava Kalitesi
                      </h3>
-                     <p className={`text-2xl font-bold leading-none tracking-tight ${colorClass}`}>{status}</p>
+                     <p className={`text-2xl font-black leading-none tracking-tight ${colorClass}`}>{status}</p>
                  </div>
              </div>
              
              <div className="text-right">
                  <div className="relative inline-block">
-                    <span className="text-4xl font-black text-slate-900 dark:text-white tracking-tighter">{aqi}</span>
-                    <div className={`absolute -right-2 top-0 w-2 h-2 rounded-full ${barColor} animate-pulse`} />
+                    <span className="text-5xl font-black text-white tracking-tighter drop-shadow-lg">{aqi}</span>
+                    <div className={`absolute -right-1.5 top-1 w-2.5 h-2.5 rounded-full ${barColor} animate-pulse shadow-[0_0_8px_currentColor]`} />
                  </div>
-                 <span className="text-[10px] text-slate-500 block uppercase font-bold mt-1">Avrupa AQI</span>
              </div>
         </div>
 
         {/* Progress Bar */}
-        <div className="mb-5 relative">
-             <div className="flex justify-between text-[10px] text-slate-500 dark:text-slate-400 mb-1.5 font-bold uppercase tracking-wider opacity-70">
+        <div className="mb-6 relative group-active:opacity-80 transition-opacity">
+             <div className="flex justify-between text-[10px] text-slate-400 mb-2 font-bold uppercase tracking-wider">
                  <span>Temiz</span>
                  <span>Tehlikeli</span>
              </div>
-             <div className="h-2.5 w-full bg-slate-200 dark:bg-slate-800/80 rounded-full overflow-hidden shadow-inner border border-black/5 dark:border-white/5">
+             <div className="h-3 w-full bg-slate-900/60 rounded-full overflow-hidden shadow-inner border border-white/5">
                  <div 
-                    className={`h-full ${barColor} transition-all duration-1000 ease-out shadow-[0_0_12px_rgba(0,0,0,0.5)] relative`} 
+                    className={`h-full ${barColor} transition-all duration-1000 ease-out shadow-[0_0_15px_currentColor] relative`} 
                     style={{ width: `${percentage}%` }}
                  >
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"></div>
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent"></div>
                  </div>
              </div>
         </div>
 
         {/* Pollutants Grid (Mini Preview) */}
         <div className="grid grid-cols-3 gap-3">
-            <div className="bg-white/40 dark:bg-slate-800/40 rounded-xl p-2.5 border border-black/5 dark:border-white/5 flex flex-col items-center">
-                 <p className="text-[9px] text-slate-600 dark:text-slate-400 uppercase font-bold mb-1">PM 2.5</p>
-                 <div className={`w-8 h-1 rounded-full ${getPollutantColor(data.pm2_5, 'pm25')}`} />
+            <div className="bg-black/20 rounded-xl p-3 border border-white/5 flex flex-col items-center gap-2">
+                 <p className="text-[9px] text-slate-400 uppercase font-bold">PM 2.5</p>
+                 <div className={`w-8 h-1.5 rounded-full ${getPollutantColor(data.pm2_5, 'pm25')}`} />
             </div>
-            <div className="bg-white/40 dark:bg-slate-800/40 rounded-xl p-2.5 border border-black/5 dark:border-white/5 flex flex-col items-center">
-                 <p className="text-[9px] text-slate-600 dark:text-slate-400 uppercase font-bold mb-1">PM 10</p>
-                 <div className={`w-8 h-1 rounded-full ${getPollutantColor(data.pm10, 'pm10')}`} />
+            <div className="bg-black/20 rounded-xl p-3 border border-white/5 flex flex-col items-center gap-2">
+                 <p className="text-[9px] text-slate-400 uppercase font-bold">PM 10</p>
+                 <div className={`w-8 h-1.5 rounded-full ${getPollutantColor(data.pm10, 'pm10')}`} />
             </div>
-            <div className="bg-white/40 dark:bg-slate-800/40 rounded-xl p-2.5 border border-black/5 dark:border-white/5 flex flex-col items-center">
-                 <p className="text-[9px] text-slate-600 dark:text-slate-400 uppercase font-bold mb-1">Toz</p>
-                 <div className="w-8 h-1 rounded-full bg-slate-400 dark:bg-slate-600" />
+            <div className="bg-black/20 rounded-xl p-3 border border-white/5 flex flex-col items-center gap-2">
+                 <p className="text-[9px] text-slate-400 uppercase font-bold">Toz</p>
+                 <div className="w-8 h-1.5 rounded-full bg-slate-600" />
             </div>
         </div>
       </div>

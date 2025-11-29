@@ -1,8 +1,9 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Heart, Navigation, MapPin, ArrowUp, ArrowDown, RefreshCw, Calendar, CloudSun, Loader2, Settings } from 'lucide-react';
-import { GeoLocation, WeatherData, WeatherAlert, PublicHoliday, AppSettings } from './types';
+import { GeoLocation, WeatherData, WeatherAlert, PublicHoliday, AppSettings, AstronomyData } from './types';
 import { fetchWeather, getDetailedAddress, fetchHolidays } from './services/weatherService';
+import { fetchAstronomyPicture } from './services/astronomyService';
 import { calculateDistance, checkWeatherAlerts, triggerHapticFeedback } from './utils/helpers';
 import Background from './components/Background';
 import Search from './components/Search';
@@ -21,6 +22,8 @@ import PWAInstallBanner from './components/PWAInstallBanner';
 import AdviceCard from './components/AdviceCard';
 import HolidayCard from './components/HolidayCard';
 import SettingsModal from './components/SettingsModal';
+import SpotifyCard from './components/SpotifyCard';
+import CalendarModal from './components/CalendarModal';
 import { getWeatherLabel } from './constants';
 
 const App: React.FC = () => {
@@ -33,6 +36,7 @@ const App: React.FC = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [alerts, setAlerts] = useState<WeatherAlert[]>([]);
   const [upcomingHolidays, setUpcomingHolidays] = useState<PublicHoliday[]>([]);
+  const [cosmicData, setCosmicData] = useState<AstronomyData | null>(null);
   
   // Settings State
   const [settings, setSettings] = useState<AppSettings>(() => {
@@ -47,6 +51,7 @@ const App: React.FC = () => {
   
   const [isFavoritesOpen, setIsFavoritesOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   
   // Navigation State
   const [activeTab, setActiveTab] = useState<'today' | 'forecast'>('today');
@@ -74,10 +79,18 @@ const App: React.FC = () => {
     localStorage.setItem('atmosfer_settings', JSON.stringify(settings));
   }, [settings]);
 
+  // Sekme değiştiğinde sayfayı en yukarı kaydır
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, [activeTab]);
+
   useEffect(() => {
     // Start the app flow
     handleCurrentLocation();
     
+    // Load non-location dependent data once
+    loadAstronomy();
+
     const handleBeforeInstallPrompt = (e: any) => {
       e.preventDefault();
       setDeferredPrompt(e);
@@ -102,6 +115,11 @@ const App: React.FC = () => {
       if (settings.hapticsEnabled) {
           triggerHapticFeedback(pattern);
       }
+  };
+
+  const loadAstronomy = async () => {
+      const data = await fetchAstronomyPicture();
+      if (data) setCosmicData(data);
   };
 
   const loadHolidays = async () => {
@@ -265,6 +283,7 @@ const App: React.FC = () => {
       haptic(50);
       loadWeather(true);
       loadHolidays();
+      loadAstronomy();
     }
     startY.current = 0;
     pullDistance.current = 0;
@@ -310,10 +329,8 @@ const App: React.FC = () => {
     : 0;
 
   const todayStr = new Date().toLocaleDateString('tr-TR', { 
-    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
+    weekday: 'long', day: 'numeric', month: 'long'
   });
-
-  const tempUnit = '°';
 
   return (
     <div 
@@ -326,6 +343,7 @@ const App: React.FC = () => {
         city={location?.name || ''} 
         weatherCode={weather?.current.weather_code}
         isDay={weather?.current.is_day}
+        cosmicUrl={cosmicData?.url}
       />
       
       {/* Modals */}
@@ -340,17 +358,20 @@ const App: React.FC = () => {
             onAdd={addFavorite}
         />
       )}
+      
+      {weather && (
+        <CalendarModal 
+            isOpen={isCalendarOpen}
+            onClose={() => setIsCalendarOpen(false)}
+            weather={weather}
+        />
+      )}
 
       <SettingsModal 
          isOpen={isSettingsOpen}
          onClose={() => setIsSettingsOpen(false)}
          settings={settings}
          onUpdate={setSettings}
-      />
-
-      <PWAInstallBanner 
-          deferredPrompt={deferredPrompt} 
-          onInstall={handleInstallClick} 
       />
 
       <div className="relative z-10 flex flex-col min-h-screen p-4 md:max-w-md md:mx-auto transition-transform duration-300">
@@ -435,37 +456,59 @@ const App: React.FC = () => {
             {activeTab === 'today' ? (
               // --- TODAY VIEW ---
               <>
-                <div className="flex flex-col items-center justify-center mb-8 mt-2 text-center">
-                  <h1 className="text-4xl font-bold tracking-tight drop-shadow-lg mb-2 text-white">{location.name}</h1>
+                <div className="flex flex-col items-center justify-center mb-10 mt-6 text-center relative z-10">
                   
-                  {location.subtext ? (
-                    <div className="flex items-center gap-1.5 bg-black/20 backdrop-blur-sm px-3 py-1 rounded-full mb-1 border border-white/5">
-                      <MapPin size={12} className="text-blue-400" />
-                      <p className="text-blue-100 text-xs font-medium truncate max-w-[250px]">
-                        {location.subtext}
-                      </p>
-                    </div>
-                  ) : (
-                    <p className="text-slate-200 text-sm font-medium drop-shadow-md">
-                      {location.admin1 ? `${location.admin1}, ` : ''}{location.country}
-                    </p>
-                  )}
-                  
-                  <p className="text-slate-300 text-xs font-medium mt-1 uppercase tracking-wide opacity-80">
-                    {todayStr}
-                  </p>
-                  
-                  <div className="flex flex-col items-center mt-6">
-                    <span className="text-[7rem] leading-none font-thin tracking-tighter drop-shadow-2xl text-white">
-                      {Math.round(weather.current.temperature_2m)}{tempUnit}
-                    </span>
-                    <p className="text-xl font-medium mt-2 text-blue-200 tracking-wide drop-shadow-md">
-                      {getWeatherLabel(weather.current.weather_code)}
-                    </p>
-                    <div className="flex items-center space-x-6 mt-3 text-sm font-semibold text-slate-300">
-                      <span className="flex items-center gap-1"><ArrowUp size={16} className="text-red-400" /> {Math.round(weather.daily.temperature_2m_max[0])}{tempUnit}</span>
-                      <span className="flex items-center gap-1"><ArrowDown size={16} className="text-blue-400" /> {Math.round(weather.daily.temperature_2m_min[0])}{tempUnit}</span>
-                    </div>
+                  {/* PWA Install Banner - NOW HERE FOR HIGH VISIBILITY */}
+                  <PWAInstallBanner 
+                      deferredPrompt={deferredPrompt} 
+                      onInstall={handleInstallClick} 
+                  />
+
+                  {/* 1. Date Pill (Top - Clickable) */}
+                  <button 
+                    onClick={() => setIsCalendarOpen(true)}
+                    className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/10 shadow-lg mb-6 active:scale-95 transition-transform"
+                  >
+                    <Calendar size={12} className="text-blue-300" />
+                    <span className="text-xs font-bold text-blue-100 tracking-wide uppercase">{todayStr}</span>
+                  </button>
+
+                  {/* 2. Massive Temperature (The Hero) */}
+                  <div className="relative">
+                     {/* Glow effect behind */}
+                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 bg-blue-500/20 rounded-full blur-[80px] pointer-events-none"></div>
+                     
+                     <h1 className="text-[9rem] leading-[0.85] font-thin tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white via-white to-white/70 drop-shadow-2xl select-none">
+                        {Math.round(weather.current.temperature_2m)}<span className="text-[5rem] font-light text-slate-300 align-top absolute top-2 ml-1">°</span>
+                     </h1>
+                  </div>
+
+                  {/* 3. Condition & High/Low */}
+                  <div className="mt-4 flex flex-col items-center gap-1">
+                     <p className="text-2xl font-medium text-blue-100 tracking-wide drop-shadow-lg flex items-center gap-2">
+                        {getWeatherLabel(weather.current.weather_code)}
+                     </p>
+                     <div className="flex items-center gap-4 text-sm font-semibold text-white/80 bg-black/10 px-4 py-1.5 rounded-xl backdrop-blur-sm border border-white/5 mt-2">
+                         <span className="flex items-center gap-1"><ArrowUp size={14} className="text-red-400" /> {Math.round(weather.daily.temperature_2m_max[0])}°</span>
+                         <div className="w-px h-3 bg-white/20"></div>
+                         <span className="flex items-center gap-1"><ArrowDown size={14} className="text-blue-400" /> {Math.round(weather.daily.temperature_2m_min[0])}°</span>
+                     </div>
+                  </div>
+
+                  {/* 4. Location Pill (New Design) */}
+                  <div className="mt-6 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
+                      <button 
+                         onClick={() => setIsFavoritesOpen(true)}
+                         className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/10 hover:bg-white/15 active:scale-95 transition-all backdrop-blur-md border border-white/10 shadow-xl group"
+                      >
+                         <MapPin size={16} className="text-red-400 group-hover:animate-bounce" />
+                         <span className="text-sm font-bold text-white tracking-wide shadow-sm">
+                             {location.name}
+                             {location.admin1 && location.name !== location.admin1 && (
+                                 <span className="opacity-80 font-normal">, {location.admin1}</span>
+                             )}
+                         </span>
+                      </button>
                   </div>
                 </div>
 
@@ -475,8 +518,10 @@ const App: React.FC = () => {
                   <AdviceCard weather={weather} cityName={location.name} />
                   <ForecastInsight weather={weather} />
                   <HourlyForecast weather={weather} />
+                  {/* CosmicCard removed, now background */}
                   
                   <div className="grid grid-cols-1 gap-5">
+                    <SpotifyCard weather={weather} />
                     <GoldenHourCard weather={weather} />
                     <ActivityScore weather={weather} />
                   </div>

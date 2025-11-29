@@ -51,31 +51,32 @@ const PWAInstallBanner: React.FC<PWAInstallBannerProps> = ({ deferredPrompt, onI
 
   return (
     <>
-      {/* Banner at the bottom */}
-      <div className="fixed bottom-24 left-4 right-4 z-40 animate-fade-in-up">
-        <div className="bg-slate-900/95 backdrop-blur-xl border border-white/10 rounded-2xl p-4 shadow-2xl flex items-center justify-between gap-4">
-           <div className="flex items-center gap-3">
-              <div className="p-2.5 bg-blue-600 rounded-xl shadow-lg shadow-blue-600/20">
-                  <Smartphone size={20} className="text-white" />
+      {/* In-Flow Banner (High Visibility) */}
+      <div className="w-full max-w-sm mx-auto mb-6 px-2 animate-fade-in-up relative z-50">
+        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-4 shadow-xl shadow-blue-500/20 flex items-center justify-between gap-3 border border-blue-400/30">
+           
+           <div className="flex items-center gap-3.5">
+              <div className="p-2.5 bg-white/20 rounded-xl backdrop-blur-sm shrink-0">
+                  <Download size={22} className="text-white animate-bounce" />
               </div>
-              <div>
-                  <h4 className="font-bold text-white text-sm">Uygulamayı Yükle</h4>
-                  <p className="text-xs text-slate-400">Daha hızlı erişim ve tam ekran deneyimi.</p>
+              <div className="text-left">
+                  <h4 className="font-bold text-white text-sm leading-tight">Uygulamayı Yükle</h4>
+                  <p className="text-[11px] text-blue-100 font-medium mt-0.5">Daha hızlı ve tam ekran deneyim.</p>
               </div>
            </div>
            
-           <div className="flex items-center gap-2">
-               <button 
-                 onClick={handleClose}
-                 className="p-2 text-slate-400 hover:text-white transition-colors"
-               >
-                 <X size={18} />
-               </button>
+           <div className="flex items-center gap-2 shrink-0">
                <button 
                  onClick={handleClick}
-                 className="bg-white text-slate-900 px-4 py-2 rounded-xl text-xs font-bold hover:bg-slate-200 transition-colors shadow-lg"
+                 className="bg-white text-blue-700 px-4 py-2 rounded-xl text-xs font-black hover:bg-blue-50 transition-transform active:scale-95 shadow-md tracking-wide"
                >
-                 Yükle
+                 YÜKLE
+               </button>
+               <button 
+                 onClick={handleClose}
+                 className="p-1.5 text-blue-200 hover:text-white hover:bg-white/10 rounded-full transition-colors"
+               >
+                 <X size={18} />
                </button>
            </div>
         </div>
@@ -83,34 +84,35 @@ const PWAInstallBanner: React.FC<PWAInstallBannerProps> = ({ deferredPrompt, onI
 
       {/* iOS Instructions Modal */}
       {showIOSInstructions && createPortal(
-         <div className="fixed inset-0 z-[600] flex items-end justify-center sm:items-center">
-             <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowIOSInstructions(false)} />
+         <div className="fixed inset-0 z-[999] flex items-end justify-center sm:items-center p-4">
+             <div className="absolute inset-0 bg-black/80 backdrop-blur-md transition-opacity" onClick={() => setShowIOSInstructions(false)} />
              
-             <div className="relative w-full max-w-sm bg-slate-900 border-t border-white/10 sm:border sm:rounded-3xl p-6 pb-10 sm:pb-6 shadow-2xl animate-fade-in-up">
-                 <div className="flex items-center justify-between mb-4">
-                     <h3 className="text-lg font-bold text-white">iOS'a Nasıl Yüklenir?</h3>
-                     <button onClick={() => setShowIOSInstructions(false)} className="bg-white/5 p-2 rounded-full text-slate-400">
+             <div className="relative w-full max-w-sm bg-slate-900 border border-white/10 rounded-3xl p-6 pb-10 sm:pb-6 shadow-2xl animate-fade-in-up">
+                 <div className="flex items-center justify-between mb-5">
+                     <div className="flex items-center gap-2">
+                        <div className="p-2 bg-white/10 rounded-lg">
+                            <Share size={18} className="text-white" />
+                        </div>
+                        <h3 className="text-lg font-bold text-white">iOS Kurulumu</h3>
+                     </div>
+                     <button onClick={() => setShowIOSInstructions(false)} className="bg-white/5 p-2 rounded-full text-slate-400 hover:text-white transition-colors">
                          <X size={20} />
                      </button>
                  </div>
 
                  <div className="space-y-4 text-sm text-slate-300">
-                     <div className="flex items-center gap-3">
-                         <span className="flex items-center justify-center w-6 h-6 rounded-full bg-white/10 text-xs font-bold">1</span>
-                         <p>Tarayıcının altındaki <Share size={16} className="inline mx-1 text-blue-400" /> <strong>Paylaş</strong> butonuna dokunun.</p>
+                     <div className="flex items-start gap-4">
+                         <span className="flex items-center justify-center w-6 h-6 rounded-full bg-blue-600 text-white text-xs font-bold shrink-0 mt-0.5">1</span>
+                         <p>Tarayıcının alt menüsündeki <span className="text-blue-400 font-bold">Paylaş</span> butonuna dokunun.</p>
                      </div>
-                     <div className="flex items-center gap-3">
-                         <span className="flex items-center justify-center w-6 h-6 rounded-full bg-white/10 text-xs font-bold">2</span>
-                         <p>Aşağı kaydırın ve <PlusSquare size={16} className="inline mx-1 text-white" /> <strong>Ana Ekrana Ekle</strong>'yi seçin.</p>
+                     <div className="flex items-start gap-4">
+                         <span className="flex items-center justify-center w-6 h-6 rounded-full bg-blue-600 text-white text-xs font-bold shrink-0 mt-0.5">2</span>
+                         <p>Menüyü yukarı kaydırın ve <span className="text-white font-bold">Ana Ekrana Ekle</span> seçeneğini bulun.</p>
                      </div>
-                     <div className="flex items-center gap-3">
-                         <span className="flex items-center justify-center w-6 h-6 rounded-full bg-white/10 text-xs font-bold">3</span>
-                         <p>Sağ üst köşedeki <strong>Ekle</strong> butonuna basın.</p>
+                     <div className="flex items-start gap-4">
+                         <span className="flex items-center justify-center w-6 h-6 rounded-full bg-blue-600 text-white text-xs font-bold shrink-0 mt-0.5">3</span>
+                         <p>Sağ üst köşedeki <span className="text-white font-bold">Ekle</span> butonuna basarak tamamlayın.</p>
                      </div>
-                 </div>
-                 
-                 <div className="mt-6 bg-blue-500/10 p-3 rounded-xl border border-blue-500/20 text-center">
-                     <p className="text-xs text-blue-300 font-medium">Bu işlem uygulamayı ana ekranınıza ekleyecektir.</p>
                  </div>
              </div>
          </div>,

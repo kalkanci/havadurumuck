@@ -19,7 +19,7 @@ const HolidayCard: React.FC<HolidayCardProps> = ({ holidays }) => {
   const dateStr = date.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', weekday: 'long' });
 
   return (
-    <div className="w-full glass-card rounded-2xl p-4 my-4 flex items-center justify-between relative overflow-hidden group border-amber-500/20">
+    <div className="w-full glass-card rounded-2xl p-4 my-4 flex items-center justify-between relative overflow-hidden group border-amber-500/20 transition-transform duration-200 active:scale-95">
        
        {/* Background Glow */}
        <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none"></div>

@@ -6,15 +6,16 @@ interface BackgroundProps {
   city: string;
   weatherCode?: number;
   isDay?: number;
+  cosmicUrl?: string; // New prop for NASA image
 }
 
-const Background: React.FC<BackgroundProps> = ({ city, weatherCode, isDay }) => {
+const Background: React.FC<BackgroundProps> = ({ city, weatherCode, isDay, cosmicUrl }) => {
   const [currentImg, setCurrentImg] = useState<string>('');
   const [nextImg, setNextImg] = useState<string>('');
   const [isLoaded, setIsLoaded] = useState(false);
   
   // Track props to prevent unnecessary re-fetches
-  const prevPropsRef = useRef<{city: string, weatherCode?: number, isDay?: number}>({ city: '', weatherCode: undefined, isDay: undefined });
+  const prevPropsRef = useRef<{city: string, weatherCode?: number, isDay?: number, cosmicUrl?: string}>({ city: '', weatherCode: undefined, isDay: undefined, cosmicUrl: undefined });
 
   useEffect(() => {
     const prev = prevPropsRef.current;
@@ -24,14 +25,22 @@ const Background: React.FC<BackgroundProps> = ({ city, weatherCode, isDay }) => 
         city === prev.city && 
         weatherCode === prev.weatherCode && 
         isDay === prev.isDay && 
+        cosmicUrl === prev.cosmicUrl &&
         currentImg !== ''
     ) return;
     
-    prevPropsRef.current = { city, weatherCode, isDay };
+    prevPropsRef.current = { city, weatherCode, isDay, cosmicUrl };
 
     const updateBackground = () => {
       setIsLoaded(false);
-      fetchAiImage();
+      
+      // PRIORITY 1: Cosmic URL (NASA) if available
+      if (cosmicUrl) {
+          setNextImg(cosmicUrl);
+      } else {
+          // PRIORITY 2: AI Generated City Image
+          fetchAiImage();
+      }
     };
 
     const fetchAiImage = () => {
@@ -49,7 +58,7 @@ const Background: React.FC<BackgroundProps> = ({ city, weatherCode, isDay }) => 
     };
 
     updateBackground();
-  }, [city, weatherCode, isDay]);
+  }, [city, weatherCode, isDay, cosmicUrl]);
 
   const handleImageLoad = () => {
     setIsLoaded(true);
@@ -85,8 +94,8 @@ const Background: React.FC<BackgroundProps> = ({ city, weatherCode, isDay }) => 
       {/* 3. Gradient Overlays */}
       <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-black/60 to-transparent pointer-events-none z-10" />
       
-      {/* Main blending gradient */}
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent via-40% to-slate-900 to-65% h-full pointer-events-none z-10" />
+      {/* Main blending gradient - Modified for Space Background to be more subtle but still legible */}
+      <div className={`absolute inset-0 bg-gradient-to-b ${cosmicUrl ? 'from-black/40 via-black/20 to-slate-900' : 'from-transparent via-transparent via-40% to-slate-900 to-65%'} h-full pointer-events-none z-10`} />
       
       <div className="absolute bottom-0 left-0 right-0 h-full bg-gradient-to-t from-slate-900 via-slate-900/95 to-transparent pointer-events-none z-10 opacity-100" />
 

@@ -3,8 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { WeatherData } from '../types';
 import { 
     CloudRain, Sun, Moon, Sunrise, Sunset, CloudLightning, 
-    Umbrella, Timer, TrendingUp, TrendingDown, Minus, Wind, 
-    ChevronRight 
+    Umbrella, Timer, TrendingUp, TrendingDown, Minus, Wind 
 } from 'lucide-react';
 import { formatTime, formatCountdown } from '../utils/helpers';
 
@@ -26,11 +25,19 @@ const ForecastInsight: React.FC<ForecastInsightProps> = ({ weather }) => {
   
   const [targetEvent, setTargetEvent] = useState<EventTarget | null>(null);
   const [timeLeft, setTimeLeft] = useState<string>('');
-  const [activeSlide, setActiveSlide] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [activeSlide, setActiveSlide] = useState(0);
 
   // Helper to determine weather condition from code
   const isRaining = (code: number) => [51, 53, 55, 61, 63, 65, 66, 67, 80, 81, 82, 95, 96, 99].includes(code);
+
+  // Force scroll to start at the beginning (left) when component mounts or data changes
+  useEffect(() => {
+    if (scrollRef.current) {
+        scrollRef.current.scrollLeft = 0;
+        setActiveSlide(0);
+    }
+  }, [targetEvent, weather]);
 
   // --- 1. EVENT DETECTION LOGIC ---
   useEffect(() => {
@@ -203,10 +210,10 @@ const ForecastInsight: React.FC<ForecastInsightProps> = ({ weather }) => {
             onScroll={handleScroll}
             className="flex overflow-x-auto snap-x snap-mandatory no-scrollbar gap-3 pb-2"
         >
-            {/* CARD 1: COUNTDOWN (Only if event exists) */}
+            {/* CARD 1: COUNTDOWN (Only if event exists) - This is naturally the LEFT card in flex container */}
             {targetEvent && (
                 <div className="snap-center min-w-full">
-                    <div className={`glass-card p-4 rounded-2xl flex items-center justify-between gap-4 h-full bg-gradient-to-br ${targetEvent.colorClass}`}>
+                    <div className={`glass-card p-4 rounded-2xl flex items-center justify-between gap-4 h-full bg-gradient-to-br ${targetEvent.colorClass} transition-transform duration-200 active:scale-95`}>
                         <div className="flex items-center gap-3">
                             <div className="p-2.5 bg-slate-100/10 dark:bg-white/10 rounded-full shrink-0 shadow-inner backdrop-blur-md">
                                 {targetEvent.icon}
@@ -239,10 +246,10 @@ const ForecastInsight: React.FC<ForecastInsightProps> = ({ weather }) => {
                 </div>
             )}
 
-            {/* CARD 2: 4-HOUR SUMMARY */}
+            {/* CARD 2: 4-HOUR SUMMARY - This is naturally the RIGHT card */}
             {summary && (
                 <div className="snap-center min-w-full">
-                     <div className="glass-card p-4 rounded-2xl flex items-center justify-between gap-2 h-full bg-gradient-to-br from-slate-700/40 to-slate-800/40 border-white/10">
+                     <div className="glass-card p-4 rounded-2xl flex items-center justify-between gap-2 h-full bg-gradient-to-br from-slate-700/40 to-slate-800/40 border-white/10 transition-transform duration-200 active:scale-95">
                         <div className="flex flex-col gap-1">
                              <span className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1">
                                  Önümüzdeki 4 Saat

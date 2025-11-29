@@ -110,3 +110,13 @@ export interface PublicHoliday {
   launchYear: number | null;
   types: string[];
 }
+
+export interface AstronomyData {
+  title: string;
+  explanation: string;
+  url: string;
+  hdurl?: string;
+  media_type: 'image' | 'video';
+  copyright?: string;
+  date: string;
+}
