@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="tr">
   <head>
@@ -128,15 +127,7 @@
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          // Use relative path './sw.js' instead of absolute '/sw.js' 
-          // to avoid Origin mismatch errors in cloud IDE environments.
-          navigator.serviceWorker.register('./sw.js')
-            .then((registration) => {
-              console.log('ServiceWorker registration successful with scope: ', registration.scope);
-            })
-            .catch((err) => {
-              console.warn('ServiceWorker registration failed: ', err);
-            });
+          navigator.serviceWorker.register('/sw.js');
         });
       }
     </script>

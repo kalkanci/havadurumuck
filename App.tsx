@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Heart, Navigation, MapPin, ArrowUp, ArrowDown, RefreshCw } from 'lucide-react';
+import { Menu, Heart, Navigation, MapPin, ArrowUp, ArrowDown, RefreshCw } from 'lucide-react';
 import { GeoLocation, WeatherData, UserSettings } from './types';
 import { fetchWeather, getDetailedAddress } from './services/weatherService';
 import { calculateDistance } from './utils/helpers';
@@ -11,11 +11,11 @@ import DailyForecast from './components/DailyForecast';
 import AdviceCard from './components/AdviceCard';
 import DetailsGrid from './components/DetailsGrid';
 import AirQualityCard from './components/AirQualityCard';
+import Drawer from './components/Drawer';
 import WeatherOverlay from './components/WeatherOverlay';
 import SkeletonLoader from './components/SkeletonLoader';
 import GoldenHourCard from './components/GoldenHourCard';
 import ActivityScore from './components/ActivityScore';
-import FavoritesModal from './components/FavoritesModal';
 import { getWeatherLabel } from './constants';
 
 const App: React.FC = () => {
@@ -31,10 +31,12 @@ const App: React.FC = () => {
     return saved ? JSON.parse(saved) : [];
   });
   
-  // Settings removed, defaulting to high accuracy
-  const settings: UserSettings = { highAccuracyGPS: true };
+  const [settings, setSettings] = useState<UserSettings>(() => {
+    const saved = localStorage.getItem('user_settings');
+    return saved ? JSON.parse(saved) : { highAccuracyGPS: true };
+  });
 
-  const [isFavModalOpen, setIsFavModalOpen] = useState(false);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [gpsError, setGpsError] = useState<boolean>(false);
 
@@ -43,6 +45,10 @@ const App: React.FC = () => {
   const pullDistance = useRef(0);
   const PULL_THRESHOLD = 120;
   const contentRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    localStorage.setItem('user_settings', JSON.stringify(settings));
+  }, [settings]);
 
   useEffect(() => {
     localStorage.setItem('weather_favorites', JSON.stringify(favorites));
@@ -88,14 +94,15 @@ const App: React.FC = () => {
         
         const loc: GeoLocation = {
           id: Date.now(),
-          name: details.city, 
+          name: details.city, // Artık gerçek ilçe/şehir ismi
           latitude,
           longitude,
-          country: details.country || 'Konum',
-          subtext: details.address,
-          admin1: details.country 
+          country: details.country || 'Konum', // Artık gerçek ülke ismi
+          subtext: details.address, // Mahalle detayları
+          admin1: details.country // Admin1 için de ülke kullanabiliriz veya boş bırakabiliriz
         };
         setLocation(loc);
+        setIsDrawerOpen(false);
       },
       (err) => {
         console.warn("GPS Error:", err);
@@ -160,7 +167,6 @@ const App: React.FC = () => {
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
-      {/* Dynamic Slideshow Background */}
       <Background 
         city={location.name} 
         weatherCode={weather?.current.weather_code}
@@ -170,15 +176,18 @@ const App: React.FC = () => {
       {/* Weather Overlay (Rain/Snow effects) */}
       {weather && <WeatherOverlay weatherCode={weather.current.weather_code} />}
       
-      {/* Favorites Modal (Replaces Drawer) */}
-      <FavoritesModal 
-        isOpen={isFavModalOpen}
-        onClose={() => setIsFavModalOpen(false)}
+      <Drawer 
+        isOpen={isDrawerOpen} 
+        onClose={() => setIsDrawerOpen(false)} 
         favorites={favorites}
         onSelect={setLocation}
         onRemove={(id) => setFavorites(favorites.filter(f => f.id !== id))}
-        currentLocation={location}
-        onToggleCurrent={toggleFavorite}
+        settings={settings}
+        onUpdateSettings={setSettings}
+        onRequestLocation={handleCurrentLocation}
+        currentLocationName={location.name}
+        currentTemp={weather ? Math.round(weather.current.temperature_2m) : undefined}
+        currentCondition={weather ? getWeatherLabel(weather.current.weather_code) : undefined}
       />
 
       <div className="relative z-10 flex flex-col min-h-screen p-4 md:max-w-md md:mx-auto transition-transform duration-300">
@@ -208,22 +217,21 @@ const App: React.FC = () => {
           </div>
         )}
 
-        {/* Header - Simplified */}
+        {/* Header */}
         <header 
-          className="flex items-center gap-3 mb-6"
+          className="flex items-center justify-between mb-6"
           style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}
         >
-          {/* Search Bar takes full width minus heart */}
-          <div className="flex-1">
+          <button onClick={() => setIsDrawerOpen(true)} className="p-2 glass-card rounded-full hover:bg-white/10 transition-colors">
+            <Menu size={24} className="text-white" />
+          </button>
+          
+          <div className="flex-1 mx-4">
             <Search onSelect={setLocation} onCurrentLocation={handleCurrentLocation} />
           </div>
 
-          {/* Favorites Button */}
-          <button 
-            onClick={() => setIsFavModalOpen(true)} 
-            className={`p-3 glass-card rounded-2xl transition-all active:scale-95 shadow-lg ${isFav ? 'bg-red-500/20 text-red-500 border-red-500/30' : 'text-white hover:text-red-400'}`}
-          >
-            <Heart size={22} fill={isFav ? "currentColor" : "none"} />
+          <button onClick={toggleFavorite} className={`p-2 glass-card rounded-full transition-colors ${isFav ? 'text-red-500' : 'text-white hover:text-red-400'}`}>
+            <Heart size={24} fill={isFav ? "currentColor" : "none"} />
           </button>
         </header>
 

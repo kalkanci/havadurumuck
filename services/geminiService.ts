@@ -110,30 +110,20 @@ export const generateCityImage = async (city: string, weatherCode: number, isDay
     const condition = getWeatherLabel(weatherCode);
     const timeOfDay = isDay ? "daytime with natural sunlight" : "night time with cinematic city lights";
     
-    // Updated Prompt Logic to prevent hallucinations for lesser-known cities
+    // 2-Step Logic & Improved Prompting
     const prompt = `
-      Role: Professional Travel Photographer.
-      Location: ${city}.
-      Weather Condition: ${condition}.
-      Lighting: ${timeOfDay}.
-
-      INSTRUCTIONS:
-      1. Analyze the location "${city}".
-      2. DECISION NODE:
-         - IF "${city}" is a major global capital (e.g. Paris, London, NYC, Istanbul, Rome): Generate its specific famous landmark.
-         - IF "${city}" is a smaller town, district, or less globally recognizable city: Generate a HIGH-QUALITY ATMOSPHERIC SHOT representing the general vibe of that region (e.g. typical street architecture, coastline if coastal, town square) WITHOUT inventing a fake famous building.
+      Step 1: Identify the single most famous, globally recognized architectural landmark in ${city} (e.g. Eiffel Tower if Paris, Hagia Sophia if Istanbul, Colosseum if Rome, Burj Khalifa if Dubai). 
       
-      3. CRITICAL CONSTRAINTS (Prevent Hallucinations):
-         - If the city is in Turkey but IS NOT Istanbul, DO NOT show Hagia Sophia, Blue Mosque, or Galata Tower.
-         - Do not put random flags.
-         - Do not generate maps or text.
-
-      4. Visual Style:
-         - Cinematic, 8k resolution, National Geographic style.
-         - Wide angle, realistic textures.
+      Step 2: Generate a breathtaking wide-angle architectural photograph of that specific landmark.
+      The shot is taken from a cinematic viewpoint (eye-level or low-angle, looking up at the grandeur).
+      The weather is ${condition} and lighting is ${timeOfDay}.
+      
+      Style: High-end travel photography, 8k resolution, National Geographic style, hyper-realistic, highly detailed textures.
+      
+      Negative Prompt (Strictly Avoid): No maps, no text, no flags, no blurry objects, no chart, no ui elements, no distorted, no satellite view, no aerial map view, no cartoon, no low quality.
     `;
 
-    // Using 'gemini-2.5-flash-image' as it is stable and free of 403 errors
+    // 403 Hatalarını önlemek için 'gemini-2.5-flash-image' modeline geçildi.
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash-image', 
       contents: {
@@ -144,11 +134,13 @@ export const generateCityImage = async (city: string, weatherCode: number, isDay
       config: {
         imageConfig: {
           aspectRatio: "9:16", 
+          // imageSize: "1K" // 'flash-image' modeli imageSize parametresini desteklemez, kaldırıldı.
         }
       }
     });
 
     if (response.candidates && response.candidates[0].content.parts) {
+      // API yanıtındaki inlineData'yı bul (Genelde ilk part olmayabilir, kontrol ediyoruz)
       for (const part of response.candidates[0].content.parts) {
         if (part.inlineData) {
           const base64String = part.inlineData.data;
