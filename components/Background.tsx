@@ -52,7 +52,8 @@ const Background: React.FC<BackgroundProps> = ({ city, country, weatherCode, isD
       const newImages = prompts.map((prompt, index) => {
         const seed = Math.floor(Math.random() * 50000) + index;
         // flux-realism modeli ile daha gerçekçi sonuçlar
-        return `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1080&height=1920&nologo=true&model=flux-realism&seed=${seed}`;
+        // Vercel'de görünmesi için width/height optimize edildi ve img tagına referrerPolicy eklendi
+        return `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=720&height=1280&nologo=true&model=flux-realism&seed=${seed}`;
       });
 
       setImages(newImages);
@@ -87,7 +88,10 @@ const Background: React.FC<BackgroundProps> = ({ city, country, weatherCode, isD
            <img
             src={imgUrl}
             alt="Background"
-            className="w-full h-full object-cover object-center scale-105 animate-[pulse_20s_infinite]" 
+            className="w-full h-full object-cover object-center scale-105 animate-[pulse_20s_infinite]"
+            loading="eager"
+            referrerPolicy="no-referrer"
+            crossOrigin="anonymous"
           />
         </div>
       ))}
