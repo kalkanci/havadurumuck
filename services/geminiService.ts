@@ -25,10 +25,8 @@ const getApiKey = (): string | undefined => {
 const apiKey = getApiKey();
 const ai = apiKey ? new GoogleGenAI({ apiKey }) : null;
 
-export const getGeminiAdvice = async (weather: WeatherData, locationName: string): Promise<AdviceResponse> => {
-  if (!ai) {
-    throw new Error("API Key eksik. Lütfen .env dosyasında VITE_API_KEY veya process.env.API_KEY tanımlayın.");
-  }
+export const getGeminiAdvice = async (weather: WeatherData, locationName: string): Promise<AdviceResponse | null> => {
+  if (!ai) return null;
 
   try {
     const current = weather.current;
@@ -37,34 +35,63 @@ export const getGeminiAdvice = async (weather: WeatherData, locationName: string
         return (arr && arr[index] !== undefined) ? arr[index] : fallback;
     };
 
+    // Gelecek 6 saatin detaylı analizi için veri hazırlığı
     const nextHoursData = weather.hourly?.time?.slice(0, 6) || [];
+    
+    let rainIncoming = false;
+    let rainStopping = false;
+    let tempTrend = "sabit"; // artiyor, azaliyor, sabit
+
     const trendContext = nextHoursData.length > 0 ? nextHoursData.map((t, i) => {
       const date = new Date(t);
       const hourString = date.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
       const temp = safeGet(weather.hourly?.temperature_2m, i);
       const code = safeGet(weather.hourly?.weather_code, i);
-      return `${hourString}: ${Math.round(temp)}°C (${getWeatherLabel(code)})`;
-    }).join(', ') : "";
+      const rainProb = safeGet(weather.hourly?.precipitation_probability, i);
+      const windSpeed = safeGet(weather.hourly?.wind_speed_10m, i);
+      
+      return `[Saat ${hourString}]: ${Math.round(temp)}°C, ${getWeatherLabel(code)}, Yağış İhtimali: %${rainProb}, Rüzgar: ${windSpeed} km/s`;
+    }).join('\n      ') : "Saatlik veri yok";
 
     const uvIndex = safeGet(weather.daily?.uv_index_max, 0, 0);
+    const airQualityScore = weather.air_quality ? weather.air_quality.european_aqi : "Bilinmiyor";
 
     const prompt = `
-      Sen bir hava durumu asistanısın. Şu anki veriler:
-      Konum: ${locationName}
-      Sıcaklık: ${current.temperature_2m}°C (Hissedilen: ${current.apparent_temperature}°C)
-      Durum: ${getWeatherLabel(current.weather_code)}
-      Rüzgar: ${current.wind_speed_10m} km/s
-      Nem: %${current.relative_humidity_2m}
-      UV İndeksi: ${uvIndex}
-      Saat: ${new Date().toLocaleTimeString('tr-TR')}
-      Gelecek 6 Saat Trendi (Bilgi için): ${trendContext}
+      Sen kullanıcı ile konuşan, samimi, yardımsever ve dikkatli bir "Yerel Hava Durumu Arkadaşısın".
+      Aşağıdaki verilere dayanarak kullanıcıya bugün için stratejik tavsiyeler vermelisin.
 
-      Görevin: Bu verilere dayanarak Türkçe bir JSON yanıtı oluştur.
-      Yanıt şu formatta OLMALI (başka metin ekleme, sadece JSON):
+      MEVCUT DURUM:
+      - Konum: ${locationName}
+      - Şu An: ${current.temperature_2m}°C (Hissedilen: ${current.apparent_temperature}°C)
+      - Gökyüzü: ${getWeatherLabel(current.weather_code)}
+      - Rüzgar: ${current.wind_speed_10m} km/s
+      - Nem: %${current.relative_humidity_2m}
+      - UV İndeksi: ${uvIndex}
+      - Hava Kalitesi (AQI): ${airQualityScore} (0-20 iyi, 100+ kötü)
+      - Saat: ${new Date().toLocaleTimeString('tr-TR')}
+
+      GELECEK 6 SAATİN DETAYLI DÖKÜMÜ:
+      ${trendContext}
+
+      GÖREVİN:
+      Aşağıdaki JSON formatında bir yanıt üret.
+
+      1. "mood": Durumu özetleyen kısa, enerjik veya esprili bir başlık (Maksimum 5 kelime).
+      
+      2. "advice": 
+         - Burası EN ÖNEMLİ kısım. En az 4-5 cümleden oluşan, akıcı bir paragraf yaz.
+         - GELECEK ANALİZİ YAP: "Şu an hava güzel ama 2 saat sonra yağmur riski artıyor, işlerini hemen hallet" gibi zamanlamaya dayalı tavsiye ver.
+         - TRENDLERİ YORUMLA: Hava soğuyor mu, rüzgar sertleşiyor mu? Buna göre kıyafet (kat kat giyin, bere al) veya eşya (şemsiye, güneş gözlüğü) öner.
+         - HAVA KALİTESİ VE UV: Eğer değerler kötüyse mutlaka uyar.
+         - TON: Robotik olma. "Dostum", "Dikkat et", "Keyfini çıkar" gibi samimi ifadeler kullan.
+      
+      3. "activities": Bu spesifik hava koşullarına ve saate uygun 3 adet aktivite önerisi (Kısa başlıklar halinde).
+
+      YANIT FORMATI (Sadece JSON):
       {
-        "mood": "Kısa, esprili veya motive edici bir başlık (maks 5 kelime)",
-        "advice": "Ne giymeli ve neye dikkat etmeli konusunda samimi, arkadaşça bir paragraf. Gelecek saatlerdeki değişimi de hesaba kat.",
-        "activities": ["Bu havada ve bu şehirde yapılabilecek spesifik aktivite 1", "Aktivite 2", "Aktivite 3"]
+        "mood": "...",
+        "advice": "...",
+        "activities": ["...", "...", "..."]
       }
     `;
 
@@ -89,14 +116,13 @@ export const getGeminiAdvice = async (weather: WeatherData, locationName: string
     });
 
     const text = response.text;
-    if (!text) throw new Error("AI boş yanıt döndürdü.");
+    if (!text) return null;
 
-    const result = JSON.parse(text) as AdviceResponse;
-    return result;
+    return JSON.parse(text) as AdviceResponse;
 
-  } catch (error: any) {
+  } catch (error) {
     console.error("Gemini AI Error:", error);
-    throw error; 
+    return null;
   }
 };
 

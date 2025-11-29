@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Menu, Heart, Navigation, MapPin, ArrowUp, ArrowDown, RefreshCw } from 'lucide-react';
-import { GeoLocation, WeatherData, UserSettings } from './types';
+import { Heart, Navigation, MapPin, ArrowUp, ArrowDown, RefreshCw } from 'lucide-react';
+import { GeoLocation, WeatherData } from './types';
 import { fetchWeather, getDetailedAddress } from './services/weatherService';
 import { calculateDistance } from './utils/helpers';
 import Background from './components/Background';
@@ -11,7 +11,7 @@ import DailyForecast from './components/DailyForecast';
 import AdviceCard from './components/AdviceCard';
 import DetailsGrid from './components/DetailsGrid';
 import AirQualityCard from './components/AirQualityCard';
-import Drawer from './components/Drawer';
+import FavoritesModal from './components/FavoritesModal'; // Changed from Drawer
 import WeatherOverlay from './components/WeatherOverlay';
 import SkeletonLoader from './components/SkeletonLoader';
 import GoldenHourCard from './components/GoldenHourCard';
@@ -31,12 +31,7 @@ const App: React.FC = () => {
     return saved ? JSON.parse(saved) : [];
   });
   
-  const [settings, setSettings] = useState<UserSettings>(() => {
-    const saved = localStorage.getItem('user_settings');
-    return saved ? JSON.parse(saved) : { highAccuracyGPS: true };
-  });
-
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [isFavoritesOpen, setIsFavoritesOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [gpsError, setGpsError] = useState<boolean>(false);
 
@@ -45,10 +40,6 @@ const App: React.FC = () => {
   const pullDistance = useRef(0);
   const PULL_THRESHOLD = 120;
   const contentRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    localStorage.setItem('user_settings', JSON.stringify(settings));
-  }, [settings]);
 
   useEffect(() => {
     localStorage.setItem('weather_favorites', JSON.stringify(favorites));
@@ -94,15 +85,14 @@ const App: React.FC = () => {
         
         const loc: GeoLocation = {
           id: Date.now(),
-          name: details.city, // Artık gerçek ilçe/şehir ismi
+          name: details.city, 
           latitude,
           longitude,
-          country: details.country || 'Konum', // Artık gerçek ülke ismi
-          subtext: details.address, // Mahalle detayları
-          admin1: details.country // Admin1 için de ülke kullanabiliriz veya boş bırakabiliriz
+          country: details.country || 'Konum',
+          subtext: details.address,
+          admin1: details.country
         };
         setLocation(loc);
-        setIsDrawerOpen(false);
       },
       (err) => {
         console.warn("GPS Error:", err);
@@ -110,19 +100,21 @@ const App: React.FC = () => {
         setLoading(false);
       },
       {
-        enableHighAccuracy: settings.highAccuracyGPS,
+        enableHighAccuracy: true, // Settings removed, defaulting to true
         timeout: 10000,
         maximumAge: 0
       }
     );
   };
 
-  const toggleFavorite = () => {
-    if (favorites.some(f => f.id === location.id)) {
-      setFavorites(favorites.filter(f => f.id !== location.id));
-    } else {
-      setFavorites([...favorites, location]);
-    }
+  const addFavorite = (loc: GeoLocation) => {
+     if (!favorites.some(f => f.id === loc.id)) {
+        setFavorites([...favorites, loc]);
+     }
+  };
+
+  const removeFavorite = (id: number) => {
+     setFavorites(favorites.filter(f => f.id !== id));
   };
 
   // Pull to Refresh Logic
@@ -173,21 +165,16 @@ const App: React.FC = () => {
         isDay={weather?.current.is_day}
       />
       
-      {/* Weather Overlay (Rain/Snow effects) */}
       {weather && <WeatherOverlay weatherCode={weather.current.weather_code} />}
       
-      <Drawer 
-        isOpen={isDrawerOpen} 
-        onClose={() => setIsDrawerOpen(false)} 
+      <FavoritesModal 
+        isOpen={isFavoritesOpen}
+        onClose={() => setIsFavoritesOpen(false)}
         favorites={favorites}
+        currentLocation={location}
         onSelect={setLocation}
-        onRemove={(id) => setFavorites(favorites.filter(f => f.id !== id))}
-        settings={settings}
-        onUpdateSettings={setSettings}
-        onRequestLocation={handleCurrentLocation}
-        currentLocationName={location.name}
-        currentTemp={weather ? Math.round(weather.current.temperature_2m) : undefined}
-        currentCondition={weather ? getWeatherLabel(weather.current.weather_code) : undefined}
+        onRemove={removeFavorite}
+        onAdd={addFavorite}
       />
 
       <div className="relative z-10 flex flex-col min-h-screen p-4 md:max-w-md md:mx-auto transition-transform duration-300">
@@ -201,7 +188,7 @@ const App: React.FC = () => {
            </div>
         )}
 
-        {/* GPS Permission Warning Banner */}
+        {/* GPS Error Banner */}
         {gpsError && !loading && (
           <div className="mt-20 mb-4 p-3 bg-red-500/80 backdrop-blur-md rounded-xl flex items-center justify-between shadow-lg animate-bounce-short">
             <div className="flex items-center gap-2">
@@ -219,19 +206,23 @@ const App: React.FC = () => {
 
         {/* Header */}
         <header 
-          className="flex items-center justify-between mb-6"
+          className="flex items-center justify-between gap-3 mb-6"
           style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}
         >
-          <button onClick={() => setIsDrawerOpen(true)} className="p-2 glass-card rounded-full hover:bg-white/10 transition-colors">
-            <Menu size={24} className="text-white" />
-          </button>
-          
-          <div className="flex-1 mx-4">
+          {/* Expanded Search Bar */}
+          <div className="flex-1">
             <Search onSelect={setLocation} onCurrentLocation={handleCurrentLocation} />
           </div>
 
-          <button onClick={toggleFavorite} className={`p-2 glass-card rounded-full transition-colors ${isFav ? 'text-red-500' : 'text-white hover:text-red-400'}`}>
-            <Heart size={24} fill={isFav ? "currentColor" : "none"} />
+          {/* Heart / Favorites Button */}
+          <button 
+            onClick={() => setIsFavoritesOpen(true)} 
+            className={`p-3 glass-card rounded-2xl transition-all active:scale-95 duration-200 border border-white/10 ${isFav ? 'bg-red-500/20 border-red-500/30' : 'hover:bg-white/10'}`}
+          >
+            <Heart 
+                size={22} 
+                className={`transition-colors duration-300 ${isFav ? 'text-red-400 fill-red-400' : 'text-slate-300'}`} 
+            />
           </button>
         </header>
 
@@ -254,7 +245,7 @@ const App: React.FC = () => {
           </div>
         ) : weather && (
           <main 
-            key={weather.generationtime_ms} // Trigger animation on new data
+            key={weather.generationtime_ms} 
             className="flex-1 flex flex-col animate-fade-in-up" 
             ref={contentRef}
           >
