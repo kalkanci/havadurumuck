@@ -3,14 +3,31 @@ import { GoogleGenAI, Type } from "@google/genai";
 import { WeatherData, AdviceResponse } from "../types";
 import { getWeatherLabel } from "../constants";
 
-// Talimatlara uygun olarak API anahtarını doğrudan process.env'den alıyoruz.
-// Bu değişkenin ortamda tanımlı olduğu varsayılmaktadır.
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// API Anahtarını güvenli bir şekilde alma fonksiyonu
+const getApiKey = (): string | undefined => {
+  try {
+    if (typeof process !== 'undefined' && process.env && process.env.API_KEY) {
+      return process.env.API_KEY;
+    }
+  } catch (e) {}
+
+  try {
+    // @ts-ignore
+    if (import.meta && import.meta.env && import.meta.env.VITE_API_KEY) {
+      // @ts-ignore
+      return import.meta.env.VITE_API_KEY;
+    }
+  } catch (e) {}
+
+  return undefined;
+};
+
+const apiKey = getApiKey();
+const ai = apiKey ? new GoogleGenAI({ apiKey }) : null;
 
 export const getGeminiAdvice = async (weather: WeatherData, locationName: string): Promise<AdviceResponse> => {
-  // Ekstra güvenlik kontrolü: Anahtar boşsa işlemi durdur
-  if (!process.env.API_KEY) {
-    throw new Error("API Key (process.env.API_KEY) bulunamadı.");
+  if (!ai) {
+    throw new Error("API Key eksik. Lütfen .env dosyasında VITE_API_KEY veya process.env.API_KEY tanımlayın.");
   }
 
   try {
@@ -84,7 +101,7 @@ export const getGeminiAdvice = async (weather: WeatherData, locationName: string
 };
 
 export const generateCityImage = async (city: string, weatherCode: number, isDay: boolean): Promise<string | null> => {
-  if (!process.env.API_KEY) {
+  if (!ai) {
     console.warn("API Key missing, skipping image generation.");
     return null;
   }
@@ -95,40 +112,29 @@ export const generateCityImage = async (city: string, weatherCode: number, isDay
     
     // 2-Step Logic & Improved Prompting
     const prompt = `
-      Internal Step 1 (Landmark Detection): Identify the single most iconic, globally recognized architectural landmark in ${city} (e.g., Eiffel Tower if Paris, Hagia Sophia if Istanbul, Colosseum if Rome, Burj Khalifa if Dubai). Do NOT explain this step, just use the identified landmark for the image generation.
-
-      Internal Step 2 (Image Generation):
-      Generate a breathtaking wide-angle architectural photograph of that specific landmark in ${city}.
+      Step 1: Identify the single most famous, globally recognized architectural landmark in ${city} (e.g. Eiffel Tower if Paris, Hagia Sophia if Istanbul, Colosseum if Rome, Burj Khalifa if Dubai). 
+      
+      Step 2: Generate a breathtaking wide-angle architectural photograph of that specific landmark.
       The shot is taken from a cinematic viewpoint (eye-level or low-angle, looking up at the grandeur).
       The weather is ${condition} and lighting is ${timeOfDay}.
       
       Style: High-end travel photography, 8k resolution, National Geographic style, hyper-realistic, highly detailed textures.
       
-      Weather Context:
-      - If rain: Wet pavement reflections, overcast dramatic sky, raindrops.
-      - If snow: Crisp white snow, visible snowflakes, cold atmosphere.
-      - If clear: Deep blue sky, high contrast.
-
-      NEGATIVE CONSTRAINTS (STRICTLY AVOID):
-      - map, chart, text, ui elements, blurry, distorted.
-      - satellite view, aerial map view, drone top-down view.
-      - cartoon, illustration, painting, sketch, low quality.
-      - flags flying predominantly (unless part of the building), random street signs.
+      Negative Prompt (Strictly Avoid): No maps, no text, no flags, no blurry objects, no chart, no ui elements, no distorted, no satellite view, no aerial map view, no cartoon, no low quality.
     `;
 
-    // Gemini 3 Pro Image (Nano Banana Pro) kullanımı
+    // 403 Hatalarını önlemek için 'gemini-2.5-flash-image' modeline geçildi.
     const response = await ai.models.generateContent({
-      model: 'gemini-3-pro-image-preview', 
+      model: 'gemini-2.5-flash-image', 
       contents: {
         parts: [
           { text: prompt }
         ]
       },
       config: {
-        // Nano Banana modelleri için özel imageConfig
         imageConfig: {
-          aspectRatio: "9:16", // Mobil öncelikli dikey format
-          imageSize: "1K" // Hız ve kalite dengesi için 1K
+          aspectRatio: "9:16", 
+          // imageSize: "1K" // 'flash-image' modeli imageSize parametresini desteklemez, kaldırıldı.
         }
       }
     });
@@ -148,7 +154,7 @@ export const generateCityImage = async (city: string, weatherCode: number, isDay
     return null;
 
   } catch (error) {
-    console.error("Gemini Nano Banana Image Gen Error:", error);
+    console.error("Gemini Image Gen Error:", error);
     return null;
   }
 };
