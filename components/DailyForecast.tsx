@@ -3,14 +3,15 @@ import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { WeatherData } from '../types';
 import { getWeatherIcon, getWeatherLabel } from '../constants';
-import { ChevronDown, Calendar, Wind, Sun, ThermometerSun, Umbrella, Navigation } from 'lucide-react';
+import { ChevronDown, Calendar, Wind, Sun, ThermometerSun, Umbrella, Navigation, ChevronRight, ArrowLeft } from 'lucide-react';
 import { getWindDirection, getDayDuration } from '../utils/helpers';
 
 interface DailyForecastProps {
   weather: WeatherData;
+  onClose: () => void; // Parent component will handle closing this view
 }
 
-const DailyForecast: React.FC<DailyForecastProps> = ({ weather }) => {
+const DailyForecast: React.FC<DailyForecastProps> = ({ weather, onClose }) => {
   const { 
     time, 
     weather_code, 
@@ -37,13 +38,10 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ weather }) => {
   const maxTempOfWeek = Math.max(...temperature_2m_max);
 
   useEffect(() => {
-    if (selectedDay !== null) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'auto';
-    }
+    // This component acts as a full screen modal now, so lock body scroll
+    document.body.style.overflow = 'hidden';
     return () => { document.body.style.overflow = 'auto'; };
-  }, [selectedDay]);
+  }, []);
 
   const openPage = (index: number) => {
     setSelectedDay(index);
@@ -76,11 +74,12 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ weather }) => {
     sunset: sunset[selectedDay]
   } : null;
 
+  // Day Detail Modal (iOS Sheet Style)
   const modalContent = selectedDay !== null && dayData ? (
-    <div className="fixed inset-0 z-[200] flex items-end justify-center">
-        {/* Backdrop */}
+    <div className="fixed inset-0 z-[300] flex items-end justify-center">
+        {/* Backdrop for day detail */}
         <div 
-            className={`absolute inset-0 bg-black/80 backdrop-blur-md transition-opacity duration-300 ${isClosing ? 'opacity-0' : 'opacity-100'}`}
+            className={`absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300 ${isClosing ? 'opacity-0' : 'opacity-100'}`}
             onClick={closePage}
         />
 
@@ -112,9 +111,8 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ weather }) => {
 
             {/* Content */}
             <div className="flex-1 overflow-y-auto no-scrollbar p-6 pb-20 space-y-4">
-              
-              {/* Main Temp Card */}
-              <div className="stagger-item bg-gradient-to-br from-indigo-900/40 to-slate-900/40 border border-white/10 rounded-3xl p-6 text-center shadow-lg relative overflow-hidden" style={{ animationDelay: '0.1s' }}>
+              {/* Reuse the detail cards logic (same as before) */}
+              <div className="bg-gradient-to-br from-indigo-900/40 to-slate-900/40 border border-white/10 rounded-3xl p-6 text-center shadow-lg relative overflow-hidden">
                     <div className="absolute top-0 right-0 p-4 opacity-10">
                         <Calendar size={100} />
                     </div>
@@ -136,11 +134,8 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ weather }) => {
                     </div>
               </div>
 
-              {/* Grid Stats */}
               <div className="grid grid-cols-2 gap-3">
-                  
-                  {/* Feels Like */}
-                  <div className="stagger-item glass-card p-4 rounded-2xl flex flex-col justify-between h-32" style={{ animationDelay: '0.2s' }}>
+                  <div className="glass-card p-4 rounded-2xl flex flex-col justify-between h-32">
                       <div className="flex items-center gap-2 text-red-300">
                           <ThermometerSun size={20} />
                           <span className="text-xs font-bold uppercase">Hissedilen</span>
@@ -156,8 +151,7 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ weather }) => {
                       </div>
                   </div>
 
-                  {/* UV & Sun */}
-                  <div className="stagger-item glass-card p-4 rounded-2xl flex flex-col justify-between h-32" style={{ animationDelay: '0.25s' }}>
+                  <div className="glass-card p-4 rounded-2xl flex flex-col justify-between h-32">
                        <div className="flex items-center gap-2 text-orange-400">
                           <Sun size={20} />
                           <span className="text-xs font-bold uppercase">Güneş</span>
@@ -177,8 +171,7 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ weather }) => {
                       </div>
                   </div>
 
-                  {/* Wind */}
-                  <div className="stagger-item col-span-2 glass-card p-4 rounded-2xl flex items-center justify-between" style={{ animationDelay: '0.3s' }}>
+                  <div className="col-span-2 glass-card p-4 rounded-2xl flex items-center justify-between">
                        <div className="flex flex-col gap-1">
                             <div className="flex items-center gap-2 text-teal-400 mb-2">
                                 <Wind size={20} />
@@ -202,8 +195,7 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ weather }) => {
                        </div>
                   </div>
 
-                  {/* Rain */}
-                  <div className="stagger-item col-span-2 bg-gradient-to-r from-blue-900/40 to-blue-800/40 border border-blue-500/20 p-5 rounded-2xl" style={{ animationDelay: '0.35s' }}>
+                  <div className="col-span-2 bg-gradient-to-r from-blue-900/40 to-blue-800/40 border border-blue-500/20 p-5 rounded-2xl">
                       <div className="flex items-center gap-2 text-blue-300 mb-4">
                           <Umbrella size={20} />
                           <span className="text-xs font-bold uppercase">Yağış Detayları</span>
@@ -229,17 +221,28 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ weather }) => {
     </div>
   ) : null;
 
+  // Main 15-Day List View (Full Screen)
   return (
-    <>
-      <div className="w-full glass-card rounded-3xl p-4 mb-6 border border-slate-700/50">
-        <div className="flex items-center justify-between mb-4">
-            <h3 className="text-slate-400 text-xs font-semibold uppercase tracking-wider flex items-center gap-2">
-            <Calendar size={14} />
-            7 Günlük Tahmin
-            </h3>
+    <div className="fixed inset-0 z-[100] bg-slate-900 overflow-hidden flex flex-col animate-sheet-up">
+        {/* Full Screen Header */}
+        <div className="pt-4 pb-2 px-4 bg-slate-900/90 backdrop-blur-xl border-b border-white/10 z-10 flex items-center justify-between" style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}>
+             <button 
+                onClick={onClose}
+                className="p-2 bg-white/5 hover:bg-white/10 rounded-full transition-colors text-white"
+             >
+                <ArrowLeft size={24} />
+             </button>
+             
+             <h3 className="text-base font-bold text-white flex items-center gap-2">
+                 <Calendar size={18} className="text-blue-400" />
+                 15 Günlük Tahmin
+             </h3>
+             
+             <div className="w-10"></div> {/* Spacer for center alignment */}
         </div>
-        
-        <div className="flex flex-col space-y-3">
+
+        {/* Scrollable List */}
+        <div className="flex-1 overflow-y-auto p-4 space-y-3 pb-20">
           {time.map((dateStr, index) => {
             const date = new Date(dateStr);
             const dayName = index === 0 ? 'Bugün' : date.toLocaleDateString('tr-TR', { weekday: 'long' });
@@ -249,7 +252,6 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ weather }) => {
             const currentMax = temperature_2m_max[index];
             const rainProb = precipitation_probability_max ? precipitation_probability_max[index] : 0;
 
-            // Bar Hesaplamaları
             const range = maxTempOfWeek - minTempOfWeek;
             const leftPos = ((currentMin - minTempOfWeek) / range) * 100;
             const widthPos = ((currentMax - currentMin) / range) * 100;
@@ -258,15 +260,15 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ weather }) => {
               <div 
                 key={dateStr} 
                 onClick={() => openPage(index)}
-                className="group relative flex items-center py-4 px-3 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 active:scale-[0.98] transition-all cursor-pointer shadow-sm"
+                className="group relative flex items-center py-4 px-3 rounded-2xl glass-card hover:bg-white/10 active:scale-[0.98] transition-all cursor-pointer shadow-sm border-white/5"
               >
-                {/* Sol: Gün & Tarih (Sabit Genişlik: 80-90px) */}
+                {/* Left: Day & Date */}
                 <div className="flex flex-col w-24 flex-shrink-0">
                     <span className={`text-base font-bold truncate ${isWeekend ? 'text-blue-300' : 'text-white'}`}>{dayName}</span>
                     <span className="text-xs text-slate-400 font-medium truncate">{dateNum}</span>
                 </div>
                 
-                {/* Orta: İkon & Uyarılar (Sabit Genişlik: 48-60px) */}
+                {/* Center: Icon */}
                 <div className="flex flex-col items-center justify-center gap-1 w-14 flex-shrink-0">
                   <div className="w-9 h-9 drop-shadow-lg">
                     {getWeatherIcon(weather_code[index])}
@@ -279,14 +281,13 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ weather }) => {
                   )}
                 </div>
 
-                {/* Sağ: Sıcaklıklar & Bar (Esnek Alan) */}
+                {/* Right: Temp Bar */}
                 <div className="flex-1 flex items-center justify-end gap-2 pl-1 min-w-0">
                      <span className="text-sm font-medium text-slate-400 w-6 text-right">{Math.round(currentMin)}°</span>
                      
-                     {/* Visual Temp Bar - Responsive width */}
-                     <div className="h-2 w-16 sm:w-24 bg-slate-700/50 rounded-full relative overflow-hidden flex-shrink-0">
+                     <div className="h-2 w-16 sm:w-24 bg-slate-700/50 rounded-full relative overflow-hidden flex-shrink-0 ring-1 ring-white/5">
                         <div 
-                            className="absolute h-full rounded-full bg-gradient-to-r from-blue-400 to-orange-400 opacity-90"
+                            className="absolute h-full rounded-full bg-gradient-to-r from-blue-400 to-orange-400 opacity-90 shadow-[0_0_10px_rgba(251,146,60,0.4)]"
                             style={{ 
                                 left: `${leftPos}%`, 
                                 width: `${Math.max(widthPos, 10)}%` 
@@ -295,16 +296,16 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ weather }) => {
                     </div>
 
                     <span className="text-lg font-bold text-white w-7 text-right">{Math.round(currentMax)}°</span>
+                    <ChevronRight size={16} className="text-slate-600 ml-1 opacity-0 group-hover:opacity-100 transition-opacity" />
                 </div>
               </div>
             );
           })}
         </div>
-      </div>
 
-      {/* Render Modal via Portal */}
-      {selectedDay !== null && createPortal(modalContent, document.body)}
-    </>
+        {/* Render Modal via Portal for day details */}
+        {selectedDay !== null && createPortal(modalContent, document.body)}
+    </div>
   );
 };
 

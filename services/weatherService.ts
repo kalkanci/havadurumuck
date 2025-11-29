@@ -76,7 +76,7 @@ export const fetchWeather = async (lat: number, lon: number): Promise<WeatherDat
     hourly: 'temperature_2m,weather_code,is_day,wind_speed_10m,wind_direction_10m,precipitation_probability',
     daily: 'weather_code,temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,sunrise,sunset,uv_index_max,precipitation_probability_max,precipitation_sum,precipitation_hours,wind_speed_10m_max,wind_gusts_10m_max,wind_direction_10m_dominant',
     timezone: 'auto',
-    forecast_days: '7'
+    forecast_days: '16' // Updated to fetch more days
   });
 
   // 2. Hava Kalitesi Verisi (Ayrı endpoint)

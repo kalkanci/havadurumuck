@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Heart, Navigation, MapPin, ArrowUp, ArrowDown, RefreshCw } from 'lucide-react';
+import { Heart, Navigation, MapPin, ArrowUp, ArrowDown, RefreshCw, Calendar, ChevronRight } from 'lucide-react';
 import { GeoLocation, WeatherData } from './types';
 import { fetchWeather, getDetailedAddress } from './services/weatherService';
 import { calculateDistance } from './utils/helpers';
@@ -31,6 +31,8 @@ const App: React.FC = () => {
   });
   
   const [isFavoritesOpen, setIsFavoritesOpen] = useState(false);
+  const [showDailyForecast, setShowDailyForecast] = useState(false);
+  
   const [error, setError] = useState<string | null>(null);
   const [gpsError, setGpsError] = useState<boolean>(false);
 
@@ -166,6 +168,7 @@ const App: React.FC = () => {
       
       {weather && <WeatherOverlay weatherCode={weather.current.weather_code} />}
       
+      {/* Modals & Overlays */}
       <FavoritesModal 
         isOpen={isFavoritesOpen}
         onClose={() => setIsFavoritesOpen(false)}
@@ -175,6 +178,11 @@ const App: React.FC = () => {
         onRemove={removeFavorite}
         onAdd={addFavorite}
       />
+
+      {/* 15 Day Forecast Overlay */}
+      {showDailyForecast && weather && (
+        <DailyForecast weather={weather} onClose={() => setShowDailyForecast(false)} />
+      )}
 
       <div className="relative z-10 flex flex-col min-h-screen p-4 md:max-w-md md:mx-auto transition-transform duration-300">
         
@@ -288,14 +296,29 @@ const App: React.FC = () => {
               
               <HourlyForecast weather={weather} />
               
+              {/* 15-Day Forecast Trigger Button */}
+              <button 
+                onClick={() => setShowDailyForecast(true)}
+                className="w-full mb-6 py-4 glass-card rounded-2xl flex items-center justify-between px-5 group hover:bg-white/10 transition-all active:scale-[0.98]"
+              >
+                 <div className="flex items-center gap-3">
+                     <div className="p-2 bg-blue-500/20 rounded-lg text-blue-300">
+                         <Calendar size={20} />
+                     </div>
+                     <div className="text-left">
+                         <span className="block text-sm font-bold text-white">15 Günlük Tahmin</span>
+                         <span className="block text-[10px] text-slate-400 uppercase tracking-wide">Detaylı Rapor</span>
+                     </div>
+                 </div>
+                 <ChevronRight size={20} className="text-slate-500 group-hover:text-white transition-colors" />
+              </button>
+
               <div className="grid grid-cols-1 gap-2">
                 <GoldenHourCard weather={weather} />
                 <ActivityScore weather={weather} />
               </div>
               
               <AirQualityCard data={weather.air_quality} />
-              
-              <DailyForecast weather={weather} />
               
               <DetailsGrid weather={weather} />
 
