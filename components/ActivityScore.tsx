@@ -1,6 +1,7 @@
 
-import React from 'react';
-import { Car, Footprints, Shovel, ThermometerSun, Bike as MotorBike, Utensils } from 'lucide-react';
+import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
+import { Car, Footprints, Shovel, ThermometerSun, Bike as MotorBike, Utensils, X, ThumbsUp, ThumbsDown, Minus } from 'lucide-react';
 import { WeatherData } from '../types';
 
 interface ActivityScoreProps {
@@ -8,6 +9,9 @@ interface ActivityScoreProps {
 }
 
 const ActivityScore: React.FC<ActivityScoreProps> = ({ weather }) => {
+  const [selectedActivity, setSelectedActivity] = useState<any>(null);
+  const [isClosing, setIsClosing] = useState(false);
+
   const current = weather.current;
   const today = weather.daily;
 
@@ -20,91 +24,164 @@ const ActivityScore: React.FC<ActivityScoreProps> = ({ weather }) => {
   // Helper to clamp score
   const clamp = (val: number) => Math.max(1, Math.min(10, val));
 
-  // 1. Koşu (Running)
-  let runningScore = 10;
-  if (temp > 25 || temp < 5) runningScore -= 3;
-  if (rain > 0) runningScore -= 4;
-  if (wind > 20) runningScore -= 2;
+  // Calculation Logic Functions
+  const calculateScore = (type: string) => {
+    let score = 10;
+    let reasons: { type: 'pos' | 'neg' | 'neutral', text: string }[] = [];
 
-  // 2. Araba Yıkama (Car Wash)
-  let carWashScore = 10;
-  if (rainProb > 30) carWashScore -= 5;
-  if (today.precipitation_probability_max[1] > 30) carWashScore -= 4;
+    const addReason = (t: 'pos' | 'neg' | 'neutral', txt: string) => reasons.push({ type: t, text: txt });
 
-  // 3. Termal Konfor (Thermal Comfort - Üşüme/Terleme Dengesi)
-  // İdeal: 20-24 derece, düşük nem, düşük rüzgar.
-  let comfortScore = 10;
-  const idealTemp = 22;
-  const diff = Math.abs(temp - idealTemp);
-  
-  if (diff > 0) comfortScore -= diff * 0.5; // Her derece fark yarım puan götürür
-  
-  // Nem cezası (Sıcakken)
-  if (temp > 25 && humidity > 60) comfortScore -= 2; 
-  // Rüzgar cezası (Soğukken - Hissedilen düşer)
-  if (temp < 15 && wind > 15) comfortScore -= 2;
+    if (type === 'running') {
+        if (temp > 25) { score -= 3; addReason('neg', 'Hava sıcak, performans düşebilir.'); }
+        else if (temp < 5) { score -= 3; addReason('neg', 'Hava çok soğuk.'); }
+        else { addReason('pos', 'Sıcaklık koşu için ideal.'); }
 
-  // 4. Motosiklet (Motorcycle)
-  let motoScore = 10;
-  if (rain > 0) motoScore = 1;
-  else if (rainProb > 50) motoScore -= 4;
-  if (wind > 25) motoScore -= 3;
-  if (temp < 5) motoScore -= 3;
-  if (temp > 35) motoScore -= 2;
+        if (rain > 0) { score -= 4; addReason('neg', 'Yağış var, zemin kaygan.'); }
+        if (wind > 20) { score -= 2; addReason('neg', 'Rüzgar direnci yüksek.'); }
+    } 
+    else if (type === 'carwash') {
+        if (rainProb > 30) { score -= 5; addReason('neg', 'Bugün yağmur riski var.'); }
+        else if (today.precipitation_probability_max[1] > 30) { score -= 4; addReason('neg', 'Yarın yağmur bekleniyor.'); }
+        else { addReason('pos', 'Önümüzdeki günler açık görünüyor.'); }
+    }
+    else if (type === 'comfort') {
+        const idealTemp = 22;
+        const diff = Math.abs(temp - idealTemp);
+        if (diff > 0) { score -= diff * 0.5; }
+        if (temp > 25 && humidity > 60) { score -= 2; addReason('neg', 'Yüksek nem bunaltıcı olabilir.'); }
+        if (temp < 15 && wind > 15) { score -= 2; addReason('neg', 'Rüzgar hissedilen sıcaklığı düşürüyor.'); }
+        
+        if (score > 8) addReason('pos', 'Termal konfor yüksek.');
+        else if (score < 5) addReason('neg', 'Konfor seviyesi düşük.');
+    }
+    else if (type === 'moto') {
+        if (rain > 0) { score = 1; addReason('neg', 'Yağış var, sürüş tehlikeli.'); }
+        else if (rainProb > 50) { score -= 4; addReason('neg', 'Yüksek yağmur ihtimali.'); }
+        
+        if (wind > 25) { score -= 3; addReason('neg', 'Şiddetli yan rüzgar riski.'); }
+        if (temp < 5) { score -= 3; addReason('neg', 'Hava çok soğuk, ekipman önemli.'); }
+        
+        if (score > 8) addReason('pos', 'Sürüş için harika bir hava.');
+    }
+    else if (type === 'garden') {
+        if (rain > 0) { score = 1; addReason('neg', 'Toprak çamurlu.'); }
+        else if (rainProb > 60) { score -= 3; addReason('neg', 'Yağmur riski yüksek.'); }
+        if (wind > 30) { score -= 4; addReason('neg', 'Rüzgar bitkilere zarar verebilir.'); }
+        if (temp > 32) { score -= 3; addReason('neg', 'Güneş çarpması riski.'); }
+    }
+    else if (type === 'bbq') {
+        if (rain > 0) { score = 1; addReason('neg', 'Yağmur yağıyor.'); }
+        else if (rainProb > 30) { score = 4; addReason('neg', 'Yağmur riski keyif kaçırabilir.'); }
+        if (wind > 20) { score -= 4; addReason('neg', 'Rüzgar ateşi etkileyebilir.'); }
+        if (temp < 12) { score -= 3; addReason('neg', 'Hava serin, sıkı giyinin.'); }
+        if (score > 8) addReason('pos', 'Mangal için mükemmel şartlar.');
+    }
 
-  // 5. Bahçe İşleri (Gardening) - Bisiklet yerine
-  let gardenScore = 10;
-  if (rain > 0) gardenScore = 1; // Yağmurda çamur olur
-  if (rainProb > 60) gardenScore -= 3;
-  if (wind > 30) gardenScore -= 4; // Çiçekler/dallar zarar görür
-  if (temp < 5) gardenScore -= 3; // Toprak donuk olabilir
-  if (temp > 32) gardenScore -= 3; // Güneş çarpması riski
-
-  // 6. Mangal / Piknik (BBQ)
-  let bbqScore = 10;
-  if (rain > 0 || rainProb > 30) bbqScore = 1;
-  if (wind > 20) bbqScore -= 4;
-  if (temp < 12) bbqScore -= 3;
+    return { score: clamp(score), reasons };
+  };
 
   const activities = [
-    { label: "Koşu", score: clamp(runningScore), icon: <Footprints size={18} className="text-emerald-400" /> },
-    { label: "Motosiklet", score: clamp(motoScore), icon: <MotorBike size={18} className="text-red-400" /> },
-    { label: "Bahçe İşleri", score: clamp(gardenScore), icon: <Shovel size={18} className="text-amber-700" /> }, // Amber/Brown for earth
-    { label: "Termal Konfor", score: clamp(comfortScore), icon: <ThermometerSun size={18} className="text-orange-400" /> },
-    { label: "Mangal", score: clamp(bbqScore), icon: <Utensils size={18} className="text-yellow-400" /> },
-    { label: "Araba Yıkama", score: clamp(carWashScore), icon: <Car size={18} className="text-blue-400" /> },
-  ];
+    { id: 'running', label: "Koşu", icon: <Footprints size={18} className="text-emerald-500 dark:text-emerald-400" /> },
+    { id: 'moto', label: "Motosiklet", icon: <MotorBike size={18} className="text-red-500 dark:text-red-400" /> },
+    { id: 'garden', label: "Bahçe İşleri", icon: <Shovel size={18} className="text-amber-700 dark:text-amber-700" /> },
+    { id: 'comfort', label: "Termal Konfor", icon: <ThermometerSun size={18} className="text-orange-500 dark:text-orange-400" /> },
+    { id: 'bbq', label: "Mangal", icon: <Utensils size={18} className="text-yellow-600 dark:text-yellow-400" /> },
+    { id: 'carwash', label: "Araba Yıkama", icon: <Car size={18} className="text-blue-500 dark:text-blue-400" /> },
+  ].map(act => ({ ...act, ...calculateScore(act.id) }));
+
+  const handleOpen = (act: any) => {
+    setSelectedActivity(act);
+    setIsClosing(false);
+  };
+
+  const handleClose = () => {
+    setIsClosing(true);
+    setTimeout(() => {
+        setSelectedActivity(null);
+        setIsClosing(false);
+    }, 200);
+  };
+
+  const renderModal = () => {
+    if (!selectedActivity) return null;
+
+    const { label, score, reasons, icon } = selectedActivity;
+    let scoreColor = score >= 8 ? 'text-emerald-500 dark:text-emerald-400' : score >= 5 ? 'text-amber-500 dark:text-amber-400' : 'text-rose-500';
+    let ringColor = score >= 8 ? 'ring-emerald-500' : score >= 5 ? 'ring-amber-500' : 'ring-rose-500';
+
+    return createPortal(
+        <div className="fixed inset-0 z-[500] flex items-center justify-center p-6">
+            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={handleClose} />
+            
+            <div className={`relative w-full max-w-sm bg-white dark:bg-slate-900/95 backdrop-blur-xl border border-slate-200 dark:border-white/10 rounded-3xl p-6 shadow-2xl overflow-hidden ${isClosing ? 'animate-pop-out' : 'animate-pop-in'}`}>
+                 <button onClick={handleClose} className="absolute top-4 right-4 p-2 bg-slate-100 dark:bg-white/5 rounded-full text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:text-white z-10">
+                     <X size={20} />
+                 </button>
+
+                 <div className="flex flex-col items-center mb-6">
+                     <div className={`p-4 rounded-full bg-slate-50 dark:bg-white/5 shadow-xl ring-2 ${ringColor} mb-3`}>
+                         {React.cloneElement(icon, { size: 32 })}
+                     </div>
+                     <h2 className="text-2xl font-bold text-slate-900 dark:text-white">{label}</h2>
+                     <div className={`text-4xl font-black mt-2 ${scoreColor}`}>{score}/10</div>
+                     <span className="text-xs text-slate-500 uppercase tracking-widest font-bold">Uygunluk Skoru</span>
+                 </div>
+
+                 <div className="space-y-3 bg-slate-50 dark:bg-white/5 p-4 rounded-2xl border border-slate-100 dark:border-white/5">
+                     <h3 className="text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Analiz Detayları</h3>
+                     {reasons.length === 0 ? (
+                         <p className="text-sm text-slate-500 dark:text-slate-400">Önemli bir engel bulunmuyor.</p>
+                     ) : (
+                         reasons.map((r: any, idx: number) => (
+                             <div key={idx} className="flex items-start gap-3 text-sm">
+                                 {r.type === 'pos' ? <ThumbsUp size={16} className="text-emerald-500 dark:text-emerald-400 mt-0.5" /> : 
+                                  r.type === 'neg' ? <ThumbsDown size={16} className="text-rose-500 dark:text-rose-400 mt-0.5" /> :
+                                  <Minus size={16} className="text-slate-400 mt-0.5" />}
+                                 <span className={r.type === 'neg' ? 'text-rose-600 dark:text-rose-200' : r.type === 'pos' ? 'text-emerald-700 dark:text-emerald-100' : 'text-slate-600 dark:text-slate-300'}>
+                                     {r.text}
+                                 </span>
+                             </div>
+                         ))
+                     )}
+                 </div>
+            </div>
+        </div>,
+        document.body
+    );
+  };
 
   return (
     <div className="mb-6">
-      <h3 className="text-slate-400 text-xs font-semibold uppercase tracking-wider mb-3 px-1 flex items-center gap-2">
+      <h3 className="text-slate-600 dark:text-slate-400 text-xs font-semibold uppercase tracking-wider mb-3 px-1 flex items-center gap-2">
         Aktivite Rehberi
       </h3>
       <div className="grid grid-cols-3 gap-3">
         {activities.map((act, idx) => (
-            <div 
+            <button 
               key={idx} 
-              className="glass-card p-3 rounded-2xl flex flex-col items-center justify-center text-center relative overflow-hidden group hover:bg-white/10 transition-colors"
+              onClick={() => handleOpen(act)}
+              className="glass-card p-3 rounded-2xl flex flex-col items-center justify-center text-center relative overflow-hidden group hover:bg-white/60 dark:hover:bg-white/10 active:scale-95 transition-all shadow-none dark:shadow-lg"
             >
                 {/* Subtle sheen effect on hover */}
                 <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/5 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
                 
-                <div className="mb-2 p-2 bg-slate-800/50 rounded-full ring-1 ring-white/10 shadow-lg">
+                <div className="mb-2 p-2 bg-slate-100 dark:bg-slate-800/50 rounded-full ring-1 ring-black/5 dark:ring-white/10 shadow-sm">
                     {act.icon}
                 </div>
-                <span className="text-[10px] text-slate-300 font-bold uppercase mb-1">{act.label}</span>
+                <span className="text-[10px] text-slate-600 dark:text-slate-300 font-bold uppercase mb-1">{act.label}</span>
                 
                 {/* Score Bar */}
-                <div className="w-full h-1.5 bg-slate-700/50 rounded-full overflow-hidden mt-1 ring-1 ring-white/5">
+                <div className="w-full h-1.5 bg-slate-200 dark:bg-slate-700/50 rounded-full overflow-hidden mt-1 ring-1 ring-black/5 dark:ring-white/5">
                     <div 
                         className={`h-full rounded-full shadow-lg ${act.score >= 8 ? 'bg-emerald-500' : act.score >= 5 ? 'bg-amber-500' : 'bg-rose-500'}`} 
                         style={{ width: `${act.score * 10}%` }}
                     />
                 </div>
-                <span className="text-xs font-bold text-white mt-1 drop-shadow-md">{act.score}/10</span>
-            </div>
+                <span className="text-xs font-bold text-slate-800 dark:text-white mt-1 drop-shadow-sm">{act.score}/10</span>
+            </button>
         ))}
       </div>
+      {renderModal()}
     </div>
   );
 };

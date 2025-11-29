@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Search as SearchIcon, MapPin, X } from 'lucide-react';
 import { GeoLocation } from '../types';
@@ -52,7 +53,7 @@ const Search: React.FC<SearchProps> = ({ onSelect, onCurrentLocation }) => {
   return (
     <div ref={wrapperRef} className="relative w-full z-50">
       <div className="relative flex items-center">
-        <div className="absolute left-3 text-slate-400">
+        <div className="absolute left-3 text-slate-500 dark:text-slate-400">
           <SearchIcon size={20} />
         </div>
         <input
@@ -60,19 +61,19 @@ const Search: React.FC<SearchProps> = ({ onSelect, onCurrentLocation }) => {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Şehir ara..."
-          className="w-full bg-slate-800/80 backdrop-blur-md text-white pl-10 pr-12 py-3 rounded-2xl border border-slate-700/50 focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400 placeholder-slate-400 transition-all shadow-lg"
+          className="w-full bg-white/70 dark:bg-slate-800/80 backdrop-blur-md text-slate-900 dark:text-white pl-10 pr-12 py-3 rounded-2xl border border-slate-200 dark:border-slate-700/50 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 placeholder-slate-500 dark:placeholder-slate-400 transition-all shadow-lg"
         />
         {query ? (
           <button 
             onClick={() => setQuery('')}
-            className="absolute right-3 text-slate-400 hover:text-white"
+            className="absolute right-3 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
           >
             <X size={18} />
           </button>
         ) : (
           <button 
             onClick={onCurrentLocation}
-            className="absolute right-3 text-slate-400 hover:text-blue-400 transition-colors"
+            className="absolute right-3 text-slate-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400 transition-colors"
           >
             <MapPin size={20} />
           </button>
@@ -80,15 +81,15 @@ const Search: React.FC<SearchProps> = ({ onSelect, onCurrentLocation }) => {
       </div>
 
       {isOpen && results.length > 0 && (
-        <ul className="absolute top-full left-0 right-0 mt-2 bg-slate-800/90 backdrop-blur-xl border border-slate-700 rounded-2xl shadow-2xl max-h-60 overflow-y-auto no-scrollbar overflow-hidden">
+        <ul className="absolute top-full left-0 right-0 mt-2 bg-white/95 dark:bg-slate-800/90 backdrop-blur-xl border border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl max-h-60 overflow-y-auto no-scrollbar overflow-hidden">
           {results.map((loc) => (
             <li
               key={loc.id}
               onClick={() => handleSelect(loc)}
-              className="px-4 py-3 hover:bg-white/10 cursor-pointer flex flex-col border-b border-slate-700/50 last:border-none transition-colors"
+              className="px-4 py-3 hover:bg-black/5 dark:hover:bg-white/10 cursor-pointer flex flex-col border-b border-slate-100 dark:border-slate-700/50 last:border-none transition-colors"
             >
-              <span className="font-medium text-white">{loc.name}</span>
-              <span className="text-xs text-slate-400">
+              <span className="font-medium text-slate-900 dark:text-white">{loc.name}</span>
+              <span className="text-xs text-slate-500 dark:text-slate-400">
                 {loc.admin1 ? `${loc.admin1}, ` : ''}{loc.country}
               </span>
             </li>

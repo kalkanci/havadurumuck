@@ -20,6 +20,8 @@ export interface CurrentWeather {
   wind_speed_10m: number;
   surface_pressure: number;
   cloud_cover: number;
+  wind_direction_10m: number;
+  dew_point_2m: number;
 }
 
 export interface HourlyForecast {
@@ -30,6 +32,10 @@ export interface HourlyForecast {
   wind_speed_10m: number[];
   wind_direction_10m: number[];
   precipitation_probability: number[];
+  uv_index?: number[]; 
+  relative_humidity_2m?: number[]; 
+  apparent_temperature?: number[]; 
+  surface_pressure?: number[]; 
 }
 
 export interface DailyForecast {
@@ -78,4 +84,11 @@ export interface AdviceResponse {
   mood: string;
   advice: string;
   activities: string[];
+}
+
+export interface WeatherAlert {
+    type: 'rain' | 'storm' | 'heat' | 'cold' | 'wind' | 'uv' | 'air';
+    level: 'warning' | 'critical' | 'info';
+    title: string;
+    message: string;
 }

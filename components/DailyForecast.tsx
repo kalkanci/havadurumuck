@@ -1,29 +1,27 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { WeatherData } from '../types';
 import { getWeatherIcon, getWeatherLabel } from '../constants';
-import { ChevronDown, Calendar, Wind, Sun, ThermometerSun, Umbrella, Navigation, ChevronRight, ArrowLeft, Sunrise, Sunset } from 'lucide-react';
-import { getWindDirection, getDayDuration, formatTime } from '../utils/helpers';
+import { 
+    Wind, Sun, Umbrella, ChevronRight, X, 
+    Sunrise, Sunset, Droplets, Thermometer, Calendar
+} from 'lucide-react';
+import { getWindDirection, formatTime } from '../utils/helpers';
 
 interface DailyForecastProps {
   weather: WeatherData;
-  onClose: () => void; // Parent component will handle closing this view
 }
 
-const DailyForecast: React.FC<DailyForecastProps> = ({ weather, onClose }) => {
+const DailyForecast: React.FC<DailyForecastProps> = ({ weather }) => {
   const { 
     time, 
     weather_code, 
     temperature_2m_max, 
     temperature_2m_min, 
     apparent_temperature_max,
-    apparent_temperature_min,
     precipitation_probability_max, 
-    precipitation_sum,
-    precipitation_hours,
     wind_speed_10m_max, 
-    wind_gusts_10m_max,
     wind_direction_10m_dominant,
     sunrise, 
     sunset, 
@@ -31,334 +29,231 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ weather, onClose }) => {
   } = weather.daily;
 
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
-  const [isClosing, setIsClosing] = useState(false);
-  const [isMainClosing, setIsMainClosing] = useState(false);
+  const [isDetailClosing, setIsDetailClosing] = useState(false);
 
-  // Haftanın en düşük ve en yüksek sıcaklıklarını bul (Bar görselleştirmesi için)
-  const minTempOfWeek = Math.min(...temperature_2m_min);
-  const maxTempOfWeek = Math.max(...temperature_2m_max);
+  // Global Min/Max for the bar visualization
+  const globalMin = Math.min(...temperature_2m_min);
+  const globalMax = Math.max(...temperature_2m_max);
+  const globalRange = globalMax - globalMin;
 
-  useEffect(() => {
-    // This component acts as a full screen modal now, so lock body scroll
-    document.body.style.overflow = 'hidden';
-    return () => { document.body.style.overflow = 'auto'; };
-  }, []);
-
-  const openPage = (index: number) => {
+  // --- Handlers ---
+  const openDayDetail = (index: number) => {
     setSelectedDay(index);
-    setIsClosing(false);
+    setIsDetailClosing(false);
   };
 
-  const closePage = () => {
-    setIsClosing(true);
+  const closeDayDetail = () => {
+    setIsDetailClosing(true);
     setTimeout(() => {
         setSelectedDay(null);
-        setIsClosing(false);
-    }, 300);
+        setIsDetailClosing(false);
+    }, 200);
   };
 
-  const handleMainClose = () => {
-    setIsMainClosing(true);
-    setTimeout(() => {
-      onClose();
-    }, 300);
+  // --- Helpers for Visuals ---
+  const getGradient = (temp: number) => {
+      if (temp >= 30) return 'from-orange-500 to-red-600';
+      if (temp >= 20) return 'from-yellow-400 to-orange-500';
+      if (temp >= 10) return 'from-cyan-400 to-blue-500';
+      return 'from-blue-600 to-indigo-600';
   };
 
-  const dayData = selectedDay !== null ? {
-    date: new Date(time[selectedDay]),
-    code: weather_code[selectedDay],
-    maxTemp: temperature_2m_max[selectedDay],
-    minTemp: temperature_2m_min[selectedDay],
-    maxFeels: apparent_temperature_max ? apparent_temperature_max[selectedDay] : temperature_2m_max[selectedDay],
-    minFeels: apparent_temperature_min ? apparent_temperature_min[selectedDay] : temperature_2m_min[selectedDay],
-    rainProb: precipitation_probability_max ? precipitation_probability_max[selectedDay] : 0,
-    rainSum: precipitation_sum ? precipitation_sum[selectedDay] : 0,
-    rainHours: precipitation_hours ? precipitation_hours[selectedDay] : 0,
-    wind: wind_speed_10m_max ? wind_speed_10m_max[selectedDay] : 0,
-    gusts: wind_gusts_10m_max ? wind_gusts_10m_max[selectedDay] : 0,
-    windDir: wind_direction_10m_dominant ? wind_direction_10m_dominant[selectedDay] : 0,
-    uv: uv_index_max[selectedDay],
-    sunrise: sunrise[selectedDay],
-    sunset: sunset[selectedDay]
-  } : null;
+  // --- Render Detail Modal (Center Pop-in) ---
+  const renderDetailModal = () => {
+      if (selectedDay === null) return null;
+      
+      const index = selectedDay;
+      const date = new Date(time[index]);
+      const code = weather_code[index];
+      const maxT = Math.round(temperature_2m_max[index]);
+      const minT = Math.round(temperature_2m_min[index]);
+      const feels = Math.round(apparent_temperature_max ? apparent_temperature_max[index] : maxT);
+      const rain = precipitation_probability_max ? precipitation_probability_max[index] : 0;
+      const wind = Math.round(wind_speed_10m_max ? wind_speed_10m_max[index] : 0);
+      const windDir = wind_direction_10m_dominant ? wind_direction_10m_dominant[index] : 0;
+      const sr = sunrise[index];
+      const ss = sunset[index];
+      const uv = uv_index_max ? uv_index_max[index] : 0;
 
-  // Day Detail Modal (Nested Sheet)
-  const modalContent = selectedDay !== null && dayData ? (
-    <div className="fixed inset-0 z-[300] flex items-end justify-center">
-        {/* Backdrop for day detail */}
-        <div 
-            className={`absolute inset-0 bg-black/60 backdrop-blur-md transition-opacity duration-300 ${isClosing ? 'opacity-0' : 'opacity-100'}`}
-            onClick={closePage}
-        />
+      return createPortal(
+        <div className="fixed inset-0 z-[600] flex items-center justify-center p-6">
+            <div 
+                className="absolute inset-0 bg-black/60 backdrop-blur-md"
+                onClick={closeDayDetail}
+            />
+            
+            <div className={`relative w-full max-w-sm bg-white dark:bg-slate-900/95 border border-slate-200 dark:border-white/10 rounded-3xl p-6 shadow-2xl overflow-hidden flex flex-col ${isDetailClosing ? 'animate-pop-out' : 'animate-pop-in'}`}>
+                 <button onClick={closeDayDetail} className="absolute top-4 right-4 p-2 bg-slate-100 dark:bg-white/5 rounded-full text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/10 z-10">
+                     <X size={20} />
+                 </button>
 
-        {/* Sheet Card */}
-        <div 
-            className={`relative w-full max-w-md bg-slate-900/95 h-[85vh] rounded-t-[2.5rem] shadow-[0_-10px_40px_rgba(0,0,0,0.5)] overflow-hidden flex flex-col ${isClosing ? 'animate-sheet-down' : 'animate-sheet-up'}`}
-        >
-            {/* Drag Handle & Header */}
-            <div className="pt-4 pb-2 px-6 bg-slate-900/80 backdrop-blur-xl z-50 sticky top-0 border-b border-white/5">
-                <div className="w-12 h-1.5 bg-slate-700 rounded-full mx-auto mb-4 opacity-50" />
-                
-                <div className="flex items-center justify-between">
-                     <div>
-                         <h2 className="text-2xl font-bold text-white tracking-tight">
-                            {selectedDay === 0 ? 'Bugün' : dayData.date.toLocaleDateString('tr-TR', { weekday: 'long' })}
-                         </h2>
-                         <p className="text-sm text-slate-400 font-medium">
-                            {dayData.date.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long' })}
-                         </p>
+                 {/* Header */}
+                 <div className="text-center mb-6">
+                     <p className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1">
+                         {date.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })}
+                     </p>
+                     <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
+                         {date.toLocaleDateString('tr-TR', { weekday: 'long' })}
+                     </h2>
+                     <div className="flex items-center justify-center gap-2">
+                         <span className="px-3 py-1 rounded-full bg-blue-500/10 dark:bg-blue-500/20 text-blue-600 dark:text-blue-200 text-xs font-bold">
+                             {getWeatherLabel(code)}
+                         </span>
                      </div>
-                     <button 
-                        onClick={closePage}
-                        className="p-2 bg-white/10 rounded-full hover:bg-white/20 transition-colors"
-                    >
-                        <ChevronDown className="text-white" />
-                    </button>
-                </div>
+                 </div>
+
+                 {/* Main Stats Grid */}
+                 <div className="grid grid-cols-2 gap-3 mb-6">
+                     {/* Temp Card */}
+                     <div className="col-span-2 bg-gradient-to-br from-indigo-500/10 to-blue-600/10 p-4 rounded-2xl border border-blue-500/10 dark:border-blue-500/20 flex items-center justify-between">
+                         <div className="flex flex-col">
+                             <div className="flex items-center gap-2 text-slate-600 dark:text-slate-300 mb-1">
+                                 <Thermometer size={16} /> <span className="text-xs font-bold uppercase">Sıcaklık</span>
+                             </div>
+                             <div className="flex items-end gap-2">
+                                 <span className="text-4xl font-bold text-slate-900 dark:text-white">{maxT}°</span>
+                                 <span className="text-xl text-slate-500 dark:text-slate-400 mb-1">/ {minT}°</span>
+                             </div>
+                             <span className="text-xs text-blue-600 dark:text-blue-200 mt-1">Hissedilen: {feels}°</span>
+                         </div>
+                         <div className="w-16 h-16 drop-shadow-lg scale-125">
+                             {getWeatherIcon(code)}
+                         </div>
+                     </div>
+
+                     {/* Wind */}
+                     <div className="bg-slate-50 dark:bg-white/5 p-3 rounded-2xl border border-slate-100 dark:border-white/5 flex flex-col items-center justify-center text-center">
+                         <Wind size={20} className="text-teal-500 dark:text-teal-400 mb-2" />
+                         <span className="text-lg font-bold text-slate-800 dark:text-white">{wind} <span className="text-xs font-normal text-slate-500">km/s</span></span>
+                         <span className="text-[10px] text-slate-500 uppercase font-bold mt-1">{getWindDirection(windDir)}</span>
+                     </div>
+
+                     {/* Rain/UV */}
+                     <div className="bg-slate-50 dark:bg-white/5 p-3 rounded-2xl border border-slate-100 dark:border-white/5 flex flex-col items-center justify-center text-center">
+                         {rain > 0 ? (
+                             <>
+                                <Droplets size={20} className="text-blue-500 dark:text-blue-400 mb-2" />
+                                <span className="text-lg font-bold text-slate-800 dark:text-white">%{rain}</span>
+                                <span className="text-[10px] text-slate-500 uppercase font-bold mt-1">Yağış</span>
+                             </>
+                         ) : (
+                             <>
+                                <Sun size={20} className="text-orange-500 dark:text-orange-400 mb-2" />
+                                <span className="text-lg font-bold text-slate-800 dark:text-white">{uv?.toFixed(0)}</span>
+                                <span className="text-[10px] text-slate-500 uppercase font-bold mt-1">UV İndeks</span>
+                             </>
+                         )}
+                     </div>
+                 </div>
+
+                 {/* Sun Times */}
+                 <div className="bg-slate-50 dark:bg-white/5 rounded-2xl p-4 flex items-center justify-between">
+                     <div className="flex items-center gap-3">
+                         <div className="p-2 bg-yellow-500/10 rounded-full text-yellow-500 dark:text-yellow-400"><Sunrise size={18} /></div>
+                         <div>
+                             <p className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase">Gün Doğumu</p>
+                             <p className="text-sm font-bold text-slate-800 dark:text-white">{formatTime(sr)}</p>
+                         </div>
+                     </div>
+                     <div className="w-[1px] h-8 bg-slate-300 dark:bg-white/10" />
+                     <div className="flex items-center gap-3">
+                         <div className="p-2 bg-indigo-500/10 rounded-full text-indigo-500 dark:text-indigo-400"><Sunset size={18} /></div>
+                         <div>
+                             <p className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase">Gün Batımı</p>
+                             <p className="text-sm font-bold text-slate-800 dark:text-white">{formatTime(ss)}</p>
+                         </div>
+                     </div>
+                 </div>
+
             </div>
+        </div>,
+        document.body
+      );
+  };
 
-            {/* Content */}
-            <div className="flex-1 overflow-y-auto no-scrollbar p-6 pb-20 space-y-4">
-              
-              {/* Summary Card */}
-              <div className="bg-gradient-to-br from-indigo-900/40 to-slate-900/40 border border-white/10 rounded-3xl p-6 text-center shadow-lg relative overflow-hidden">
-                    <div className="absolute top-0 right-0 p-4 opacity-10">
-                        <Calendar size={100} />
-                    </div>
-                    <div className="flex justify-center mb-4 relative z-10">
-                         <div className="scale-[2] drop-shadow-2xl">{getWeatherIcon(dayData.code)}</div>
-                    </div>
-                    <div className="text-xl font-medium text-blue-100 mb-8 relative z-10">{getWeatherLabel(dayData.code)}</div>
-                    
-                    <div className="flex items-center justify-center gap-10 relative z-10">
-                        <div className="flex flex-col items-center">
-                            <span className="text-5xl font-bold text-white tracking-tighter">{Math.round(dayData.maxTemp)}°</span>
-                            <span className="text-xs text-orange-300 font-bold uppercase mt-2 px-2 py-0.5 bg-orange-500/10 rounded-full">Gündüz</span>
-                        </div>
-                        <div className="w-[1px] h-16 bg-gradient-to-b from-transparent via-white/20 to-transparent"></div>
-                        <div className="flex flex-col items-center">
-                            <span className="text-5xl font-light text-slate-400 tracking-tighter">{Math.round(dayData.minTemp)}°</span>
-                            <span className="text-xs text-blue-300 font-bold uppercase mt-2 px-2 py-0.5 bg-blue-500/10 rounded-full">Gece</span>
-                        </div>
-                    </div>
-              </div>
 
-              {/* Detail Grid */}
-              <div className="grid grid-cols-2 gap-3">
-                  
-                  {/* Feels Like */}
-                  <div className="glass-card p-4 rounded-2xl flex flex-col justify-between h-32">
-                      <div className="flex items-center gap-2 text-red-300">
-                          <ThermometerSun size={20} />
-                          <span className="text-xs font-bold uppercase">Hissedilen</span>
-                      </div>
-                      <div>
-                         <div className="flex justify-between items-end">
-                            <span className="text-3xl font-bold text-white">{Math.round(dayData.maxFeels)}°</span>
-                            <span className="text-lg text-slate-500 mb-1">{Math.round(dayData.minFeels)}°</span>
-                         </div>
-                         <div className="w-full h-1 bg-slate-700/50 rounded-full mt-2 overflow-hidden">
-                             <div className="h-full bg-gradient-to-r from-blue-500 to-red-500 w-full opacity-60"></div>
-                         </div>
-                      </div>
-                  </div>
-
-                  {/* UV & Sun */}
-                  <div className="glass-card p-4 rounded-2xl flex flex-col justify-between h-32">
-                       <div className="flex items-center gap-2 text-orange-400">
-                          <Sun size={20} />
-                          <span className="text-xs font-bold uppercase">Güneş</span>
-                      </div>
-                      <div className="flex flex-col gap-1">
-                           <div className="flex justify-between items-center">
-                               <span className="text-xs text-slate-400">UV İndeksi</span>
-                               <span className={`font-bold ${dayData.uv > 7 ? 'text-red-400' : 'text-white'}`}>{dayData.uv.toFixed(0)}</span>
-                           </div>
-                           <div className="w-full h-1 bg-slate-700 rounded-full">
-                               <div className="h-full bg-orange-400 rounded-full" style={{width: `${Math.min(dayData.uv * 10, 100)}%`}}></div>
-                           </div>
-                           <div className="flex justify-between items-center mt-1">
-                               <span className="text-xs text-slate-400">Süre</span>
-                               <span className="text-xs font-bold text-white">{getDayDuration(dayData.sunrise, dayData.sunset)}</span>
-                           </div>
-                      </div>
-                  </div>
-
-                  {/* Wind */}
-                  <div className="col-span-2 glass-card p-4 rounded-2xl flex items-center justify-between">
-                       <div className="flex flex-col gap-1">
-                            <div className="flex items-center gap-2 text-teal-400 mb-2">
-                                <Wind size={20} />
-                                <span className="text-xs font-bold uppercase">Rüzgar Durumu</span>
-                            </div>
-                            <div className="flex items-baseline gap-2">
-                                <span className="text-3xl font-bold text-white">{Math.round(dayData.wind)}</span>
-                                <span className="text-sm text-slate-400">km/s</span>
-                            </div>
-                            <div className="text-xs text-slate-500">
-                                Maksimum Hamle: {Math.round(dayData.gusts)} km/s
-                            </div>
-                       </div>
-                       <div className="flex flex-col items-center justify-center w-20 h-20 bg-slate-800/80 rounded-full border border-teal-500/20 shadow-[0_0_15px_rgba(45,212,191,0.1)]">
-                            <Navigation 
-                                size={28} 
-                                className="text-teal-400" 
-                                style={{ transform: `rotate(${dayData.windDir}deg)` }} 
-                            />
-                            <span className="text-[10px] font-bold mt-1 text-teal-200">{getWindDirection(dayData.windDir)}</span>
-                       </div>
-                  </div>
-
-                  {/* Rain */}
-                  <div className="col-span-2 bg-gradient-to-r from-blue-900/40 to-blue-800/40 border border-blue-500/20 p-5 rounded-2xl">
-                      <div className="flex items-center gap-2 text-blue-300 mb-4">
-                          <Umbrella size={20} />
-                          <span className="text-xs font-bold uppercase">Yağış Detayları</span>
-                      </div>
-                      <div className="grid grid-cols-3 gap-4 text-center">
-                            <div className="bg-black/20 rounded-xl p-2">
-                                <p className="text-2xl font-bold text-blue-100">%{dayData.rainProb}</p>
-                                <p className="text-[10px] text-blue-300 uppercase tracking-wide mt-1">İhtimal</p>
-                            </div>
-                            <div className="bg-black/20 rounded-xl p-2">
-                                <p className="text-2xl font-bold text-blue-100">{dayData.rainSum}</p>
-                                <p className="text-[10px] text-blue-300 uppercase tracking-wide mt-1">mm</p>
-                            </div>
-                            <div className="bg-black/20 rounded-xl p-2">
-                                <p className="text-2xl font-bold text-blue-100">{dayData.rainHours}</p>
-                                <p className="text-[10px] text-blue-300 uppercase tracking-wide mt-1">Saat</p>
-                            </div>
-                      </div>
-                  </div>
-
-                  {/* Sun Times */}
-                  <div className="col-span-2 glass-card p-4 rounded-2xl flex justify-around items-center">
-                      <div className="flex items-center gap-3">
-                          <div className="p-2 bg-yellow-500/10 rounded-full text-yellow-400">
-                              <Sunrise size={24} />
-                          </div>
-                          <div>
-                              <p className="text-[10px] text-slate-400 uppercase font-bold">Gün Doğumu</p>
-                              <p className="text-xl font-bold text-white">{formatTime(dayData.sunrise)}</p>
-                          </div>
-                      </div>
-                      <div className="w-[1px] h-10 bg-white/10"></div>
-                      <div className="flex items-center gap-3">
-                          <div className="p-2 bg-indigo-500/10 rounded-full text-indigo-400">
-                              <Sunset size={24} />
-                          </div>
-                          <div>
-                              <p className="text-[10px] text-slate-400 uppercase font-bold">Gün Batımı</p>
-                              <p className="text-xl font-bold text-white">{formatTime(dayData.sunset)}</p>
-                          </div>
-                      </div>
-                  </div>
-
-              </div>
+  // --- Main Render ---
+  return (
+    <div className="w-full flex flex-col pb-24 animate-fade-in-up">
+        {/* Page Title */}
+        <div className="mb-6 mt-2 flex items-center gap-3 px-2">
+            <div className="p-2 bg-indigo-500/20 rounded-xl text-indigo-600 dark:text-indigo-300">
+                <Calendar size={24} />
+            </div>
+            <div>
+                <h2 className="text-2xl font-bold text-slate-900 dark:text-white">15 Günlük Plan</h2>
+                <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Uzun Vadeli Tahmin Raporu</p>
             </div>
         </div>
-    </div>
-  ) : null;
 
-  // Main 15-Day List View (Now a Sheet/Modal)
-  return (
-    <div className="fixed inset-0 z-[100] flex items-end justify-center">
-        {/* Backdrop */}
-        <div 
-            className={`absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300 ${isMainClosing ? 'opacity-0' : 'opacity-100'}`}
-            onClick={handleMainClose}
-        />
-
-        {/* Sheet Container */}
-        <div className={`relative w-full md:max-w-md bg-slate-900/95 h-[90vh] rounded-t-[2.5rem] shadow-2xl flex flex-col overflow-hidden ${isMainClosing ? 'animate-sheet-down' : 'animate-sheet-up'}`}>
-            
-            {/* Header */}
-            <div className="pt-4 pb-2 px-6 bg-slate-900/80 backdrop-blur-xl border-b border-white/5 z-10 sticky top-0">
-                <div className="w-12 h-1.5 bg-slate-700 rounded-full mx-auto mb-4 opacity-50" />
-                
-                <div className="flex items-center justify-between">
-                     <button 
-                        onClick={handleMainClose}
-                        className="p-2 bg-white/5 hover:bg-white/10 rounded-full transition-colors text-white"
-                     >
-                        <ArrowLeft size={20} />
-                     </button>
-                     
-                     <h3 className="text-base font-bold text-white flex items-center gap-2">
-                         <Calendar size={18} className="text-blue-400" />
-                         15 Günlük Tahmin
-                     </h3>
-                     
-                     <div className="w-9"></div> {/* Spacer */}
-                </div>
-            </div>
-
-            {/* Scrollable List */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-3 pb-20 no-scrollbar">
+        {/* List */}
+        <div className="space-y-3">
             {time.map((dateStr, index) => {
                 const date = new Date(dateStr);
                 const dayName = index === 0 ? 'Bugün' : date.toLocaleDateString('tr-TR', { weekday: 'long' });
-                const dateNum = date.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long' });
+                const dateNum = date.toLocaleDateString('tr-TR', { day: 'numeric', month: 'numeric' });
                 const isWeekend = date.getDay() === 0 || date.getDay() === 6;
-                const currentMin = temperature_2m_min[index];
-                const currentMax = temperature_2m_max[index];
-                const rainProb = precipitation_probability_max ? precipitation_probability_max[index] : 0;
-
-                const range = maxTempOfWeek - minTempOfWeek;
-                const leftPos = ((currentMin - minTempOfWeek) / range) * 100;
-                const widthPos = ((currentMax - currentMin) / range) * 100;
                 
+                const min = Math.round(temperature_2m_min[index]);
+                const max = Math.round(temperature_2m_max[index]);
+                const rainProb = precipitation_probability_max ? precipitation_probability_max[index] : 0;
+                
+                // Bar Calculation
+                const leftPos = ((min - globalMin) / globalRange) * 100;
+                const widthPos = ((max - min) / globalRange) * 100;
+                const barColor = getGradient(max);
+
                 return (
-                <div 
-                    key={dateStr} 
-                    onClick={() => openPage(index)}
-                    className="stagger-appear group relative flex items-center py-4 px-3 rounded-2xl glass-card hover:bg-slate-800/80 active:scale-[0.98] transition-all cursor-pointer border-white/5"
-                    style={{ animationDelay: `${index * 50}ms` }}
-                >
-                    {/* Left: Day & Date */}
-                    <div className="flex flex-col w-24 flex-shrink-0">
-                        <span className={`text-base font-bold truncate ${isWeekend ? 'text-blue-300' : 'text-white'}`}>{dayName}</span>
-                        <span className="text-xs text-slate-400 font-medium truncate">{dateNum}</span>
-                    </div>
-                    
-                    {/* Center: Icon */}
-                    <div className="flex flex-col items-center justify-center gap-1 w-14 flex-shrink-0">
-                    <div className="w-9 h-9 drop-shadow-lg">
-                        {getWeatherIcon(weather_code[index])}
-                    </div>
-                    {rainProb > 10 && (
-                        <div className="flex items-center gap-1 bg-blue-500/20 px-1.5 py-0.5 rounded-full border border-blue-500/20">
-                            <Umbrella size={10} className="text-blue-300" />
-                            <span className="text-[9px] text-blue-200 font-bold">%{rainProb}</span>
-                        </div>
-                    )}
-                    </div>
-
-                    {/* Right: Temp Bar */}
-                    <div className="flex-1 flex items-center justify-end gap-2 pl-1 min-w-0">
-                        <span className="text-sm font-medium text-slate-400 w-6 text-right">{Math.round(currentMin)}°</span>
-                        
-                        <div className="h-2 w-16 sm:w-24 bg-slate-700/50 rounded-full relative overflow-hidden flex-shrink-0 ring-1 ring-white/5 shadow-inner">
-                            <div 
-                                className="absolute h-full rounded-full bg-gradient-to-r from-blue-400 to-orange-400 opacity-90 shadow-[0_0_10px_rgba(251,146,60,0.5)]"
-                                style={{ 
-                                    left: `${leftPos}%`, 
-                                    width: `${Math.max(widthPos, 10)}%` 
-                                }} 
-                            />
+                    <div 
+                        key={dateStr}
+                        onClick={() => openDayDetail(index)}
+                        className="group flex items-center justify-between p-4 rounded-3xl bg-white/90 dark:bg-slate-800/60 backdrop-blur-md border border-slate-200 dark:border-white/5 hover:bg-white dark:hover:bg-slate-700/60 active:scale-[0.98] transition-all cursor-pointer shadow-none dark:shadow-lg"
+                    >
+                        {/* Left: Date */}
+                        <div className="flex flex-col w-20 flex-shrink-0">
+                            <span className={`text-sm font-bold ${isWeekend ? 'text-indigo-600 dark:text-indigo-300' : 'text-slate-900 dark:text-white'}`}>{dayName}</span>
+                            <span className="text-xs text-slate-500 font-medium">{dateNum}</span>
                         </div>
 
-                        <span className="text-lg font-bold text-white w-7 text-right">{Math.round(currentMax)}°</span>
-                        <ChevronRight size={16} className="text-slate-600 ml-1 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        {/* Middle: Icon & Rain */}
+                        <div className="flex flex-col items-center justify-center w-12 flex-shrink-0 gap-1">
+                            <div className="w-8 h-8 drop-shadow-md">
+                                {getWeatherIcon(weather_code[index])}
+                            </div>
+                            {rainProb > 0 && (
+                                <div className="flex items-center gap-0.5">
+                                    <Umbrella size={10} className="text-blue-500 dark:text-blue-400" />
+                                    <span className="text-[10px] font-bold text-blue-600 dark:text-blue-300">%{rainProb}</span>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Right: Temp Bar & Values */}
+                        <div className="flex-1 flex items-center gap-3 pl-2">
+                            <span className="text-xs font-medium text-slate-500 dark:text-slate-400 w-6 text-right">{min}°</span>
+                            
+                            {/* Visual Range Bar */}
+                            <div className="h-1.5 flex-1 bg-slate-200 dark:bg-slate-700/30 rounded-full relative overflow-hidden">
+                                    <div 
+                                    className={`absolute h-full rounded-full bg-gradient-to-r ${barColor} opacity-90`}
+                                    style={{ 
+                                        left: `${leftPos}%`, 
+                                        width: `${Math.max(widthPos, 10)}%` 
+                                    }} 
+                                />
+                            </div>
+
+                            <span className="text-sm font-bold text-slate-800 dark:text-white w-6">{max}°</span>
+                        </div>
+
+                        {/* Arrow */}
+                        <ChevronRight size={16} className="text-slate-400 group-hover:text-slate-600 dark:group-hover:text-white transition-colors ml-2" />
                     </div>
-                </div>
                 );
             })}
-            </div>
         </div>
 
-        {/* Render Modal via Portal for day details */}
-        {selectedDay !== null && createPortal(modalContent, document.body)}
+        {renderDetailModal()}
     </div>
   );
 };

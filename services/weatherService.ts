@@ -16,39 +16,67 @@ export const getDetailedAddress = async (lat: number, lon: number): Promise<{ ci
     const data = await res.json();
     const addr = data.address || {};
     
-    // Ana Başlık için Öncelik: İlçe > Şehir > Kasaba
-    // "GPS Konumu" yazmaması için hiyerarşiyi tarıyoruz.
-    let mainName = 
+    // 1. En Detaylı İsim (Mahalle, Köy, Semt) - Ana Başlık Olacak
+    // Öncelik: Mahalle > Semt > Köy > Cadde > İlçe
+    const specificLocation = 
+      addr.neighbourhood || 
+      addr.suburb || 
+      addr.village || 
+      addr.road;
+
+    // 2. İlçe Bilgisi
+    const district = 
       addr.town || 
       addr.district || 
-      addr.city_district ||
-      addr.county ||
+      addr.city_district || 
+      addr.county || 
+      addr.municipality;
+
+    // 3. İl Bilgisi
+    const province = 
       addr.city || 
-      addr.province ||
-      addr.suburb;
+      addr.province || 
+      addr.state || 
+      addr.region;
 
-    // Eğer yukarıdakiler yoksa, en kötü ihtimalle köy veya mahalle
-    if (!mainName) {
-        mainName = addr.village || addr.neighbourhood || addr.road || 'Bilinmeyen Konum';
-    }
-
-    // Ülke bilgisini al
+    // Ülke
     const country = addr.country || 'Dünya';
 
-    // Alt metin (Subtext) için daha detaylı adres oluştur
-    const contextParts = [];
-    
-    // Detay: Mahalle
-    if (addr.neighbourhood && mainName !== addr.neighbourhood) contextParts.push(addr.neighbourhood);
-    
-    // Bağlam: İlçe, İl (Ana başlıkta kullanılmayanı buraya ekle)
-    if (addr.town && mainName !== addr.town) contextParts.push(addr.town);
-    if (addr.city && mainName !== addr.city) contextParts.push(addr.city);
-    if (addr.province && mainName !== addr.province && mainName !== addr.city) contextParts.push(addr.province);
-    
-    const fullAddress = contextParts.slice(0, 2).join(', ');
+    let mainName = '';
+    let subText = '';
 
-    return { city: mainName, address: fullAddress, country: country };
+    if (specificLocation) {
+        // Durum 1: Mahalle/Köy bilgisi mevcut (Örn: Barbaros Mahallesi)
+        mainName = specificLocation;
+        
+        // Alt Metin: İlçe, İl (Örn: Bağcılar, İstanbul)
+        const parts = [];
+        if (district) parts.push(district);
+        if (province && province !== district) parts.push(province);
+        
+        // Eğer ilçe yoksa sadece ili ekle, o da yoksa ülkeyi ekle
+        if (parts.length === 0) parts.push(country);
+        
+        subText = parts.join(', ');
+
+    } else if (district) {
+        // Durum 2: Sadece İlçe seviyesinde detay var (Örn: Kadıköy)
+        mainName = district;
+        
+        // Alt Metin: İl, Ülke (Örn: İstanbul, Türkiye)
+        const parts = [];
+        if (province && province !== district) parts.push(province);
+        parts.push(country);
+        
+        subText = parts.join(', ');
+        
+    } else {
+        // Durum 3: Sadece İl veya daha genel bilgi var
+        mainName = province || country || 'Bilinmeyen Konum';
+        subText = addr.country || '';
+    }
+
+    return { city: mainName, address: subText, country: country };
   } catch (error) {
     console.warn("Reverse geocoding failed", error);
     return { city: 'Konum Bulunamadı', address: '', country: '' };
@@ -72,11 +100,12 @@ export const fetchWeather = async (lat: number, lon: number): Promise<WeatherDat
   const weatherParams = new URLSearchParams({
     latitude: lat.toString(),
     longitude: lon.toString(),
-    current: 'temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,cloud_cover,pressure_msl,surface_pressure,wind_speed_10m,wind_direction_10m',
-    hourly: 'temperature_2m,weather_code,is_day,wind_speed_10m,wind_direction_10m,precipitation_probability',
+    current: 'temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,cloud_cover,pressure_msl,surface_pressure,wind_speed_10m,wind_direction_10m,dew_point_2m',
+    // Detailed hourly data for popups:
+    hourly: 'temperature_2m,weather_code,is_day,wind_speed_10m,wind_direction_10m,precipitation_probability,uv_index,relative_humidity_2m,apparent_temperature,surface_pressure',
     daily: 'weather_code,temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,sunrise,sunset,uv_index_max,precipitation_probability_max,precipitation_sum,precipitation_hours,wind_speed_10m_max,wind_gusts_10m_max,wind_direction_10m_dominant',
     timezone: 'auto',
-    forecast_days: '16' // Updated to fetch more days
+    forecast_days: '16'
   });
 
   // 2. Hava Kalitesi Verisi (Ayrı endpoint)
