@@ -8,10 +8,9 @@ import Background from './components/Background';
 import Search from './components/Search';
 import HourlyForecast from './components/HourlyForecast';
 import DailyForecast from './components/DailyForecast';
-import AdviceCard from './components/AdviceCard';
 import DetailsGrid from './components/DetailsGrid';
 import AirQualityCard from './components/AirQualityCard';
-import FavoritesModal from './components/FavoritesModal'; // Changed from Drawer
+import FavoritesModal from './components/FavoritesModal';
 import WeatherOverlay from './components/WeatherOverlay';
 import SkeletonLoader from './components/SkeletonLoader';
 import GoldenHourCard from './components/GoldenHourCard';
@@ -289,11 +288,6 @@ const App: React.FC = () => {
               
               <HourlyForecast weather={weather} />
               
-              <AdviceCard 
-                weather={weather} 
-                cityName={location.name} 
-              />
-
               <div className="grid grid-cols-1 gap-2">
                 <GoldenHourCard weather={weather} />
                 <ActivityScore weather={weather} />

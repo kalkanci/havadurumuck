@@ -3,8 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { WeatherData } from '../types';
 import { getWeatherIcon, getWeatherLabel } from '../constants';
-import { ChevronDown, Calendar, Wind, Sun, Clock, ThermometerSun, Umbrella, Navigation, Sunrise, Sunset } from 'lucide-react';
-import { formatTime, getWindDirection, getDayDuration } from '../utils/helpers';
+import { ChevronDown, Calendar, Wind, Sun, ThermometerSun, Umbrella, Navigation } from 'lucide-react';
+import { getWindDirection, getDayDuration } from '../utils/helpers';
 
 interface DailyForecastProps {
   weather: WeatherData;
@@ -31,6 +31,10 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ weather }) => {
 
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
   const [isClosing, setIsClosing] = useState(false);
+
+  // Haftanın en düşük ve en yüksek sıcaklıklarını bul (Bar görselleştirmesi için)
+  const minTempOfWeek = Math.min(...temperature_2m_min);
+  const maxTempOfWeek = Math.max(...temperature_2m_max);
 
   useEffect(() => {
     if (selectedDay !== null) {
@@ -82,7 +86,7 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ weather }) => {
 
         {/* Sheet Card */}
         <div 
-            className={`relative w-full max-w-md bg-slate-900 h-[90vh] rounded-t-[2.5rem] shadow-2xl overflow-hidden flex flex-col ${isClosing ? 'animate-sheet-down' : 'animate-sheet-up'}`}
+            className={`relative w-full max-w-md bg-slate-900 h-[85vh] rounded-t-[2.5rem] shadow-2xl overflow-hidden flex flex-col ${isClosing ? 'animate-sheet-down' : 'animate-sheet-up'}`}
         >
             {/* Drag Handle & Header */}
             <div className="pt-4 pb-2 px-6 bg-slate-900/80 backdrop-blur-xl z-50 sticky top-0 border-b border-white/5">
@@ -227,41 +231,70 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ weather }) => {
 
   return (
     <>
-      <div className="w-full glass-card rounded-3xl p-5 mb-6">
-        <h3 className="text-slate-400 text-xs font-semibold uppercase tracking-wider mb-4 flex items-center gap-2">
-          <Calendar size={14} />
-          7 Günlük Tahmin
-        </h3>
+      <div className="w-full glass-card rounded-3xl p-4 mb-6 border border-slate-700/50">
+        <div className="flex items-center justify-between mb-4">
+            <h3 className="text-slate-400 text-xs font-semibold uppercase tracking-wider flex items-center gap-2">
+            <Calendar size={14} />
+            7 Günlük Tahmin
+            </h3>
+        </div>
         
-        <div className="flex flex-col space-y-4">
+        <div className="flex flex-col space-y-3">
           {time.map((dateStr, index) => {
             const date = new Date(dateStr);
             const dayName = index === 0 ? 'Bugün' : date.toLocaleDateString('tr-TR', { weekday: 'long' });
+            const dateNum = date.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long' });
             const isWeekend = date.getDay() === 0 || date.getDay() === 6;
+            const currentMin = temperature_2m_min[index];
+            const currentMax = temperature_2m_max[index];
+            const rainProb = precipitation_probability_max ? precipitation_probability_max[index] : 0;
+
+            // Bar Hesaplamaları
+            const range = maxTempOfWeek - minTempOfWeek;
+            const leftPos = ((currentMin - minTempOfWeek) / range) * 100;
+            const widthPos = ((currentMax - currentMin) / range) * 100;
             
             return (
               <div 
                 key={dateStr} 
                 onClick={() => openPage(index)}
-                className="flex items-center justify-between p-2 -mx-2 rounded-xl hover:bg-white/5 transition-colors cursor-pointer active:scale-95 duration-200"
+                className="group relative flex items-center py-4 px-3 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 active:scale-[0.98] transition-all cursor-pointer shadow-sm"
               >
-                <div className="flex items-center gap-2 w-28">
-                    <span className={`font-medium ${isWeekend ? 'text-blue-300' : 'text-slate-200'}`}>{dayName}</span>
+                {/* Sol: Gün & Tarih (Sabit Genişlik: 80-90px) */}
+                <div className="flex flex-col w-24 flex-shrink-0">
+                    <span className={`text-base font-bold truncate ${isWeekend ? 'text-blue-300' : 'text-white'}`}>{dayName}</span>
+                    <span className="text-xs text-slate-400 font-medium truncate">{dateNum}</span>
                 </div>
                 
-                <div className="flex-1 flex justify-center items-center gap-2">
-                  <div className="w-6 h-6 text-slate-300">
+                {/* Orta: İkon & Uyarılar (Sabit Genişlik: 48-60px) */}
+                <div className="flex flex-col items-center justify-center gap-1 w-14 flex-shrink-0">
+                  <div className="w-9 h-9 drop-shadow-lg">
                     {getWeatherIcon(weather_code[index])}
                   </div>
-                  {precipitation_probability_max && precipitation_probability_max[index] > 20 && (
-                    <span className="text-[10px] text-blue-400 font-bold bg-blue-400/10 px-1.5 py-0.5 rounded-full">
-                      %{precipitation_probability_max[index]}
-                    </span>
+                  {rainProb > 10 && (
+                    <div className="flex items-center gap-1 bg-blue-500/20 px-1.5 py-0.5 rounded-full border border-blue-500/20">
+                        <Umbrella size={10} className="text-blue-300" />
+                        <span className="text-[9px] text-blue-200 font-bold">%{rainProb}</span>
+                    </div>
                   )}
                 </div>
-                <div className="flex space-x-4 w-24 justify-end">
-                  <span className="font-bold text-white">{Math.round(temperature_2m_max[index])}°</span>
-                  <span className="text-slate-400 font-medium">{Math.round(temperature_2m_min[index])}°</span>
+
+                {/* Sağ: Sıcaklıklar & Bar (Esnek Alan) */}
+                <div className="flex-1 flex items-center justify-end gap-2 pl-1 min-w-0">
+                     <span className="text-sm font-medium text-slate-400 w-6 text-right">{Math.round(currentMin)}°</span>
+                     
+                     {/* Visual Temp Bar - Responsive width */}
+                     <div className="h-2 w-16 sm:w-24 bg-slate-700/50 rounded-full relative overflow-hidden flex-shrink-0">
+                        <div 
+                            className="absolute h-full rounded-full bg-gradient-to-r from-blue-400 to-orange-400 opacity-90"
+                            style={{ 
+                                left: `${leftPos}%`, 
+                                width: `${Math.max(widthPos, 10)}%` 
+                            }} 
+                        />
+                    </div>
+
+                    <span className="text-lg font-bold text-white w-7 text-right">{Math.round(currentMax)}°</span>
                 </div>
               </div>
             );
