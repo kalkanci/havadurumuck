@@ -40,6 +40,14 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ weather }) => {
   const coldestTemp = globalMin;
   const rainyDays = precipitation_probability_max.filter(p => p > 50).length;
 
+  // Find Indices for interactions
+  const hottestIndex = temperature_2m_max.indexOf(globalMax);
+  const coldestIndex = temperature_2m_min.indexOf(globalMin);
+  // For rain, find the day with the MAX precipitation probability
+  const maxRainProb = Math.max(...precipitation_probability_max);
+  const rainiestIndex = precipitation_probability_max.indexOf(maxRainProb);
+
+
   // --- Handlers ---
   const openDayDetail = (index: number) => {
     setSelectedDay(index);
@@ -260,29 +268,38 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ weather }) => {
              </div>
         </div>
 
-        {/* 2. Summary Cards */}
+        {/* 2. Summary Cards (Interactive) */}
         <div className="grid grid-cols-3 gap-3 mb-6">
-            <div className="glass-card p-3 rounded-2xl flex flex-col items-center justify-center text-center">
+            <button 
+                onClick={() => openDayDetail(hottestIndex)}
+                className="glass-card p-3 rounded-2xl flex flex-col items-center justify-center text-center active:scale-95 transition-all hover:bg-white/10"
+            >
                  <span className="text-[10px] text-slate-400 font-bold uppercase mb-1">En Sıcak</span>
                  <div className="flex items-center gap-1">
                      <ArrowUp size={14} className="text-red-500" />
                      <span className="text-xl font-bold text-white">{Math.round(hottestTemp)}°</span>
                  </div>
-            </div>
-            <div className="glass-card p-3 rounded-2xl flex flex-col items-center justify-center text-center">
+            </button>
+            <button 
+                onClick={() => openDayDetail(coldestIndex)}
+                className="glass-card p-3 rounded-2xl flex flex-col items-center justify-center text-center active:scale-95 transition-all hover:bg-white/10"
+            >
                  <span className="text-[10px] text-slate-400 font-bold uppercase mb-1">En Soğuk</span>
                  <div className="flex items-center gap-1">
                      <ArrowDown size={14} className="text-blue-500" />
                      <span className="text-xl font-bold text-white">{Math.round(coldestTemp)}°</span>
                  </div>
-            </div>
-            <div className="glass-card p-3 rounded-2xl flex flex-col items-center justify-center text-center">
+            </button>
+            <button 
+                onClick={() => openDayDetail(rainiestIndex)}
+                className="glass-card p-3 rounded-2xl flex flex-col items-center justify-center text-center active:scale-95 transition-all hover:bg-white/10"
+            >
                  <span className="text-[10px] text-slate-400 font-bold uppercase mb-1">Yağışlı Gün</span>
                  <div className="flex items-center gap-1">
                      <Droplets size={14} className="text-blue-400" />
                      <span className="text-xl font-bold text-white">{rainyDays}</span>
                  </div>
-            </div>
+            </button>
         </div>
 
         {/* 3. Detailed List */}

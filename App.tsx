@@ -490,7 +490,7 @@ const App: React.FC = () => {
             }`}
           >
               <Calendar size={18} className={activeTab === 'forecast' ? "fill-white/10" : ""} />
-              16 Gün
+              Uzun Vade
           </button>
         </div>
       </div>
