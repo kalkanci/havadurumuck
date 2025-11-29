@@ -3,8 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { WeatherData } from '../types';
 import { getWeatherIcon, getWeatherLabel } from '../constants';
-import { ChevronDown, Calendar, Wind, Sun, ThermometerSun, Umbrella, Navigation, ChevronRight, ArrowLeft } from 'lucide-react';
-import { getWindDirection, getDayDuration } from '../utils/helpers';
+import { ChevronDown, Calendar, Wind, Sun, ThermometerSun, Umbrella, Navigation, ChevronRight, ArrowLeft, Sunrise, Sunset } from 'lucide-react';
+import { getWindDirection, getDayDuration, formatTime } from '../utils/helpers';
 
 interface DailyForecastProps {
   weather: WeatherData;
@@ -119,6 +119,8 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ weather, onClose }) => {
 
             {/* Content */}
             <div className="flex-1 overflow-y-auto no-scrollbar p-6 pb-20 space-y-4">
+              
+              {/* Summary Card */}
               <div className="bg-gradient-to-br from-indigo-900/40 to-slate-900/40 border border-white/10 rounded-3xl p-6 text-center shadow-lg relative overflow-hidden">
                     <div className="absolute top-0 right-0 p-4 opacity-10">
                         <Calendar size={100} />
@@ -141,8 +143,10 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ weather, onClose }) => {
                     </div>
               </div>
 
-              {/* ... (Reuse Detail Grid from previous step) ... */}
+              {/* Detail Grid */}
               <div className="grid grid-cols-2 gap-3">
+                  
+                  {/* Feels Like */}
                   <div className="glass-card p-4 rounded-2xl flex flex-col justify-between h-32">
                       <div className="flex items-center gap-2 text-red-300">
                           <ThermometerSun size={20} />
@@ -159,6 +163,7 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ weather, onClose }) => {
                       </div>
                   </div>
 
+                  {/* UV & Sun */}
                   <div className="glass-card p-4 rounded-2xl flex flex-col justify-between h-32">
                        <div className="flex items-center gap-2 text-orange-400">
                           <Sun size={20} />
@@ -173,12 +178,82 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ weather, onClose }) => {
                                <div className="h-full bg-orange-400 rounded-full" style={{width: `${Math.min(dayData.uv * 10, 100)}%`}}></div>
                            </div>
                            <div className="flex justify-between items-center mt-1">
-                               <span className="text-xs text-slate-400">Gündüz Süresi</span>
+                               <span className="text-xs text-slate-400">Süre</span>
                                <span className="text-xs font-bold text-white">{getDayDuration(dayData.sunrise, dayData.sunset)}</span>
                            </div>
                       </div>
                   </div>
-                  {/* ... other cards (simplified for brevity, assume full content is here as per previous file) ... */}
+
+                  {/* Wind */}
+                  <div className="col-span-2 glass-card p-4 rounded-2xl flex items-center justify-between">
+                       <div className="flex flex-col gap-1">
+                            <div className="flex items-center gap-2 text-teal-400 mb-2">
+                                <Wind size={20} />
+                                <span className="text-xs font-bold uppercase">Rüzgar Durumu</span>
+                            </div>
+                            <div className="flex items-baseline gap-2">
+                                <span className="text-3xl font-bold text-white">{Math.round(dayData.wind)}</span>
+                                <span className="text-sm text-slate-400">km/s</span>
+                            </div>
+                            <div className="text-xs text-slate-500">
+                                Maksimum Hamle: {Math.round(dayData.gusts)} km/s
+                            </div>
+                       </div>
+                       <div className="flex flex-col items-center justify-center w-20 h-20 bg-slate-800/80 rounded-full border border-teal-500/20 shadow-[0_0_15px_rgba(45,212,191,0.1)]">
+                            <Navigation 
+                                size={28} 
+                                className="text-teal-400" 
+                                style={{ transform: `rotate(${dayData.windDir}deg)` }} 
+                            />
+                            <span className="text-[10px] font-bold mt-1 text-teal-200">{getWindDirection(dayData.windDir)}</span>
+                       </div>
+                  </div>
+
+                  {/* Rain */}
+                  <div className="col-span-2 bg-gradient-to-r from-blue-900/40 to-blue-800/40 border border-blue-500/20 p-5 rounded-2xl">
+                      <div className="flex items-center gap-2 text-blue-300 mb-4">
+                          <Umbrella size={20} />
+                          <span className="text-xs font-bold uppercase">Yağış Detayları</span>
+                      </div>
+                      <div className="grid grid-cols-3 gap-4 text-center">
+                            <div className="bg-black/20 rounded-xl p-2">
+                                <p className="text-2xl font-bold text-blue-100">%{dayData.rainProb}</p>
+                                <p className="text-[10px] text-blue-300 uppercase tracking-wide mt-1">İhtimal</p>
+                            </div>
+                            <div className="bg-black/20 rounded-xl p-2">
+                                <p className="text-2xl font-bold text-blue-100">{dayData.rainSum}</p>
+                                <p className="text-[10px] text-blue-300 uppercase tracking-wide mt-1">mm</p>
+                            </div>
+                            <div className="bg-black/20 rounded-xl p-2">
+                                <p className="text-2xl font-bold text-blue-100">{dayData.rainHours}</p>
+                                <p className="text-[10px] text-blue-300 uppercase tracking-wide mt-1">Saat</p>
+                            </div>
+                      </div>
+                  </div>
+
+                  {/* Sun Times */}
+                  <div className="col-span-2 glass-card p-4 rounded-2xl flex justify-around items-center">
+                      <div className="flex items-center gap-3">
+                          <div className="p-2 bg-yellow-500/10 rounded-full text-yellow-400">
+                              <Sunrise size={24} />
+                          </div>
+                          <div>
+                              <p className="text-[10px] text-slate-400 uppercase font-bold">Gün Doğumu</p>
+                              <p className="text-xl font-bold text-white">{formatTime(dayData.sunrise)}</p>
+                          </div>
+                      </div>
+                      <div className="w-[1px] h-10 bg-white/10"></div>
+                      <div className="flex items-center gap-3">
+                          <div className="p-2 bg-indigo-500/10 rounded-full text-indigo-400">
+                              <Sunset size={24} />
+                          </div>
+                          <div>
+                              <p className="text-[10px] text-slate-400 uppercase font-bold">Gün Batımı</p>
+                              <p className="text-xl font-bold text-white">{formatTime(dayData.sunset)}</p>
+                          </div>
+                      </div>
+                  </div>
+
               </div>
             </div>
         </div>

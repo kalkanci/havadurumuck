@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Heart, Navigation, MapPin, ArrowUp, ArrowDown, RefreshCw, Calendar, ChevronRight } from 'lucide-react';
+import { Heart, Navigation, MapPin, ArrowUp, ArrowDown, RefreshCw, Calendar, ChevronRight, Download } from 'lucide-react';
 import { GeoLocation, WeatherData } from './types';
 import { fetchWeather, getDetailedAddress } from './services/weatherService';
 import { calculateDistance } from './utils/helpers';
@@ -34,6 +34,9 @@ const App: React.FC = () => {
   const [isFavoritesOpen, setIsFavoritesOpen] = useState(false);
   const [showDailyForecast, setShowDailyForecast] = useState(false);
   
+  // PWA Install Prompt State
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  
   const [error, setError] = useState<string | null>(null);
   const [gpsError, setGpsError] = useState<boolean>(false);
 
@@ -52,6 +55,18 @@ const App: React.FC = () => {
 
   useEffect(() => {
     handleCurrentLocation();
+    
+    // PWA Install Event Listener
+    const handleBeforeInstallPrompt = (e: any) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
   }, []);
 
   useEffect(() => {
@@ -120,6 +135,18 @@ const App: React.FC = () => {
 
   const removeFavorite = (id: number) => {
      setFavorites(favorites.filter(f => f.id !== id));
+  };
+
+  const handleInstallClick = () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then((choiceResult: any) => {
+        if (choiceResult.outcome === 'accepted') {
+          console.log('User accepted the install prompt');
+        }
+        setDeferredPrompt(null);
+      });
+    }
   };
 
   // Pull to Refresh Logic
@@ -238,16 +265,29 @@ const App: React.FC = () => {
             <Search onSelect={setLocation} onCurrentLocation={handleCurrentLocation} />
           </div>
 
-          {/* Heart / Favorites Button */}
-          <button 
-            onClick={() => setIsFavoritesOpen(true)} 
-            className={`p-3 glass-card rounded-2xl transition-all active:scale-95 duration-200 border border-white/10 ${isFav ? 'bg-red-500/20 border-red-500/30' : 'hover:bg-slate-800/80'}`}
-          >
-            <Heart 
-                size={22} 
-                className={`transition-colors duration-300 ${isFav ? 'text-red-400 fill-red-400' : 'text-slate-300'}`} 
-            />
-          </button>
+          <div className="flex items-center gap-2">
+            {/* PWA Install Button (Only visible if prompt is available) */}
+            {deferredPrompt && (
+              <button 
+                onClick={handleInstallClick}
+                className="p-3 glass-card rounded-2xl transition-all active:scale-95 duration-200 border border-white/10 hover:bg-slate-800/80"
+                aria-label="Uygulamayı Yükle"
+              >
+                <Download size={22} className="text-blue-400" />
+              </button>
+            )}
+
+            {/* Heart / Favorites Button */}
+            <button 
+              onClick={() => setIsFavoritesOpen(true)} 
+              className={`p-3 glass-card rounded-2xl transition-all active:scale-95 duration-200 border border-white/10 ${isFav ? 'bg-red-500/20 border-red-500/30' : 'hover:bg-slate-800/80'}`}
+            >
+              <Heart 
+                  size={22} 
+                  className={`transition-colors duration-300 ${isFav ? 'text-red-400 fill-red-400' : 'text-slate-300'}`} 
+              />
+            </button>
+          </div>
         </header>
 
         {/* Main Content */}
@@ -308,15 +348,15 @@ const App: React.FC = () => {
               </div>
             </div>
 
-            {/* Scrollable Data Area */}
-            <div className="flex-1 pb-6 space-y-2">
+            {/* Scrollable Data Area - Increased spacing to gap-5 for better breathing room */}
+            <div className="flex-1 pb-6 flex flex-col gap-5">
               
               <HourlyForecast weather={weather} />
               
               {/* 15-Day Forecast Trigger Button */}
               <button 
                 onClick={() => setShowDailyForecast(true)}
-                className="w-full mb-6 py-4 glass-card rounded-2xl flex items-center justify-between px-5 group hover:bg-slate-800/80 transition-all active:scale-[0.98]"
+                className="w-full py-4 glass-card rounded-2xl flex items-center justify-between px-5 group hover:bg-slate-800/80 transition-all active:scale-[0.98]"
               >
                  <div className="flex items-center gap-3">
                      <div className="p-2 bg-blue-500/20 rounded-lg text-blue-300">
@@ -330,7 +370,7 @@ const App: React.FC = () => {
                  <ChevronRight size={20} className="text-slate-500 group-hover:text-white transition-colors" />
               </button>
 
-              <div className="grid grid-cols-1 gap-2">
+              <div className="grid grid-cols-1 gap-5">
                 <GoldenHourCard weather={weather} />
                 <ActivityScore weather={weather} />
               </div>
