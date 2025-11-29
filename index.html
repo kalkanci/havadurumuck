@@ -47,14 +47,24 @@
 
       /* --- Animations --- */
       
-      /* iOS Style Navigation Push */
+      /* iOS Style Navigation Push (Enter) */
       @keyframes slideInRight {
-        from { transform: translateX(100%); }
-        to { transform: translateX(0); }
+        from { transform: translateX(100%); opacity: 0.5; }
+        to { transform: translateX(0); opacity: 1; }
+      }
+      
+      /* iOS Style Navigation Pop (Exit) */
+      @keyframes slideOutRight {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100%); opacity: 0.5; }
       }
       
       .animate-slide-in-right {
-        animation: slideInRight 0.4s cubic-bezier(0.32, 0.72, 0, 1) forwards;
+        animation: slideInRight 0.35s cubic-bezier(0.32, 0.72, 0, 1) forwards;
+      }
+
+      .animate-slide-out-right {
+        animation: slideOutRight 0.35s cubic-bezier(0.32, 0.72, 0, 1) forwards;
       }
 
       @keyframes rain {

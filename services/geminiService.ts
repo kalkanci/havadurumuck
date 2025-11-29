@@ -1,3 +1,4 @@
+
 import { GoogleGenAI, Type } from "@google/genai";
 import { WeatherData, AdviceResponse } from "../types";
 import { getWeatherLabel } from "../constants";
@@ -18,7 +19,6 @@ const ai = apiKey ? new GoogleGenAI({ apiKey }) : null;
 
 export const getGeminiAdvice = async (weather: WeatherData, locationName: string): Promise<AdviceResponse> => {
   if (!ai) {
-    // API Key yoksa hatayı yakalayan üst katmana fırlat
     throw new Error("API Key Eksik");
   }
 
@@ -100,32 +100,43 @@ export const generateCityImage = async (city: string, weatherCode: number, isDay
 
   try {
     const condition = getWeatherLabel(weatherCode);
-    const timeOfDay = isDay ? "daylight, bright sun" : "night time, city lights, cinematic lighting";
-    const atmosphere = isDay ? "vibrant colors, blue sky" : "moody, dark atmosphere, glowing lights";
+    const timeOfDay = isDay ? "daytime" : "night";
     
-    // Prompt optimizations for Nano Banana (Flash Image)
+    // Nano Banana Pro Prompt Mühendisliği
     const prompt = `
-      A breathtaking, vertical cinematic wallpaper of ${city} city.
-      Conditions: ${condition}, ${timeOfDay}.
-      Style: Hyper-realistic 8k photography, wide angle, ${atmosphere}.
-      No text, no overlays. High quality.
+      A hyper-realistic, 4K wide-angle vertical photograph of the most iconic landmark in ${city}. 
+      The weather is ${condition} and it is ${timeOfDay}. 
+      Cinematic lighting, high detailed texture, architectural photography style. 
+      Do not use blur, ensure sharp focus.
+      
+      Weather Details:
+      - If rain: Wet pavement reflections, overcast dramatic sky.
+      - If snow: Crisp white snow, visible snowflakes.
+      - If clear: Deep blue sky, high contrast sun/moon.
     `;
 
+    // Gemini 3 Pro Image (Nano Banana Pro) kullanımı
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash-image',
+      model: 'gemini-3-pro-image-preview', 
       contents: {
         parts: [
           { text: prompt }
         ]
       },
-      // Flash image genellikle config gerektirmez veya desteklemez, sade tutuyoruz
+      config: {
+        // Nano Banana modelleri için özel imageConfig
+        imageConfig: {
+          aspectRatio: "9:16", // Mobil öncelikli dikey format
+          imageSize: "1K" // Hız ve kalite dengesi için 1K (Preview modellerde bazen 4K kısıtlı olabilir)
+        }
+      }
     });
 
     if (response.candidates && response.candidates[0].content.parts) {
+      // API yanıtındaki inlineData'yı bul (Genelde ilk part olmayabilir, kontrol ediyoruz)
       for (const part of response.candidates[0].content.parts) {
         if (part.inlineData) {
           const base64String = part.inlineData.data;
-          // Base64 string'in geçerli olup olmadığını kontrol et
           if (base64String && base64String.length > 100) {
               return `data:image/png;base64,${base64String}`;
           }
@@ -136,7 +147,7 @@ export const generateCityImage = async (city: string, weatherCode: number, isDay
     return null;
 
   } catch (error) {
-    console.error("Gemini Image Gen Error:", error);
+    console.error("Gemini Nano Banana Image Gen Error:", error);
     return null;
   }
 };

@@ -29,6 +29,7 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ weather }) => {
   } = weather.daily;
 
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
+  const [isClosing, setIsClosing] = useState(false);
 
   // Prevent background scrolling when modal is open
   useEffect(() => {
@@ -40,8 +41,19 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ weather }) => {
     return () => { document.body.style.overflow = 'auto'; };
   }, [selectedDay]);
 
-  const openPage = (index: number) => setSelectedDay(index);
-  const closePage = () => setSelectedDay(null);
+  const openPage = (index: number) => {
+    setSelectedDay(index);
+    setIsClosing(false);
+  };
+
+  const closePage = () => {
+    setIsClosing(true);
+    // Animasyon süresi kadar bekle (350ms defined in CSS)
+    setTimeout(() => {
+        setSelectedDay(null);
+        setIsClosing(false);
+    }, 320);
+  };
 
   const dayData = selectedDay !== null ? {
     date: new Date(time[selectedDay]),
@@ -108,7 +120,7 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ weather }) => {
 
       {/* Full Screen Page Transition */}
       {selectedDay !== null && dayData && (
-        <div className="fixed inset-0 z-[200] bg-slate-900 animate-slide-in-right flex flex-col h-full w-full overflow-hidden">
+        <div className={`fixed inset-0 z-[200] bg-slate-900 flex flex-col h-full w-full overflow-hidden ${isClosing ? 'animate-slide-out-right' : 'animate-slide-in-right'}`}>
             
             {/* Artistic Background Layer */}
             <div className="absolute inset-0 bg-gradient-to-b from-blue-900/20 to-slate-900 pointer-events-none z-0" />
