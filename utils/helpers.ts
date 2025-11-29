@@ -44,6 +44,17 @@ export const formatTime = (isoString: string) => {
   });
 };
 
+// Geri Sayım Formatlayıcı (HH:MM:SS)
+export const formatCountdown = (ms: number): string => {
+  if (ms <= 0) return "00:00:00";
+  const seconds = Math.floor((ms / 1000) % 60);
+  const minutes = Math.floor((ms / (1000 * 60)) % 60);
+  const hours = Math.floor((ms / (1000 * 60 * 60)));
+
+  const pad = (n: number) => n.toString().padStart(2, '0');
+  return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+};
+
 // Rüzgar Yönü Çevirici
 export const getWindDirection = (degrees: number): string => {
   const directions = ['K', 'KKD', 'KD', 'DKD', 'D', 'DGD', 'GD', 'GGD', 'G', 'GGB', 'GB', 'BGB', 'B', 'BKB', 'KB', 'KKB'];
@@ -59,6 +70,17 @@ export const getDayDuration = (sunrise: string, sunset: string): string => {
   const hours = Math.floor(diffMs / (1000 * 60 * 60));
   const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
   return `${hours} sa ${minutes} dk`;
+};
+
+// Haptic Feedback Helper
+export const triggerHapticFeedback = (pattern: number | number[] = 10) => {
+  if (typeof navigator !== 'undefined' && navigator.vibrate) {
+    try {
+        navigator.vibrate(pattern);
+    } catch (e) {
+        // Fail silently if not supported or allowed
+    }
+  }
 };
 
 // --- HAVA DURUMU UYARILARI ANALİZİ ---

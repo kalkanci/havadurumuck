@@ -3,6 +3,7 @@ import React from 'react';
 import { WeatherData } from '../types';
 import { getWeatherIcon, getWeatherLabel } from '../constants';
 import { RefreshCw, MapPin } from 'lucide-react';
+import { triggerHapticFeedback } from '../utils/helpers';
 
 interface WidgetViewProps {
   weather: WeatherData | null;
@@ -51,7 +52,10 @@ const WidgetView: React.FC<WidgetViewProps> = ({ weather, locationName, loading,
            </div>
 
            <button 
-             onClick={onRefresh}
+             onClick={() => {
+                 triggerHapticFeedback(50);
+                 onRefresh();
+             }}
              className="absolute bottom-4 right-4 p-2 bg-white/5 hover:bg-white/10 rounded-full transition-colors text-slate-400"
            >
               <RefreshCw size={16} />

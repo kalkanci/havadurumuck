@@ -1,9 +1,9 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Heart, Navigation, MapPin, ArrowUp, ArrowDown, RefreshCw, Calendar, ChevronRight, Download, CloudSun, Moon, Sun, Bell } from 'lucide-react';
+import { Heart, Navigation, MapPin, ArrowUp, ArrowDown, RefreshCw, Calendar, Download, CloudSun } from 'lucide-react';
 import { GeoLocation, WeatherData, WeatherAlert } from './types';
 import { fetchWeather, getDetailedAddress } from './services/weatherService';
-import { calculateDistance, checkWeatherAlerts } from './utils/helpers';
+import { calculateDistance, checkWeatherAlerts, triggerHapticFeedback } from './utils/helpers';
 import Background from './components/Background';
 import Search from './components/Search';
 import HourlyForecast from './components/HourlyForecast';
@@ -17,6 +17,7 @@ import ActivityScore from './components/ActivityScore';
 import WeatherAlerts from './components/WeatherAlerts';
 import ForecastInsight from './components/ForecastInsight';
 import WidgetView from './components/WidgetView';
+import PWAInstallBanner from './components/PWAInstallBanner';
 import { getWeatherLabel } from './constants';
 
 const App: React.FC = () => {
@@ -36,11 +37,6 @@ const App: React.FC = () => {
   
   const [isFavoritesOpen, setIsFavoritesOpen] = useState(false);
   
-  // Theme State (Default Dark)
-  const [theme, setTheme] = useState<'dark' | 'light'>(() => {
-    return localStorage.getItem('theme') as 'dark' | 'light' || 'dark';
-  });
-
   // Navigation State
   const [activeTab, setActiveTab] = useState<'today' | 'forecast'>('today');
   
@@ -58,21 +54,6 @@ const App: React.FC = () => {
   const pullDistance = useRef(0);
   const PULL_THRESHOLD = 120;
   const contentRef = useRef<HTMLDivElement>(null);
-
-  // Theme Effect
-  useEffect(() => {
-      const root = window.document.documentElement;
-      if (theme === 'dark') {
-          root.classList.add('dark');
-      } else {
-          root.classList.remove('dark');
-      }
-      localStorage.setItem('theme', theme);
-  }, [theme]);
-
-  const toggleTheme = () => {
-      setTheme(prev => prev === 'dark' ? 'light' : 'dark');
-  };
 
   useEffect(() => {
     localStorage.setItem('weather_favorites', JSON.stringify(favorites));
@@ -107,6 +88,13 @@ const App: React.FC = () => {
       // Generate Alerts
       const generatedAlerts = checkWeatherAlerts(data);
       setAlerts(generatedAlerts);
+      
+      // Haptic for Critical Alerts
+      if (generatedAlerts.some(a => a.level === 'critical')) {
+          triggerHapticFeedback([50, 100, 50]);
+      } else if (isRefresh) {
+          triggerHapticFeedback(20); // Subtle confirm for refresh success
+      }
 
       if (location.country !== 'GPS') setGpsError(false); 
     } catch (err) {
@@ -120,6 +108,7 @@ const App: React.FC = () => {
   const handleCurrentLocation = () => {
     setLoading(true);
     setGpsError(false);
+    triggerHapticFeedback(10);
 
     if (!navigator.geolocation) {
       setError('Cihazınız konum özelliğini desteklemiyor.');
@@ -142,11 +131,13 @@ const App: React.FC = () => {
           admin1: details.country
         };
         setLocation(loc);
+        triggerHapticFeedback(20); // Success feedback
       },
       (err) => {
         console.warn("GPS Error:", err);
         setGpsError(true);
         setLoading(false);
+        triggerHapticFeedback([50, 50]); // Error feedback
       },
       {
         enableHighAccuracy: true,
@@ -159,15 +150,18 @@ const App: React.FC = () => {
   const addFavorite = (loc: GeoLocation) => {
      if (!favorites.some(f => f.id === loc.id)) {
         setFavorites([...favorites, loc]);
+        triggerHapticFeedback(30);
      }
   };
 
   const removeFavorite = (id: number) => {
      setFavorites(favorites.filter(f => f.id !== id));
+     triggerHapticFeedback(30);
   };
 
   const handleInstallClick = () => {
     if (deferredPrompt) {
+      triggerHapticFeedback(20);
       deferredPrompt.prompt();
       deferredPrompt.userChoice.then((choiceResult: any) => {
         if (choiceResult.outcome === 'accepted') {
@@ -198,6 +192,7 @@ const App: React.FC = () => {
   const handleTouchEnd = () => {
     if (pullDistance.current > PULL_THRESHOLD && window.scrollY === 0) {
       setRefreshing(true);
+      triggerHapticFeedback(50); // Feedback for trigger
       loadWeather(true);
     }
     startY.current = 0;
@@ -228,7 +223,7 @@ const App: React.FC = () => {
 
   return (
     <div 
-      className="relative min-h-screen overflow-hidden selection:bg-blue-500/30 pb-28 text-slate-900 dark:text-white transition-colors duration-500"
+      className="relative min-h-screen overflow-hidden selection:bg-blue-500/30 pb-28 text-white transition-colors duration-500"
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
@@ -239,9 +234,6 @@ const App: React.FC = () => {
         isDay={weather?.current.is_day}
       />
       
-      {/* Light Mode Overlay (Increased opacity for better text readability on light wallpapers) */}
-      <div className="fixed inset-0 bg-slate-50/60 pointer-events-none z-[1] dark:hidden transition-opacity" />
-
       {/* Modals */}
       <FavoritesModal 
         isOpen={isFavoritesOpen}
@@ -253,12 +245,17 @@ const App: React.FC = () => {
         onAdd={addFavorite}
       />
 
+      <PWAInstallBanner 
+          deferredPrompt={deferredPrompt} 
+          onInstall={handleInstallClick} 
+      />
+
       <div className="relative z-10 flex flex-col min-h-screen p-4 md:max-w-md md:mx-auto transition-transform duration-300">
         
         {/* Pull to Refresh Indicator */}
         {refreshing && (
            <div className="absolute top-24 left-0 right-0 flex justify-center z-50">
-             <div className="bg-white/90 dark:bg-slate-800/80 backdrop-blur rounded-full p-2 shadow-lg animate-spin">
+             <div className="bg-slate-800/80 backdrop-blur rounded-full p-2 shadow-lg animate-spin">
                <RefreshCw size={20} className="text-blue-500" />
              </div>
            </div>
@@ -291,34 +288,13 @@ const App: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-2">
-            {/* Theme Toggle */}
-            <button 
-                onClick={toggleTheme}
-                className="p-3 glass-card rounded-2xl transition-all active:scale-95 duration-200 hover:bg-white/40 dark:hover:bg-slate-800/80"
-            >
-                {theme === 'dark' ? (
-                    <Sun size={22} className="text-yellow-400 fill-yellow-400" />
-                ) : (
-                    <Moon size={22} className="text-slate-600 fill-slate-600" />
-                )}
-            </button>
-
-            {deferredPrompt && (
-              <button 
-                onClick={handleInstallClick}
-                className="p-3 glass-card rounded-2xl transition-all active:scale-95 duration-200 hover:bg-white/40 dark:hover:bg-slate-800/80"
-              >
-                <Download size={22} className="text-blue-600 dark:text-blue-400" />
-              </button>
-            )}
-
             <button 
               onClick={() => setIsFavoritesOpen(true)} 
-              className={`p-3 glass-card rounded-2xl transition-all active:scale-95 duration-200 ${isFav ? 'bg-red-500/20 border-red-500/30' : 'hover:bg-white/40 dark:hover:bg-slate-800/80'}`}
+              className={`p-3 glass-card rounded-2xl transition-all active:scale-95 duration-200 ${isFav ? 'bg-red-500/20 border-red-500/30' : 'hover:bg-slate-800/80'}`}
             >
               <Heart 
                   size={22} 
-                  className={`transition-colors duration-300 ${isFav ? 'text-red-500 fill-red-500 dark:text-red-400 dark:fill-red-400' : 'text-slate-600 dark:text-slate-300'}`} 
+                  className={`transition-colors duration-300 ${isFav ? 'text-red-400 fill-red-400' : 'text-slate-300'}`} 
               />
             </button>
           </div>
@@ -330,10 +306,10 @@ const App: React.FC = () => {
         ) : error ? (
           <div className="flex-1 flex flex-col items-center justify-center text-center">
             <div className="p-4 bg-red-500/20 rounded-full mb-4">
-              <Navigation size={32} className="text-red-500 dark:text-red-400" />
+              <Navigation size={32} className="text-red-400" />
             </div>
-            <p className="text-red-500 dark:text-red-400 text-lg mb-2 font-bold">Bağlantı Sorunu</p>
-            <p className="text-slate-600 dark:text-slate-300 max-w-xs mx-auto mb-6">{error}</p>
+            <p className="text-red-400 text-lg mb-2 font-bold">Bağlantı Sorunu</p>
+            <p className="text-slate-300 max-w-xs mx-auto mb-6">{error}</p>
             <button 
               onClick={() => loadWeather()} 
               className="px-6 py-2 bg-blue-600 hover:bg-blue-500 rounded-xl font-medium transition-colors text-white"
@@ -351,35 +327,35 @@ const App: React.FC = () => {
               // --- TODAY VIEW ---
               <>
                 <div className="flex flex-col items-center justify-center mb-8 mt-2 text-center">
-                  <h1 className="text-4xl font-bold tracking-tight drop-shadow-lg mb-2 text-slate-900 dark:text-white">{location.name}</h1>
+                  <h1 className="text-4xl font-bold tracking-tight drop-shadow-lg mb-2 text-white">{location.name}</h1>
                   
                   {location.subtext ? (
-                    <div className="flex items-center gap-1.5 bg-white/50 dark:bg-black/20 backdrop-blur-sm px-3 py-1 rounded-full mb-1 border border-black/5 dark:border-white/5">
-                      <MapPin size={12} className="text-blue-600 dark:text-blue-400" />
-                      <p className="text-slate-800 dark:text-blue-100 text-xs font-medium truncate max-w-[250px]">
+                    <div className="flex items-center gap-1.5 bg-black/20 backdrop-blur-sm px-3 py-1 rounded-full mb-1 border border-white/5">
+                      <MapPin size={12} className="text-blue-400" />
+                      <p className="text-blue-100 text-xs font-medium truncate max-w-[250px]">
                         {location.subtext}
                       </p>
                     </div>
                   ) : (
-                    <p className="text-slate-600 dark:text-slate-200 text-sm font-medium drop-shadow-md">
+                    <p className="text-slate-200 text-sm font-medium drop-shadow-md">
                       {location.admin1 ? `${location.admin1}, ` : ''}{location.country}
                     </p>
                   )}
                   
-                  <p className="text-slate-600 dark:text-slate-300 text-xs font-medium mt-1 uppercase tracking-wide opacity-80">
+                  <p className="text-slate-300 text-xs font-medium mt-1 uppercase tracking-wide opacity-80">
                     {today}
                   </p>
                   
                   <div className="flex flex-col items-center mt-6">
-                    <span className="text-[7rem] leading-none font-thin tracking-tighter drop-shadow-2xl text-slate-800 dark:text-white">
+                    <span className="text-[7rem] leading-none font-thin tracking-tighter drop-shadow-2xl text-white">
                       {Math.round(weather.current.temperature_2m)}°
                     </span>
-                    <p className="text-xl font-medium mt-2 text-blue-600 dark:text-blue-200 tracking-wide drop-shadow-md">
+                    <p className="text-xl font-medium mt-2 text-blue-200 tracking-wide drop-shadow-md">
                       {getWeatherLabel(weather.current.weather_code)}
                     </p>
-                    <div className="flex items-center space-x-6 mt-3 text-sm font-semibold text-slate-600 dark:text-slate-300">
-                      <span className="flex items-center gap-1"><ArrowUp size={16} className="text-red-500 dark:text-red-400" /> {Math.round(weather.daily.temperature_2m_max[0])}°</span>
-                      <span className="flex items-center gap-1"><ArrowDown size={16} className="text-blue-500 dark:text-blue-400" /> {Math.round(weather.daily.temperature_2m_min[0])}°</span>
+                    <div className="flex items-center space-x-6 mt-3 text-sm font-semibold text-slate-300">
+                      <span className="flex items-center gap-1"><ArrowUp size={16} className="text-red-400" /> {Math.round(weather.daily.temperature_2m_max[0])}°</span>
+                      <span className="flex items-center gap-1"><ArrowDown size={16} className="text-blue-400" /> {Math.round(weather.daily.temperature_2m_min[0])}°</span>
                     </div>
                   </div>
                 </div>
@@ -402,7 +378,7 @@ const App: React.FC = () => {
                   <DetailsGrid weather={weather} />
                   
                   <div className="text-center pt-4 opacity-50">
-                    <p className="text-[10px] uppercase tracking-widest text-slate-500 dark:text-slate-400">
+                    <p className="text-[10px] uppercase tracking-widest text-slate-400">
                       En Yakın İstasyon: {distanceToStation} km
                     </p>
                   </div>
@@ -418,22 +394,22 @@ const App: React.FC = () => {
 
       {/* FLOATING GLASS BOTTOM NAVIGATION (Sliding Effect) */}
       <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-full max-w-[280px]">
-        <div className="relative flex items-center bg-white/70 dark:bg-slate-900/60 backdrop-blur-2xl border border-white/20 dark:border-white/10 rounded-full p-1.5 shadow-2xl">
+        <div className="relative flex items-center bg-slate-900/60 backdrop-blur-2xl border border-white/10 rounded-full p-1.5 shadow-2xl">
           
           {/* Sliding Background */}
           <div 
-            className={`absolute top-1.5 bottom-1.5 w-[calc(50%-6px)] rounded-full bg-white dark:bg-slate-700 shadow-lg shadow-black/5 dark:shadow-black/20 transition-all duration-300 cubic-bezier(0.4, 0, 0.2, 1) ${activeTab === 'today' ? 'left-1.5' : 'left-1/2'}`}
+            className={`absolute top-1.5 bottom-1.5 w-[calc(50%-6px)] rounded-full bg-slate-700 shadow-lg shadow-black/20 transition-all duration-300 cubic-bezier(0.4, 0, 0.2, 1) ${activeTab === 'today' ? 'left-1.5' : 'left-1/2'}`}
           />
 
           <button
             onClick={() => setActiveTab('today')}
             className={`relative z-10 flex-1 flex items-center justify-center gap-2 py-3 rounded-full text-sm font-bold transition-colors duration-300 ${
               activeTab === 'today' 
-              ? 'text-blue-600 dark:text-white' 
-              : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+              ? 'text-white' 
+              : 'text-slate-400 hover:text-slate-200'
             }`}
           >
-              <CloudSun size={18} className={activeTab === 'today' ? "fill-blue-600/10 dark:fill-white/10" : ""} />
+              <CloudSun size={18} className={activeTab === 'today' ? "fill-white/10" : ""} />
               Bugün
           </button>
           
@@ -441,11 +417,11 @@ const App: React.FC = () => {
             onClick={() => setActiveTab('forecast')}
             className={`relative z-10 flex-1 flex items-center justify-center gap-2 py-3 rounded-full text-sm font-bold transition-colors duration-300 ${
               activeTab === 'forecast' 
-              ? 'text-indigo-600 dark:text-white' 
-              : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+              ? 'text-white' 
+              : 'text-slate-400 hover:text-slate-200'
             }`}
           >
-              <Calendar size={18} className={activeTab === 'forecast' ? "fill-indigo-600/10 dark:fill-white/10" : ""} />
+              <Calendar size={18} className={activeTab === 'forecast' ? "fill-white/10" : ""} />
               15 Gün
           </button>
         </div>

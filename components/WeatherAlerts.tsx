@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { AlertTriangle, CloudLightning, Thermometer, Wind, Sun, Info, X, ShieldAlert } from 'lucide-react';
 import { WeatherAlert } from '../types';
+import { triggerHapticFeedback } from '../utils/helpers';
 
 interface WeatherAlertsProps {
   alerts: WeatherAlert[];
@@ -34,6 +35,7 @@ const WeatherAlerts: React.FC<WeatherAlertsProps> = ({ alerts }) => {
 
   const dismiss = (index: number) => {
       setVisibleAlerts(prev => prev.filter(i => i !== index));
+      triggerHapticFeedback(10);
   };
 
   return (
