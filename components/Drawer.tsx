@@ -1,5 +1,6 @@
+
 import React, { useState } from 'react';
-import { X, MapPin, Trash2, Settings, Info, Crosshair, Heart, Github, Cloud } from 'lucide-react';
+import { X, MapPin, Trash2, Settings, Thermometer, Wind, Github, Heart, Share2, RefreshCcw, Mail, Info } from 'lucide-react';
 import { GeoLocation, UserSettings } from '../types';
 
 interface DrawerProps {
@@ -11,6 +12,9 @@ interface DrawerProps {
   settings: UserSettings;
   onUpdateSettings: (newSettings: UserSettings) => void;
   onRequestLocation: () => void;
+  currentLocationName?: string;
+  currentTemp?: number;
+  currentCondition?: string;
 }
 
 const Drawer: React.FC<DrawerProps> = ({ 
@@ -21,9 +25,35 @@ const Drawer: React.FC<DrawerProps> = ({
   onRemove,
   settings,
   onUpdateSettings,
-  onRequestLocation
+  onRequestLocation,
+  currentLocationName,
+  currentTemp,
+  currentCondition
 }) => {
-  const [activeTab, setActiveTab] = useState<'favorites' | 'menu'>('favorites');
+  const [activeTab, setActiveTab] = useState<'favorites' | 'settings'>('favorites');
+
+  const handleShare = () => {
+    if (currentLocationName && currentTemp) {
+        const text = `Atmosfer AI: ${currentLocationName} şu an ${currentTemp}°C ve ${currentCondition}.`;
+        if (navigator.share) {
+            navigator.share({
+                title: 'Hava Durumu',
+                text: text,
+                url: window.location.href
+            }).catch(console.error);
+        } else {
+            navigator.clipboard.writeText(text);
+            alert("Durum kopyalandı!");
+        }
+    }
+  };
+
+  const handleReset = () => {
+      if (confirm("Tüm favoriler ve ayarlar silinecek. Emin misiniz?")) {
+          localStorage.clear();
+          window.location.reload();
+      }
+  };
 
   return (
     <>
@@ -36,29 +66,29 @@ const Drawer: React.FC<DrawerProps> = ({
       )}
       
       {/* Drawer Panel */}
-      <div className={`fixed top-0 left-0 h-full w-[85%] max-w-sm bg-slate-900 border-r border-slate-800 z-[70] transform transition-transform duration-300 ease-out shadow-2xl flex flex-col ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+      <div className={`fixed top-0 left-0 h-full w-[85%] max-w-sm bg-slate-900/95 backdrop-blur-xl border-r border-white/10 z-[70] transform transition-transform duration-300 ease-out shadow-2xl flex flex-col ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         
         {/* Header */}
-        <div className="p-6 flex justify-between items-center bg-slate-900/50 backdrop-blur-md border-b border-slate-800/50">
+        <div className="p-6 flex justify-between items-center border-b border-white/5">
           <h2 className="text-xl font-bold text-white tracking-wide">Atmosfer AI</h2>
-          <button onClick={onClose} className="p-2 hover:bg-slate-800 rounded-full transition-colors">
+          <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-full transition-colors">
             <X size={24} className="text-slate-400" />
           </button>
         </div>
 
         {/* Tabs */}
-        <div className="flex border-b border-slate-800 px-6 pt-2">
+        <div className="flex border-b border-white/5 px-6 pt-2">
           <button 
             onClick={() => setActiveTab('favorites')}
-            className={`flex-1 pb-3 text-sm font-medium transition-colors flex items-center justify-center gap-2 ${activeTab === 'favorites' ? 'text-blue-400 border-b-2 border-blue-400' : 'text-slate-500 hover:text-slate-300'}`}
+            className={`flex-1 pb-3 text-sm font-medium transition-colors flex items-center justify-center gap-2 ${activeTab === 'favorites' ? 'text-blue-500 border-b-2 border-blue-500' : 'text-slate-500 hover:text-slate-300'}`}
           >
             <Heart size={16} /> Favoriler
           </button>
           <button 
-            onClick={() => setActiveTab('menu')}
-            className={`flex-1 pb-3 text-sm font-medium transition-colors flex items-center justify-center gap-2 ${activeTab === 'menu' ? 'text-blue-400 border-b-2 border-blue-400' : 'text-slate-500 hover:text-slate-300'}`}
+            onClick={() => setActiveTab('settings')}
+            className={`flex-1 pb-3 text-sm font-medium transition-colors flex items-center justify-center gap-2 ${activeTab === 'settings' ? 'text-blue-500 border-b-2 border-blue-500' : 'text-slate-500 hover:text-slate-300'}`}
           >
-            <Settings size={16} /> Menü
+            <Settings size={16} /> Ayarlar
           </button>
         </div>
 
@@ -70,11 +100,11 @@ const Drawer: React.FC<DrawerProps> = ({
                 <div className="text-center text-slate-500 mt-10">
                   <MapPin size={48} className="mx-auto mb-4 opacity-20" />
                   <p>Henüz favori yok.</p>
-                  <p className="text-sm mt-2">Şehirleri arayıp kalp ikonuna tıklayarak ekleyin.</p>
+                  <p className="text-sm mt-2 opacity-70">Arama yaparak şehir ekleyin.</p>
                 </div>
               ) : (
                 favorites.map(fav => (
-                  <div key={fav.id} className="group bg-slate-800/50 hover:bg-slate-800 rounded-xl p-4 flex justify-between items-center border border-slate-700/50 transition-all">
+                  <div key={fav.id} className="group glass-card hover:bg-white/5 rounded-xl p-4 flex justify-between items-center transition-all">
                     <div 
                       className="flex-1 cursor-pointer"
                       onClick={() => { onSelect(fav); onClose(); }}
@@ -84,7 +114,7 @@ const Drawer: React.FC<DrawerProps> = ({
                     </div>
                     <button 
                       onClick={() => onRemove(fav.id)}
-                      className="p-2 text-slate-500 hover:text-red-400 transition-colors"
+                      className="p-2 text-slate-400 hover:text-red-400 transition-colors"
                     >
                       <Trash2 size={18} />
                     </button>
@@ -93,68 +123,86 @@ const Drawer: React.FC<DrawerProps> = ({
               )}
             </div>
           ) : (
-            <div className="space-y-6">
-              {/* Settings Group: GPS */}
-              <div className="space-y-4">
-                <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest">Konum Servisleri</h3>
-                
-                <div className="bg-slate-800/30 p-4 rounded-xl border border-slate-700/30">
-                  <div className="flex items-center justify-between mb-3">
+            <div className="space-y-8">
+              
+              {/* Birim Ayarları (Visual Only) */}
+              <section>
+                <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4 px-1">Birimler</h3>
+                <div className="glass-card rounded-xl overflow-hidden">
+                  <div className="p-4 flex items-center justify-between border-b border-white/5">
                     <div className="flex items-center gap-3">
-                      <div className="bg-emerald-500/20 p-2 rounded-lg text-emerald-400">
-                        <Crosshair size={20} />
+                      <div className="p-2 rounded-lg bg-red-500/20 text-red-400">
+                        <Thermometer size={20} />
                       </div>
-                      <div>
-                        <p className="text-white font-medium">GPS Yenile</p>
-                        <p className="text-xs text-slate-400">Konumunuzu tekrar bulun</p>
-                      </div>
+                      <span className="font-medium text-white">Sıcaklık</span>
                     </div>
-                  </div>
-                  <button 
-                    onClick={() => { onRequestLocation(); onClose(); }}
-                    className="w-full py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-lg transition-colors"
-                  >
-                    Konum İznini Yenile / Al
-                  </button>
-                </div>
-              </div>
-
-              {/* Info Group */}
-              <div className="space-y-4 pt-4 border-t border-slate-800">
-                <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest">Hakkında</h3>
-                
-                <div className="space-y-2">
-                  <div className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 transition-colors">
-                    <Cloud size={18} className="text-slate-400" />
-                    <div>
-                      <p className="text-sm text-slate-200">Veri Sağlayıcı</p>
-                      <p className="text-xs text-slate-500">Open-Meteo & OpenStreetMap</p>
-                    </div>
+                    <span className="text-sm font-bold text-slate-400">Celsius (°C)</span>
                   </div>
                   
-                  <div className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 transition-colors">
-                    <Settings size={18} className="text-slate-400" />
-                    <div>
-                      <p className="text-sm text-slate-200">Sürüm</p>
-                      <p className="text-xs text-slate-500">v2.1.0 (Mobile First)</p>
+                  <div className="p-4 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-lg bg-teal-500/20 text-teal-400">
+                        <Wind size={20} />
+                      </div>
+                      <span className="font-medium text-white">Rüzgar Hızı</span>
                     </div>
-                  </div>
-
-                   <div className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 transition-colors">
-                    <Github size={18} className="text-slate-400" />
-                    <div>
-                      <p className="text-sm text-slate-200">Geliştirici</p>
-                      <p className="text-xs text-slate-500">React & Gemini Powered</p>
-                    </div>
+                    <span className="text-sm font-bold text-slate-400">km/s</span>
                   </div>
                 </div>
-              </div>
+              </section>
 
-              <div className="mt-4 p-4 rounded-xl bg-gradient-to-r from-blue-900/20 to-indigo-900/20 border border-blue-500/10">
-                <p className="text-xs text-blue-300 text-center italic">
-                  "Gökyüzüne bakmayı unutma."
-                </p>
-              </div>
+               {/* GPS */}
+               <section>
+                <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4 px-1">Konum</h3>
+                <div className="glass-card rounded-xl p-4">
+                   <button 
+                    onClick={() => { onRequestLocation(); onClose(); }}
+                    className="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
+                  >
+                    <MapPin size={18} /> GPS Konumunu Yenile
+                  </button>
+                </div>
+               </section>
+
+               {/* Diğer */}
+               <section>
+                <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4 px-1">Diğer İşlemler</h3>
+                <div className="glass-card rounded-xl overflow-hidden">
+                   
+                   <button 
+                    onClick={handleShare}
+                    className="w-full p-4 flex items-center gap-3 hover:bg-white/5 transition-colors border-b border-white/5 text-left"
+                   >
+                       <Share2 size={20} className="text-slate-400" />
+                       <span className="text-sm font-medium text-slate-200">Durumu Paylaş</span>
+                   </button>
+
+                   <button 
+                    onClick={handleReset}
+                    className="w-full p-4 flex items-center gap-3 hover:bg-white/5 transition-colors border-b border-white/5 text-left"
+                   >
+                       <RefreshCcw size={20} className="text-slate-400" />
+                       <span className="text-sm font-medium text-slate-200">Verileri Sıfırla</span>
+                   </button>
+
+                   <div className="w-full p-4 flex items-center gap-3 hover:bg-white/5 transition-colors text-left cursor-default">
+                       <Mail size={20} className="text-slate-400" />
+                       <div>
+                           <span className="text-sm font-medium text-slate-200 block">İletişim</span>
+                           <span className="text-xs text-slate-500">iletisim@atmosfer.ai</span>
+                       </div>
+                   </div>
+
+                </div>
+               </section>
+
+              {/* Info */}
+              <section className="pt-4 border-t border-white/10">
+                <div className="flex items-center justify-between px-2 opacity-60">
+                   <span className="text-xs text-slate-500">v2.5.1 Premium</span>
+                   <Github size={16} className="text-slate-500" />
+                </div>
+              </section>
             </div>
           )}
         </div>

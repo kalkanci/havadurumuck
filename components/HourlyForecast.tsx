@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { WeatherData } from '../types';
 import { getWeatherIcon } from '../constants';
@@ -46,7 +47,7 @@ const HourlyForecast: React.FC<HourlyForecastProps> = ({ weather }) => {
       
       {/* Scrollable Container with Extra Padding for Scaling */}
       <div className="overflow-x-auto no-scrollbar py-4">
-        <div className="flex space-x-3 px-1 min-w-max">
+        <div className="flex space-x-2 px-1 min-w-max">
           {hours.map((time, index) => {
             const temp = temps[index];
             const code = codes[index];
@@ -62,25 +63,25 @@ const HourlyForecast: React.FC<HourlyForecastProps> = ({ weather }) => {
                 key={time} 
                 className={`
                   relative flex flex-col items-center justify-between 
-                  w-28 h-28 p-3 rounded-3xl transition-all duration-300 border
+                  w-20 h-28 p-2 rounded-3xl transition-all duration-300 border
                   ${isNow ? 'scale-105 z-10 shadow-2xl ring-1 ring-white/30' : 'scale-100 shadow-md opacity-90'}
                   ${bgGradient}
                 `}
               >
                 {/* Time */}
-                <span className="text-[11px] font-bold text-white/90 drop-shadow-md tracking-wide">
+                <span className="text-[10px] font-bold text-white/90 drop-shadow-md tracking-wide">
                     {isNow ? 'ŞİMDİ' : formattedTime}
                 </span>
 
                 {/* Icon */}
-                <div className="w-9 h-9 drop-shadow-lg filter transform transition-transform group-hover:scale-110">
+                <div className="w-8 h-8 drop-shadow-lg filter transform transition-transform group-hover:scale-110">
                      {getWeatherIcon(code, isDay)}
                 </div>
 
                 {/* Info Row: Wind or Rain */}
                 <div className="w-full flex justify-center items-center h-4">
                      {rainProb > 15 ? (
-                        <div className="flex items-center gap-1 bg-black/20 px-1.5 py-0.5 rounded-full">
+                        <div className="flex items-center gap-0.5 bg-black/20 px-1.5 py-0.5 rounded-full">
                             <Droplets size={8} className="text-blue-100" />
                             <span className="text-[9px] font-bold text-blue-50">%{rainProb}</span>
                         </div>
@@ -97,7 +98,7 @@ const HourlyForecast: React.FC<HourlyForecastProps> = ({ weather }) => {
                 </div>
 
                 {/* Temp */}
-                <span className="text-xl font-bold text-white tracking-tighter drop-shadow-md">
+                <span className="text-lg font-bold text-white tracking-tighter drop-shadow-md">
                     {Math.round(temp)}°
                 </span>
               </div>

@@ -37,17 +37,17 @@ export interface DailyForecast {
   weather_code: number[];
   temperature_2m_max: number[];
   temperature_2m_min: number[];
-  apparent_temperature_max: number[]; // Added
-  apparent_temperature_min: number[]; // Added
+  apparent_temperature_max: number[]; 
+  apparent_temperature_min: number[]; 
   sunrise: string[];
   sunset: string[];
   uv_index_max: number[];
   precipitation_probability_max: number[];
-  precipitation_sum: number[]; // Added
-  precipitation_hours: number[]; // Added
+  precipitation_sum: number[]; 
+  precipitation_hours: number[]; 
   wind_speed_10m_max: number[];
-  wind_gusts_10m_max: number[]; // Added
-  wind_direction_10m_dominant: number[]; // Added
+  wind_gusts_10m_max: number[]; 
+  wind_direction_10m_dominant: number[]; 
 }
 
 export interface AirQuality {

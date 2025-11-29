@@ -6,7 +6,7 @@ const WEATHER_API_URL = 'https://api.open-meteo.com/v1/forecast';
 const AIR_QUALITY_API_URL = 'https://air-quality-api.open-meteo.com/v1/air-quality';
 
 // Sokak/Mahalle detayını bulmak için Nominatim servisi (OpenStreetMap)
-export const getDetailedAddress = async (lat: number, lon: number): Promise<{ city: string, address: string }> => {
+export const getDetailedAddress = async (lat: number, lon: number): Promise<{ city: string, address: string, country: string }> => {
   try {
     const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1`, {
       headers: {
@@ -16,37 +16,42 @@ export const getDetailedAddress = async (lat: number, lon: number): Promise<{ ci
     const data = await res.json();
     const addr = data.address || {};
     
-    // Öncelik Sıralaması: Mahalle > Semt > Köy > İlçe > Şehir
-    let specificLocationName = 
-      addr.neighbourhood || 
-      addr.suburb || 
-      addr.village || 
+    // Ana Başlık için Öncelik: İlçe > Şehir > Kasaba
+    // "GPS Konumu" yazmaması için hiyerarşiyi tarıyoruz.
+    let mainName = 
       addr.town || 
       addr.district || 
       addr.city_district ||
-      'Bilinmeyen Konum';
+      addr.county ||
+      addr.city || 
+      addr.province ||
+      addr.suburb;
 
-    if (specificLocationName === 'Bilinmeyen Konum' && addr.road) {
-      specificLocationName = addr.road;
+    // Eğer yukarıdakiler yoksa, en kötü ihtimalle köy veya mahalle
+    if (!mainName) {
+        mainName = addr.village || addr.neighbourhood || addr.road || 'Bilinmeyen Konum';
     }
 
+    // Ülke bilgisini al
+    const country = addr.country || 'Dünya';
+
+    // Alt metin (Subtext) için daha detaylı adres oluştur
     const contextParts = [];
-    if (addr.road && specificLocationName !== addr.road) {
-        contextParts.push(addr.road);
-    }
-
-    if (addr.town && specificLocationName !== addr.town) contextParts.push(addr.town);
-    else if (addr.district && specificLocationName !== addr.district) contextParts.push(addr.district);
     
-    if (addr.city && specificLocationName !== addr.city) contextParts.push(addr.city);
-    else if (addr.province && specificLocationName !== addr.province) contextParts.push(addr.province);
+    // Detay: Mahalle
+    if (addr.neighbourhood && mainName !== addr.neighbourhood) contextParts.push(addr.neighbourhood);
+    
+    // Bağlam: İlçe, İl (Ana başlıkta kullanılmayanı buraya ekle)
+    if (addr.town && mainName !== addr.town) contextParts.push(addr.town);
+    if (addr.city && mainName !== addr.city) contextParts.push(addr.city);
+    if (addr.province && mainName !== addr.province && mainName !== addr.city) contextParts.push(addr.province);
     
     const fullAddress = contextParts.slice(0, 2).join(', ');
 
-    return { city: specificLocationName, address: fullAddress };
+    return { city: mainName, address: fullAddress, country: country };
   } catch (error) {
     console.warn("Reverse geocoding failed", error);
-    return { city: 'GPS Konumu', address: '' };
+    return { city: 'Konum Bulunamadı', address: '', country: '' };
   }
 };
 
@@ -64,7 +69,6 @@ export const searchCity = async (query: string): Promise<GeoLocation[]> => {
 
 export const fetchWeather = async (lat: number, lon: number): Promise<WeatherData> => {
   // 1. Hava Durumu Verisi
-  // Daily parametrelerine: apparent_temperature_max/min, precipitation_sum, precipitation_hours, wind_gusts_10m_max, wind_direction_10m_dominant eklendi.
   const weatherParams = new URLSearchParams({
     latitude: lat.toString(),
     longitude: lon.toString(),

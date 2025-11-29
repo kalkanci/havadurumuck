@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Menu, Heart, Navigation, MapPin, ArrowUp, ArrowDown, RefreshCw } from 'lucide-react';
 import { GeoLocation, WeatherData, UserSettings } from './types';
@@ -24,7 +25,7 @@ const App: React.FC = () => {
   
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false); // Pull to refresh state
+  const [refreshing, setRefreshing] = useState(false);
   const [favorites, setFavorites] = useState<GeoLocation[]>(() => {
     const saved = localStorage.getItem('weather_favorites');
     return saved ? JSON.parse(saved) : [];
@@ -46,12 +47,12 @@ const App: React.FC = () => {
   const contentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    localStorage.setItem('weather_favorites', JSON.stringify(favorites));
-  }, [favorites]);
-
-  useEffect(() => {
     localStorage.setItem('user_settings', JSON.stringify(settings));
   }, [settings]);
+
+  useEffect(() => {
+    localStorage.setItem('weather_favorites', JSON.stringify(favorites));
+  }, [favorites]);
 
   useEffect(() => {
     handleCurrentLocation();
@@ -93,11 +94,12 @@ const App: React.FC = () => {
         
         const loc: GeoLocation = {
           id: Date.now(),
-          name: details.city,
+          name: details.city, // Artık gerçek ilçe/şehir ismi
           latitude,
           longitude,
-          country: 'GPS',
-          subtext: details.address
+          country: details.country || 'Konum', // Artık gerçek ülke ismi
+          subtext: details.address, // Mahalle detayları
+          admin1: details.country // Admin1 için de ülke kullanabiliriz veya boş bırakabiliriz
         };
         setLocation(loc);
         setIsDrawerOpen(false);
@@ -137,7 +139,6 @@ const App: React.FC = () => {
     
     if (diff > 0 && window.scrollY === 0) {
       pullDistance.current = diff;
-      // Visual feedback could be added here if needed via transform
     }
   };
 
@@ -168,8 +169,6 @@ const App: React.FC = () => {
     >
       <Background 
         city={location.name} 
-        weatherCode={weather?.current.weather_code}
-        isDay={weather?.current.is_day}
       />
       
       {/* Weather Overlay (Rain/Snow effects) */}
@@ -184,11 +183,14 @@ const App: React.FC = () => {
         settings={settings}
         onUpdateSettings={setSettings}
         onRequestLocation={handleCurrentLocation}
+        currentLocationName={location.name}
+        currentTemp={weather ? Math.round(weather.current.temperature_2m) : undefined}
+        currentCondition={weather ? getWeatherLabel(weather.current.weather_code) : undefined}
       />
 
       <div className="relative z-10 flex flex-col min-h-screen p-4 md:max-w-md md:mx-auto transition-transform duration-300">
         
-        {/* Pull to Refresh Indicator - Adjusted position */}
+        {/* Pull to Refresh Indicator */}
         {refreshing && (
            <div className="absolute top-24 left-0 right-0 flex justify-center z-50">
              <div className="bg-slate-800/80 backdrop-blur rounded-full p-2 shadow-lg animate-spin">
@@ -213,15 +215,13 @@ const App: React.FC = () => {
           </div>
         )}
 
-        {/* Header with DYNAMIC safe area padding. 
-            Replaced 'pt-14' with dynamic calculation to avoid hardcoded black bars. 
-        */}
+        {/* Header */}
         <header 
           className="flex items-center justify-between mb-6"
           style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}
         >
           <button onClick={() => setIsDrawerOpen(true)} className="p-2 glass-card rounded-full hover:bg-white/10 transition-colors">
-            <Menu size={24} />
+            <Menu size={24} className="text-white" />
           </button>
           
           <div className="flex-1 mx-4">
@@ -245,16 +245,20 @@ const App: React.FC = () => {
             <p className="text-slate-300 max-w-xs mx-auto mb-6">{error}</p>
             <button 
               onClick={() => loadWeather()} 
-              className="px-6 py-2 bg-blue-600 hover:bg-blue-500 rounded-xl font-medium transition-colors"
+              className="px-6 py-2 bg-blue-600 hover:bg-blue-500 rounded-xl font-medium transition-colors text-white"
             >
               Tekrar Dene
             </button>
           </div>
         ) : weather && (
-          <main className="flex-1 flex flex-col animate-fadeIn" ref={contentRef}>
+          <main 
+            key={weather.generationtime_ms} // Trigger animation on new data
+            className="flex-1 flex flex-col animate-fade-in-up" 
+            ref={contentRef}
+          >
             {/* Hero Section */}
             <div className="flex flex-col items-center justify-center mb-10 mt-2 text-center">
-              <h1 className="text-4xl font-bold tracking-tight drop-shadow-lg mb-2">{location.name}</h1>
+              <h1 className="text-4xl font-bold tracking-tight drop-shadow-lg mb-2 text-white">{location.name}</h1>
               
               {location.subtext ? (
                 <div className="flex items-center gap-1.5 bg-black/20 backdrop-blur-sm px-3 py-1 rounded-full mb-1">
@@ -274,7 +278,7 @@ const App: React.FC = () => {
               </p>
               
               <div className="flex flex-col items-center mt-6">
-                <span className="text-[7rem] leading-none font-thin tracking-tighter drop-shadow-2xl">
+                <span className="text-[7rem] leading-none font-thin tracking-tighter drop-shadow-2xl text-white">
                   {Math.round(weather.current.temperature_2m)}°
                 </span>
                 <p className="text-xl font-medium mt-2 text-blue-200 tracking-wide drop-shadow-md">
