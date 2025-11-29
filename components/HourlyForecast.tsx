@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { WeatherData } from '../types';
 import { getWeatherIcon, getWeatherLabel } from '../constants';
@@ -22,6 +22,21 @@ const getTempColor = (temp: number, isDay: number) => {
 const HourlyForecast: React.FC<HourlyForecastProps> = ({ weather }) => {
   const [selectedHour, setSelectedHour] = useState<number | null>(null);
   const [isClosing, setIsClosing] = useState(false);
+
+  const tempUnit = '°';
+  const speedUnit = 'km/s';
+
+  // Lock body scroll
+  useEffect(() => {
+    if (selectedHour !== null) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [selectedHour]);
 
   // Find the index for the current hour to start the forecast
   const now = new Date();
@@ -82,7 +97,7 @@ const HourlyForecast: React.FC<HourlyForecastProps> = ({ weather }) => {
                  <div className="w-20 h-20 my-2 drop-shadow-2xl scale-125">
                      {getWeatherIcon(code, isDay)}
                  </div>
-                 <h2 className="text-5xl font-bold text-slate-800 dark:text-white tracking-tighter mb-1">{Math.round(temp)}°</h2>
+                 <h2 className="text-5xl font-bold text-slate-800 dark:text-white tracking-tighter mb-1">{Math.round(temp)}{tempUnit}</h2>
                  <p className="text-blue-600 dark:text-blue-200 font-medium text-lg mb-6">{getWeatherLabel(code)}</p>
 
                  <div className="grid grid-cols-2 gap-3 w-full">
@@ -90,7 +105,7 @@ const HourlyForecast: React.FC<HourlyForecastProps> = ({ weather }) => {
                          <div className="flex items-center gap-2 mb-1 text-slate-500 dark:text-slate-400">
                              <Thermometer size={16} /> <span className="text-xs font-bold uppercase">Hissedilen</span>
                          </div>
-                         <span className="text-xl font-bold text-slate-800 dark:text-white">{Math.round(feelsLike)}°</span>
+                         <span className="text-xl font-bold text-slate-800 dark:text-white">{Math.round(feelsLike)}{tempUnit}</span>
                      </div>
                      <div className="bg-slate-50 dark:bg-white/5 p-3 rounded-2xl flex flex-col items-center justify-center border border-slate-100 dark:border-transparent">
                          <div className="flex items-center gap-2 mb-1 text-blue-500 dark:text-blue-400">
@@ -102,7 +117,7 @@ const HourlyForecast: React.FC<HourlyForecastProps> = ({ weather }) => {
                          <div className="flex items-center gap-2 mb-1 text-teal-500 dark:text-teal-400">
                              <Wind size={16} /> <span className="text-xs font-bold uppercase">Rüzgar</span>
                          </div>
-                         <span className="text-xl font-bold text-slate-800 dark:text-white">{Math.round(windSpeed)} <span className="text-xs font-normal">km/s</span></span>
+                         <span className="text-xl font-bold text-slate-800 dark:text-white">{Math.round(windSpeed)} <span className="text-xs font-normal">{speedUnit}</span></span>
                          <Navigation size={12} className="text-slate-500 mt-1" style={{ transform: `rotate(${windDir}deg)` }} />
                      </div>
                       <div className="bg-slate-50 dark:bg-white/5 p-3 rounded-2xl flex flex-col items-center justify-center border border-slate-100 dark:border-transparent">
@@ -204,7 +219,7 @@ const HourlyForecast: React.FC<HourlyForecastProps> = ({ weather }) => {
 
                 {/* Temp */}
                 <span className={`text-lg font-bold tracking-tight z-10 ${tempColor}`}>
-                    {Math.round(temp)}°
+                    {Math.round(temp)}{tempUnit}
                 </span>
               </button>
             );

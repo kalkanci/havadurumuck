@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Wind, ShieldCheck, ShieldAlert, ShieldX, Activity, Info, X, HelpCircle } from 'lucide-react';
 import { AirQuality } from '../types';
@@ -11,6 +11,18 @@ interface AirQualityCardProps {
 const AirQualityCard: React.FC<AirQualityCardProps> = ({ data }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
+
+  // Lock body scroll
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
 
   if (!data) return null;
 

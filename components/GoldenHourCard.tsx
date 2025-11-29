@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Camera, Sun, Moon, X, Aperture } from 'lucide-react';
 import { WeatherData } from '../types';
@@ -15,6 +15,18 @@ const GoldenHourCard: React.FC<GoldenHourCardProps> = ({ weather }) => {
 
   const sunriseStr = weather.daily.sunrise[0];
   const sunsetStr = weather.daily.sunset[0];
+
+  // Lock body scroll
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
 
   if (!sunriseStr || !sunsetStr) return null;
 
@@ -114,7 +126,7 @@ const GoldenHourCard: React.FC<GoldenHourCardProps> = ({ weather }) => {
             <h3 className="text-xs font-bold text-orange-600 dark:text-orange-300 uppercase tracking-widest flex items-center gap-2">
             <Camera size={14} /> Golden Hour
             </h3>
-            <span className="text-[10px] text-slate-500 dark:text-slate-400 bg-white/40 dark:bg-white/5 px-2 py-1 rounded-full group-hover:bg-white/60 dark:group-hover:bg-white/10 transition-colors font-medium">Detaylar için dokun</span>
+            <span className="text-xs text-slate-500 dark:text-slate-400 bg-white/40 dark:bg-white/5 px-2 py-1 rounded-full group-hover:bg-white/60 dark:group-hover:bg-white/10 transition-colors font-medium">Detaylar için dokun</span>
         </div>
 
         <div className="relative z-10 flex justify-between items-center gap-4">

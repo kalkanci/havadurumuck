@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Car, Footprints, Shovel, ThermometerSun, Bike as MotorBike, Utensils, X, ThumbsUp, ThumbsDown, Minus } from 'lucide-react';
 import { WeatherData } from '../types';
@@ -20,6 +20,18 @@ const ActivityScore: React.FC<ActivityScoreProps> = ({ weather }) => {
   const rain = current.precipitation;
   const rainProb = today.precipitation_probability_max[0];
   const humidity = current.relative_humidity_2m;
+
+  // Lock body scroll
+  useEffect(() => {
+    if (selectedActivity) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [selectedActivity]);
 
   // Helper to clamp score
   const clamp = (val: number) => Math.max(1, Math.min(10, val));

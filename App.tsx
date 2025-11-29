@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Heart, Navigation, MapPin, ArrowUp, ArrowDown, RefreshCw, Calendar, CloudSun, Loader2 } from 'lucide-react';
-import { GeoLocation, WeatherData, WeatherAlert, PublicHoliday } from './types';
+import { Heart, Navigation, MapPin, ArrowUp, ArrowDown, RefreshCw, Calendar, CloudSun, Loader2, Settings } from 'lucide-react';
+import { GeoLocation, WeatherData, WeatherAlert, PublicHoliday, AppSettings } from './types';
 import { fetchWeather, getDetailedAddress, fetchHolidays } from './services/weatherService';
 import { calculateDistance, checkWeatherAlerts, triggerHapticFeedback } from './utils/helpers';
 import Background from './components/Background';
@@ -20,6 +20,7 @@ import WidgetView from './components/WidgetView';
 import PWAInstallBanner from './components/PWAInstallBanner';
 import AdviceCard from './components/AdviceCard';
 import HolidayCard from './components/HolidayCard';
+import SettingsModal from './components/SettingsModal';
 import { getWeatherLabel } from './constants';
 
 const App: React.FC = () => {
@@ -33,12 +34,19 @@ const App: React.FC = () => {
   const [alerts, setAlerts] = useState<WeatherAlert[]>([]);
   const [upcomingHolidays, setUpcomingHolidays] = useState<PublicHoliday[]>([]);
   
+  // Settings State
+  const [settings, setSettings] = useState<AppSettings>(() => {
+      const saved = localStorage.getItem('atmosfer_settings');
+      return saved ? JSON.parse(saved) : { hapticsEnabled: true };
+  });
+
   const [favorites, setFavorites] = useState<GeoLocation[]>(() => {
     const saved = localStorage.getItem('weather_favorites');
     return saved ? JSON.parse(saved) : [];
   });
   
   const [isFavoritesOpen, setIsFavoritesOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   
   // Navigation State
   const [activeTab, setActiveTab] = useState<'today' | 'forecast'>('today');
@@ -63,6 +71,10 @@ const App: React.FC = () => {
   }, [favorites]);
 
   useEffect(() => {
+    localStorage.setItem('atmosfer_settings', JSON.stringify(settings));
+  }, [settings]);
+
+  useEffect(() => {
     // Start the app flow
     handleCurrentLocation();
     
@@ -85,6 +97,12 @@ const App: React.FC = () => {
         loadHolidays();
     }
   }, [location]);
+
+  const haptic = (pattern?: number | number[]) => {
+      if (settings.hapticsEnabled) {
+          triggerHapticFeedback(pattern);
+      }
+  };
 
   const loadHolidays = async () => {
       if (!location || !location.countryCode) return;
@@ -121,9 +139,9 @@ const App: React.FC = () => {
       setAlerts(generatedAlerts);
       
       if (generatedAlerts.some(a => a.level === 'critical')) {
-          triggerHapticFeedback([50, 100, 50]);
+          haptic([50, 100, 50]);
       } else if (isRefresh) {
-          triggerHapticFeedback(20);
+          haptic(20);
       }
 
       if (location.country !== 'GPS') setGpsError(false); 
@@ -147,7 +165,7 @@ const App: React.FC = () => {
     if (!initialBoot) setLoading(true);
     
     setGpsError(false);
-    triggerHapticFeedback(10);
+    haptic(10);
 
     if (!navigator.geolocation) {
       handleLocationError('Cihazınız konum özelliğini desteklemiyor.');
@@ -170,7 +188,7 @@ const App: React.FC = () => {
           admin1: details.country
         };
         setLocation(loc); // This triggers useEffect -> loadWeather
-        triggerHapticFeedback(20);
+        haptic(20);
       },
       (err) => {
         console.warn("GPS Error:", err);
@@ -202,18 +220,18 @@ const App: React.FC = () => {
   const addFavorite = (loc: GeoLocation) => {
      if (!favorites.some(f => f.id === loc.id)) {
         setFavorites([...favorites, loc]);
-        triggerHapticFeedback(30);
+        haptic(30);
      }
   };
 
   const removeFavorite = (id: number) => {
      setFavorites(favorites.filter(f => f.id !== id));
-     triggerHapticFeedback(30);
+     haptic(30);
   };
 
   const handleInstallClick = () => {
     if (deferredPrompt) {
-      triggerHapticFeedback(20);
+      haptic(20);
       deferredPrompt.prompt();
       deferredPrompt.userChoice.then((choiceResult: any) => {
         if (choiceResult.outcome === 'accepted') {
@@ -244,7 +262,7 @@ const App: React.FC = () => {
   const handleTouchEnd = () => {
     if (pullDistance.current > PULL_THRESHOLD && window.scrollY === 0) {
       setRefreshing(true);
-      triggerHapticFeedback(50);
+      haptic(50);
       loadWeather(true);
       loadHolidays();
     }
@@ -295,6 +313,8 @@ const App: React.FC = () => {
     weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
   });
 
+  const tempUnit = '°';
+
   return (
     <div 
       className="relative min-h-screen overflow-hidden selection:bg-blue-500/30 pb-28 text-white transition-colors duration-500"
@@ -320,6 +340,13 @@ const App: React.FC = () => {
             onAdd={addFavorite}
         />
       )}
+
+      <SettingsModal 
+         isOpen={isSettingsOpen}
+         onClose={() => setIsSettingsOpen(false)}
+         settings={settings}
+         onUpdate={setSettings}
+      />
 
       <PWAInstallBanner 
           deferredPrompt={deferredPrompt} 
@@ -373,6 +400,12 @@ const App: React.FC = () => {
                   className={`transition-colors duration-300 ${isFav ? 'text-red-400 fill-red-400' : 'text-slate-300'}`} 
               />
             </button>
+            <button 
+               onClick={() => setIsSettingsOpen(true)}
+               className="p-3 glass-card rounded-2xl transition-all active:scale-95 duration-200 hover:bg-slate-800/80 text-slate-300 hover:text-white"
+            >
+               <Settings size={22} />
+            </button>
           </div>
         </header>
 
@@ -424,14 +457,14 @@ const App: React.FC = () => {
                   
                   <div className="flex flex-col items-center mt-6">
                     <span className="text-[7rem] leading-none font-thin tracking-tighter drop-shadow-2xl text-white">
-                      {Math.round(weather.current.temperature_2m)}°
+                      {Math.round(weather.current.temperature_2m)}{tempUnit}
                     </span>
                     <p className="text-xl font-medium mt-2 text-blue-200 tracking-wide drop-shadow-md">
                       {getWeatherLabel(weather.current.weather_code)}
                     </p>
                     <div className="flex items-center space-x-6 mt-3 text-sm font-semibold text-slate-300">
-                      <span className="flex items-center gap-1"><ArrowUp size={16} className="text-red-400" /> {Math.round(weather.daily.temperature_2m_max[0])}°</span>
-                      <span className="flex items-center gap-1"><ArrowDown size={16} className="text-blue-400" /> {Math.round(weather.daily.temperature_2m_min[0])}°</span>
+                      <span className="flex items-center gap-1"><ArrowUp size={16} className="text-red-400" /> {Math.round(weather.daily.temperature_2m_max[0])}{tempUnit}</span>
+                      <span className="flex items-center gap-1"><ArrowDown size={16} className="text-blue-400" /> {Math.round(weather.daily.temperature_2m_min[0])}{tempUnit}</span>
                     </div>
                   </div>
                 </div>

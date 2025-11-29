@@ -83,6 +83,10 @@ export interface UserSettings {
   highAccuracyGPS: boolean;
 }
 
+export interface AppSettings {
+  hapticsEnabled: boolean;
+}
+
 export interface AdviceResponse {
   mood: string;
   advice: string;

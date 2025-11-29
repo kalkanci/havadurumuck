@@ -14,64 +14,91 @@ export const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2
   return Math.round(R * c * 10) / 10;
 };
 
-// Akıllı Tavsiye Motoru (Local Logic)
+// Akıllı Tavsiye Motoru (Gelişmiş Mantık)
 export const generateSmartAdvice = (weather: WeatherData): AdviceResponse => {
   const { current, daily, air_quality } = weather;
   const temp = current.temperature_2m;
   const code = current.weather_code;
   const wind = current.wind_speed_10m;
-  const uv = daily.uv_index_max[0] || 0;
+  const isDay = current.is_day === 1;
   const rainProb = daily.precipitation_probability_max[0] || 0;
   
   let mood = "Dengeli";
-  let advice = "Hava koşulları mevsim normallerinde seyrediyor.";
-  let activities: string[] = ["Yürüyüş", "Kitap Okuma", "Müzik Dinleme"];
+  let advice = "Hava koşulları standart seyrediyor.";
+  let activities: string[] = [];
 
-  // Logic Tree for Weather Conditions
-  if (code >= 95) { // Thunderstorm
-     mood = "Fırtınalı";
-     advice = "Dışarıda fırtına riski var. Mecbur kalmadıkça dışarı çıkmaman ve güvenli alanlarda kalman en iyisi.";
-     activities = ["Film Maratonu", "Ev Düzenleme", "Yemek Yapma"];
-  } 
-  else if (code >= 71) { // Snow
-     mood = "Büyülü Beyaz";
-     advice = "Hava karlı ve soğuk. Dışarı çıkacaksan sıkı giyin ve kaygan zeminlere dikkat et. Manzaranın tadını çıkar!";
-     activities = ["Kardan Adam Yapma", "Sıcak Çikolata", "Manzara İzleme"];
-  } 
-  else if (code >= 51 || rainProb > 80) { // Rain
-     mood = "Yağmurlu";
-     advice = "Şemsiyeni almadan çıkma. Islanmak istemiyorsan kapalı mekan aktivitelerini tercih edebilirsin.";
-     activities = ["Kahve Keyfi", "Müze Gezisi", "Kapalı Sporlar"];
-  } 
-  else if (temp > 32) { // Extreme Hot
-     mood = "Kavurucu";
-     advice = "Hava çok sıcak! Güneş çarpmasına karşı dikkatli ol, bol su tüket ve gölgede kalmaya çalış.";
-     activities = ["Yüzme", "Dondurma Keyfi", "Kliması Olan Yerler"];
-  } 
-  else if (temp < 0) { // Freezing
-     mood = "Dondurucu";
-     advice = "Hava ısırıyor! Atkı, bere ve eldivenlerini takmadan dışarı adım atma.";
-     activities = ["Sıcak Kafe", "Sinema", "Evde Oyun Gecesi"];
-  } 
-  else if (wind > 35) { // Windy
-     mood = "Rüzgarlı";
-     advice = "Rüzgar oldukça sert esiyor. Şapkam uçmasın diyorsan dikkatli ol, saçların dağılabilir!";
-     activities = ["Uçurtma Uçurma", "Hızlı Yürüyüş", "Fotoğrafçılık"];
-  } 
-  else if (code <= 1 && uv > 6) { // Clear & High UV
-     mood = "Güneşli";
-     advice = "Harika bir gün ama UV indeksi yüksek. Dışarı çıkarken güneş kremi sürmeyi ve gözlük takmayı unutma.";
-     activities = ["Piknik", "Bisiklet Turu", "Doğa Yürüyüşü"];
-  } 
-  else if (temp >= 15 && temp <= 25 && code <= 2) { // Perfect
-     mood = "Mükemmel";
-     advice = "Hava tam gezmelik! Ne çok sıcak ne çok soğuk. Bu güzel havanın tadını mutlaka çıkar.";
-     activities = ["Şehir Turu", "Park Gezisi", "Arkadaş Buluşması"];
+  // --- 1. GECE MODU ---
+  if (!isDay) {
+      if (code <= 2) { // Açık Gece
+          mood = "Huzurlu Gece";
+          advice = "Gökyüzü açık ve sakin. Şehrin ışıklarından uzaklaşabilirsen harika bir yıldız manzarası var.";
+          activities = ["Yıldız İzleme", "Gece Yürüyüşü", "Sıcak Bir Çay", "Meditasyon"];
+      } else if (code >= 51) { // Yağmurlu Gece
+          mood = "Melankolik";
+          advice = "Dışarıda yağmurun sesi var, içeride ise huzur. Kendine vakit ayırmak için mükemmel bir atmosfer.";
+          activities = ["Loş Işıkta Film", "Kitap & Battaniye", "Jazz Müzik", "Uyku Öncesi Yoga"];
+      } else { // Bulutlu Gece
+          mood = "Sakin";
+          advice = "Serin ve kapalı bir gece. Yarınki planlarını gözden geçirmek veya erken uyumak için iyi bir fırsat.";
+          activities = ["Cilt Bakımı", "Günlük Yazma", "Podcast Dinleme"];
+      }
+      return { mood, advice, activities };
   }
 
-  // Air Quality Override
+  // --- 2. GÜNDÜZ MODU (Hava Olaylarına Göre) ---
+
+  // Fırtına ve Şiddetli Yağış
+  if (code >= 95 || code === 82) { 
+     mood = "Kaotik";
+     advice = "Dışarısı şu an pek tekin değil. Fırtına geçene kadar güvenli ve kuru bir yerde kal.";
+     activities = ["Ev Düzenleme", "Yemek Denemeleri", "Online Oyunlar", "Eski Fotoğraflara Bakma"];
+  } 
+  // Kar Yağışı
+  else if (code >= 71) { 
+     mood = "Büyülü Beyaz";
+     advice = "Şehir beyaza bürünüyor! Soğuğa aldırmayıp bu görsel şölenin tadını çıkarabilirsin.";
+     activities = ["Fotoğraf Çekimi", "Salep Keyfi", "Kış Yürüyüşü", "Pencere Kenarı Keyfi"];
+  } 
+  // Yağmur
+  else if (code >= 51 || rainProb > 80) { 
+     mood = "Islak & Gri";
+     advice = "Gri bulutlar şehre hakim. Islanmayı sevmiyorsan kapalı mekan planları yapmalısın.";
+     activities = ["Müze/Galeri Gezisi", "AVM Turu", "Sinema", "Kahve Dükkanı Keşfi"];
+  } 
+  // Aşırı Sıcak (>32°C)
+  else if (temp > 32) { 
+     mood = "Kavurucu";
+     advice = "Güneş yakıcı seviyede. Dışarıda fazla kalmamaya ve bol sıvı tüketmeye dikkat et.";
+     activities = ["Yüzme Havuzu", "Kliması Olan Mekanlar", "Soğuk Kahve Molası", "Siesta"];
+  } 
+  // Soğuk (<5°C)
+  else if (temp < 5) { 
+     mood = "Dondurucu";
+     advice = "Hava ısırıyor! Kat kat giyinmeden kapıdan çıkma. Sıcak içecekler en iyi dostun olacak.";
+     activities = ["Sıcak Çikolata", "Arkadaş Evinde Toplanma", "Termal Giyim Alışverişi"];
+  } 
+  // Rüzgarlı (>30 km/s)
+  else if (wind > 30) { 
+     mood = "Rüzgarlı";
+     advice = "Rüzgar saçını başını dağıtabilir. Açık alanlarda yürümek biraz zorlayıcı olabilir.";
+     activities = ["Uçurtma Uçurma (Varsa)", "Hızlı Tempolu Yürüyüş", "Kapalı Spor Salonu"];
+  } 
+  // Mükemmel Hava (18-26°C, Açık/Parçalı)
+  else if (temp >= 18 && temp <= 26 && code <= 3) { 
+     mood = "Enerjik";
+     advice = "Hava tam anlamıyla 'gezmelik'. Evde durmak için çok güzel bir gün, dışarı at kendini!";
+     activities = ["Yeni Semt Keşfi", "Sahil Yürüyüşü", "Dışarıda Yemek", "Fotoğraf Safarisi"];
+  }
+  // Standart/Bulutlu
+  else {
+      mood = "Durağan";
+      advice = "Ne çok sıcak, ne çok soğuk. Günlük rutinlerini halletmek için ideal bir gün.";
+      activities = ["Alışveriş", "Arkadaş Buluşması", "Kütüphane", "Park Yürüyüşü"];
+  }
+
+  // Hava Kalitesi Uyarısı Ekler
   if (air_quality && air_quality.european_aqi > 80) {
-      advice += " Ayrıca hava kalitesi biraz düşük, hassasiyetin varsa maske takmayı düşünebilirsin.";
+      advice += " Dikkat: Hava kirliliği yüksek, açık hava sporlarını erteleyebilirsin.";
   }
 
   return { mood, advice, activities };

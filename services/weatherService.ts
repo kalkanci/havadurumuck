@@ -1,7 +1,7 @@
 
 import { WeatherData, GeoLocation, AirQuality, PublicHoliday } from '../types';
 
-const GEO_API_URL = 'https://geocoding-api.open-meteo.com/v1/search';
+const SEARCH_API_URL = 'https://nominatim.openstreetmap.org/search';
 const WEATHER_API_URL = 'https://api.open-meteo.com/v1/forecast';
 const AIR_QUALITY_API_URL = 'https://air-quality-api.open-meteo.com/v1/air-quality';
 const HOLIDAY_API_URL = 'https://date.nager.at/api/v3/PublicHolidays';
@@ -18,7 +18,6 @@ export const getDetailedAddress = async (lat: number, lon: number): Promise<{ ci
     const addr = data.address || {};
     
     // 1. En Detaylı İsim (Mahalle, Köy, Semt) - Ana Başlık Olacak
-    // Öncelik: Mahalle > Semt > Köy > Cadde > İlçe
     const specificLocation = 
       addr.neighbourhood || 
       addr.suburb || 
@@ -48,32 +47,20 @@ export const getDetailedAddress = async (lat: number, lon: number): Promise<{ ci
     let subText = '';
 
     if (specificLocation) {
-        // Durum 1: Mahalle/Köy bilgisi mevcut (Örn: Barbaros Mahallesi)
         mainName = specificLocation;
-        
-        // Alt Metin: İlçe, İl (Örn: Bağcılar, İstanbul)
         const parts = [];
         if (district) parts.push(district);
         if (province && province !== district) parts.push(province);
-        
-        // Eğer ilçe yoksa sadece ili ekle, o da yoksa ülkeyi ekle
         if (parts.length === 0) parts.push(country);
-        
         subText = parts.join(', ');
 
     } else if (district) {
-        // Durum 2: Sadece İlçe seviyesinde detay var (Örn: Kadıköy)
         mainName = district;
-        
-        // Alt Metin: İl, Ülke (Örn: İstanbul, Türkiye)
         const parts = [];
         if (province && province !== district) parts.push(province);
         parts.push(country);
-        
         subText = parts.join(', ');
-        
     } else {
-        // Durum 3: Sadece İl veya daha genel bilgi var
         mainName = province || country || 'Bilinmeyen Konum';
         subText = addr.country || '';
     }
@@ -85,23 +72,44 @@ export const getDetailedAddress = async (lat: number, lon: number): Promise<{ ci
   }
 };
 
+// OpenStreetMap (Nominatim) kullanarak sokak/cadde araması
 export const searchCity = async (query: string): Promise<GeoLocation[]> => {
   if (query.length < 2) return [];
   try {
-    const res = await fetch(`${GEO_API_URL}?name=${encodeURIComponent(query)}&count=5&language=en&format=json`);
+    // addressdetails=1: Detaylı adres parçalarını getirir
+    // limit=5: En fazla 5 sonuç
+    const res = await fetch(`${SEARCH_API_URL}?q=${encodeURIComponent(query)}&format=json&addressdetails=1&limit=5&accept-language=tr`, {
+        headers: {
+            'User-Agent': 'AtmosferAI/1.0'
+        }
+    });
     const data = await res.json();
     
-    if (!data.results) return [];
+    if (!data || data.length === 0) return [];
 
-    return data.results.map((item: any) => ({
-        id: item.id,
-        name: item.name,
-        latitude: item.latitude,
-        longitude: item.longitude,
-        country: item.country,
-        countryCode: item.country_code, // Open-Meteo returns country_code
-        admin1: item.admin1
-    }));
+    return data.map((item: any) => {
+        const addr = item.address || {};
+        
+        // Görünen ana isim (Sokak, Mahalle veya Şehir)
+        const name = addr.road || addr.neighbourhood || addr.suburb || addr.town || addr.city || addr.county || item.name;
+        
+        // Alt metin (İlçe, İl, Ülke)
+        const parts = [];
+        if (addr.town && addr.town !== name) parts.push(addr.town);
+        if (addr.city && addr.city !== name) parts.push(addr.city);
+        if (addr.country) parts.push(addr.country);
+
+        return {
+            id: parseInt(item.place_id), // Nominatim place_id
+            name: name,
+            latitude: parseFloat(item.lat),
+            longitude: parseFloat(item.lon),
+            country: addr.country || '',
+            countryCode: addr.country_code ? addr.country_code.toUpperCase() : '',
+            admin1: addr.state || addr.province || addr.city, // İl bilgisi
+            subtext: parts.join(', ')
+        };
+    });
 
   } catch (error) {
     console.error("Geocoding error:", error);
@@ -110,6 +118,7 @@ export const searchCity = async (query: string): Promise<GeoLocation[]> => {
 };
 
 export const fetchWeather = async (lat: number, lon: number): Promise<WeatherData> => {
+  
   // 1. Hava Durumu Verisi
   const weatherParams = new URLSearchParams({
     latitude: lat.toString(),
@@ -119,7 +128,11 @@ export const fetchWeather = async (lat: number, lon: number): Promise<WeatherDat
     hourly: 'temperature_2m,weather_code,is_day,wind_speed_10m,wind_direction_10m,precipitation_probability,uv_index,relative_humidity_2m,apparent_temperature,surface_pressure,pressure_msl',
     daily: 'weather_code,temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,sunrise,sunset,uv_index_max,precipitation_probability_max,precipitation_sum,precipitation_hours,wind_speed_10m_max,wind_gusts_10m_max,wind_direction_10m_dominant',
     timezone: 'auto',
-    forecast_days: '16'
+    forecast_days: '16',
+    // Force Metric Units
+    temperature_unit: 'celsius',
+    wind_speed_unit: 'kmh',
+    precipitation_unit: 'mm',
   });
 
   // 2. Hava Kalitesi Verisi (Ayrı endpoint)

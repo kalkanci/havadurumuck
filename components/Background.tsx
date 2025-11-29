@@ -13,49 +13,42 @@ const Background: React.FC<BackgroundProps> = ({ city, weatherCode, isDay }) => 
   const [nextImg, setNextImg] = useState<string>('');
   const [isLoaded, setIsLoaded] = useState(false);
   
-  // Track previous props to prevent unnecessary re-fetches
+  // Track props to prevent unnecessary re-fetches
   const prevPropsRef = useRef<{city: string, weatherCode?: number, isDay?: number}>({ city: '', weatherCode: undefined, isDay: undefined });
 
   useEffect(() => {
     const prev = prevPropsRef.current;
     
-    // Sadece hava durumu kodu veya gece/gündüz durumu değiştiğinde çalış.
-    if (weatherCode === prev.weatherCode && isDay === prev.isDay && currentImg !== '') return;
+    // Check if anything significant changed
+    if (
+        city === prev.city && 
+        weatherCode === prev.weatherCode && 
+        isDay === prev.isDay && 
+        currentImg !== ''
+    ) return;
     
     prevPropsRef.current = { city, weatherCode, isDay };
 
-    const fetchRandomImage = async () => {
+    const updateBackground = () => {
       setIsLoaded(false);
-      
-      // Temel koşullar
-      const condition = weatherCode !== undefined ? getWeatherLabel(weatherCode) : 'clear sky';
-      const timeOfDay = isDay === 1 ? 'daylight, bright' : 'night, moonlight, dark sky';
-      
-      // Rastgele manzara tipleri
-      const landscapes = [
-        "majestic mountains", 
-        "misty pine forest", 
-        "calm ocean horizon", 
-        "desert dunes", 
-        "rolling green hills", 
-        "snowy peaks",
-        "tropical beach",
-        "lake reflection",
-        "deep canyon"
-      ];
-      const randomLandscape = landscapes[Math.floor(Math.random() * landscapes.length)];
-
-      // Optimization: Reduced resolution for mobile speed (720x1280 is sufficient for backgrounds)
-      const prompt = `cinematic wide shot of ${randomLandscape}, ${condition} weather, ${timeOfDay}, atmospheric lighting, 8k, highly detailed, realistic, wallpaper style, no text`;
-      const seed = Math.floor(Math.random() * 10000);
-      
-      // Using 'flux-realism' model but with mobile optimized dimensions
-      const imgUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=720&height=1280&nologo=true&model=flux-realism&seed=${seed}`;
-
-      setNextImg(imgUrl);
+      fetchAiImage();
     };
 
-    fetchRandomImage();
+    const fetchAiImage = () => {
+        const condition = weatherCode !== undefined ? getWeatherLabel(weatherCode) : 'clear sky';
+        const timeOfDay = isDay === 1 ? 'daylight, bright sun' : 'night time, moonlight, street lights';
+        
+        // Sokak seviyesinde detay ve gerçekçilik vurgusu
+        const prompt = `hyper-realistic street level photography of ${city}, ${condition}, ${timeOfDay}, cinematic lighting, highly detailed 8k, urban atmosphere, no text, wallpaper style`;
+        
+        // Seed ile rastgelelik ama aynı gün/şehir için tutarlılık denemesi (şimdilik tam rastgele)
+        const seed = Math.floor(Math.random() * 10000);
+        
+        const imgUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=720&height=1280&nologo=true&model=flux-realism&seed=${seed}`;
+        setNextImg(imgUrl);
+    };
+
+    updateBackground();
   }, [city, weatherCode, isDay]);
 
   const handleImageLoad = () => {
@@ -89,9 +82,12 @@ const Background: React.FC<BackgroundProps> = ({ city, weatherCode, isDay }) => 
         />
       )}
       
-      {/* 3. Gradient Overlay */}
+      {/* 3. Gradient Overlays */}
       <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-black/60 to-transparent pointer-events-none z-10" />
+      
+      {/* Main blending gradient */}
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent via-40% to-slate-900 to-65% h-full pointer-events-none z-10" />
+      
       <div className="absolute bottom-0 left-0 right-0 h-full bg-gradient-to-t from-slate-900 via-slate-900/95 to-transparent pointer-events-none z-10 opacity-100" />
 
     </div>

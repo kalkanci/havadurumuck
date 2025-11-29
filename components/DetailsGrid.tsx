@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { WeatherData } from '../types';
 import { Droplets, Wind, Sun, Gauge, Thermometer, Navigation, X, Clock, Sunrise, Sunset, ArrowUpRight, ArrowDownRight, Minus, Moon, CloudSun, CloudMoon } from 'lucide-react';
@@ -15,6 +15,21 @@ const DetailsGrid: React.FC<DetailsGridProps> = ({ weather }) => {
   const { current, daily, hourly } = weather;
   const [selectedDetail, setSelectedDetail] = useState<DetailType>(null);
   const [isClosing, setIsClosing] = useState(false);
+
+  const tempUnit = '°';
+  const speedUnit = 'km/s';
+
+  // Lock body scroll
+  useEffect(() => {
+    if (selectedDetail !== null) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [selectedDetail]);
 
   // Helper: Close Modal with Animation
   const closeModal = () => {
@@ -86,7 +101,7 @@ const DetailsGrid: React.FC<DetailsGridProps> = ({ weather }) => {
 
                    <div className="text-center z-10 bg-white/80 dark:bg-slate-900/80 p-2 rounded-full backdrop-blur-sm shadow-sm">
                        <span className="block text-xl font-bold text-slate-900 dark:text-white leading-none">{current.wind_speed_10m}</span>
-                       <span className="block text-[9px] text-slate-500 dark:text-slate-400">km/s</span>
+                       <span className="block text-[9px] text-slate-500 dark:text-slate-400">{speedUnit}</span>
                    </div>
                </div>
                <p className="mt-3 text-teal-600 dark:text-teal-300 font-bold text-sm">{getWindDirection(current.wind_direction_10m)} Yönünden</p>
@@ -105,7 +120,7 @@ const DetailsGrid: React.FC<DetailsGridProps> = ({ weather }) => {
                                    <div className="h-full bg-teal-500/50" style={{ width: `${Math.min(h.windSpeed * 3, 100)}%` }}></div>
                                </div>
                           </div>
-                          <span className="text-xs font-bold text-slate-800 dark:text-white w-14 text-right">{h.windSpeed} <span className="text-[9px] font-normal text-slate-500">km/s</span></span>
+                          <span className="text-xs font-bold text-slate-800 dark:text-white w-14 text-right">{h.windSpeed} <span className="text-[9px] font-normal text-slate-500">{speedUnit}</span></span>
                       </div>
                   ))}
               </div>
@@ -123,13 +138,13 @@ const DetailsGrid: React.FC<DetailsGridProps> = ({ weather }) => {
               <div className="w-[1px] h-10 bg-black/10 dark:bg-white/10"></div>
               <div className="text-center">
                   <p className="text-[10px] text-slate-500 dark:text-slate-400 uppercase font-bold mb-1">Çiy Noktası</p>
-                  <p className="text-3xl font-bold text-cyan-600 dark:text-cyan-400">{Math.round(current.dew_point_2m)}°</p>
+                  <p className="text-3xl font-bold text-cyan-600 dark:text-cyan-400">{Math.round(current.dew_point_2m)}{tempUnit}</p>
               </div>
           </div>
           
           <div className="bg-blue-500/10 p-3 rounded-2xl border border-blue-500/20 text-center shrink-0">
               <p className="text-blue-700 dark:text-blue-200 text-xs font-medium leading-relaxed">
-                  Çiy noktası {Math.round(current.dew_point_2m)}°C. Hissedilen hava: <span className="font-bold text-slate-900 dark:text-white">{getDewPointDesc(current.dew_point_2m)}</span>.
+                  Çiy noktası {Math.round(current.dew_point_2m)}{tempUnit}. Hissedilen hava: <span className="font-bold text-slate-900 dark:text-white">{getDewPointDesc(current.dew_point_2m)}</span>.
               </p>
           </div>
 
@@ -355,21 +370,21 @@ const DetailsGrid: React.FC<DetailsGridProps> = ({ weather }) => {
       id: 'feels_like',
       label: 'Hissedilen',
       value: Math.round(current.apparent_temperature),
-      unit: '°',
+      unit: tempUnit,
       icon: <Thermometer size={24} className="text-red-500 dark:text-red-400" />,
       subtext: null,
       render: () => renderBasicContent(
           Math.round(current.apparent_temperature), 
-          '°', 
+          tempUnit, 
           current.apparent_temperature > current.temperature_2m ? 'Olduğundan daha sıcak' : 'Olduğundan daha soğuk',
-          `Rüzgar ve nem faktörleri hesaba katıldığında sıcaklık ${Math.round(current.apparent_temperature)}° olarak hissediliyor.`
+          `Rüzgar ve nem faktörleri hesaba katıldığında sıcaklık ${Math.round(current.apparent_temperature)}${tempUnit} olarak hissediliyor.`
       )
     },
     {
       id: 'wind',
       label: 'Rüzgar',
       value: current.wind_speed_10m,
-      unit: ' km/s',
+      unit: ' ' + speedUnit,
       icon: <Wind size={24} className="text-teal-500 dark:text-teal-400" />,
       subtext: (
         <div className="flex items-center gap-1 mt-1 text-[10px] text-slate-500 dark:text-slate-400">
@@ -392,7 +407,7 @@ const DetailsGrid: React.FC<DetailsGridProps> = ({ weather }) => {
       id: 'dew_point',
       label: 'Çiy Noktası',
       value: Math.round(current.dew_point_2m),
-      unit: '°',
+      unit: tempUnit,
       icon: <Droplets size={24} className="text-cyan-500 dark:text-cyan-300" />,
       subtext: <span className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 block">{getDewPointDesc(current.dew_point_2m)}</span>,
       render: renderHumidityContent

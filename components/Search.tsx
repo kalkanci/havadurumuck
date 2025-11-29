@@ -60,7 +60,7 @@ const Search: React.FC<SearchProps> = ({ onSelect, onCurrentLocation }) => {
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Şehir ara..."
+          placeholder="Konum, sokak, mahalle..."
           className="w-full bg-white/70 dark:bg-slate-800/80 backdrop-blur-md text-slate-900 dark:text-white pl-10 pr-12 py-3 rounded-2xl border border-slate-200 dark:border-slate-700/50 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 placeholder-slate-500 dark:placeholder-slate-400 transition-all shadow-lg"
         />
         {query ? (
@@ -90,7 +90,7 @@ const Search: React.FC<SearchProps> = ({ onSelect, onCurrentLocation }) => {
             >
               <span className="font-medium text-slate-900 dark:text-white">{loc.name}</span>
               <span className="text-xs text-slate-500 dark:text-slate-400">
-                {loc.admin1 ? `${loc.admin1}, ` : ''}{loc.country}
+                {loc.subtext || loc.country}
               </span>
             </li>
           ))}

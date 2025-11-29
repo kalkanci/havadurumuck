@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { WeatherData } from '../types';
 import { getWeatherIcon, getWeatherLabel } from '../constants';
@@ -31,6 +31,10 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ weather }) => {
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
   const [isDetailClosing, setIsDetailClosing] = useState(false);
 
+  // Defaults
+  const tempUnit = '°';
+  const speedUnit = 'km/s';
+
   // Global Min/Max for calculations
   const globalMin = Math.min(...temperature_2m_min);
   const globalMax = Math.max(...temperature_2m_max);
@@ -46,6 +50,18 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ weather }) => {
   // For rain, find the day with the MAX precipitation probability
   const maxRainProb = Math.max(...precipitation_probability_max);
   const rainiestIndex = precipitation_probability_max.indexOf(maxRainProb);
+
+  // Lock body scroll
+  useEffect(() => {
+    if (selectedDay !== null) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [selectedDay]);
 
 
   // --- Handlers ---
@@ -157,10 +173,10 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ weather }) => {
                                  <Thermometer size={16} /> <span className="text-xs font-bold uppercase">Sıcaklık</span>
                              </div>
                              <div className="flex items-end gap-2">
-                                 <span className="text-4xl font-bold text-slate-900 dark:text-white">{maxT}°</span>
-                                 <span className="text-xl text-slate-500 dark:text-slate-400 mb-1">/ {minT}°</span>
+                                 <span className="text-4xl font-bold text-slate-900 dark:text-white">{maxT}{tempUnit}</span>
+                                 <span className="text-xl text-slate-500 dark:text-slate-400 mb-1">/ {minT}{tempUnit}</span>
                              </div>
-                             <span className="text-xs text-blue-600 dark:text-blue-200 mt-1">Hissedilen: {feels}°</span>
+                             <span className="text-xs text-blue-600 dark:text-blue-200 mt-1">Hissedilen: {feels}{tempUnit}</span>
                          </div>
                          <div className="w-16 h-16 drop-shadow-lg scale-125">
                              {getWeatherIcon(code)}
@@ -170,7 +186,7 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ weather }) => {
                      {/* Wind */}
                      <div className="bg-slate-50 dark:bg-white/5 p-3 rounded-2xl border border-slate-100 dark:border-white/5 flex flex-col items-center justify-center text-center">
                          <Wind size={20} className="text-teal-500 dark:text-teal-400 mb-2" />
-                         <span className="text-lg font-bold text-slate-800 dark:text-white">{wind} <span className="text-xs font-normal text-slate-500">km/s</span></span>
+                         <span className="text-lg font-bold text-slate-800 dark:text-white">{wind} <span className="text-xs font-normal text-slate-500">{speedUnit}</span></span>
                          <span className="text-[10px] text-slate-500 uppercase font-bold mt-1">{getWindDirection(windDir)}</span>
                      </div>
 
@@ -277,7 +293,7 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ weather }) => {
                  <span className="text-[10px] text-slate-400 font-bold uppercase mb-1">En Sıcak</span>
                  <div className="flex items-center gap-1">
                      <ArrowUp size={14} className="text-red-500" />
-                     <span className="text-xl font-bold text-white">{Math.round(hottestTemp)}°</span>
+                     <span className="text-xl font-bold text-white">{Math.round(hottestTemp)}{tempUnit}</span>
                  </div>
             </button>
             <button 
@@ -287,7 +303,7 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ weather }) => {
                  <span className="text-[10px] text-slate-400 font-bold uppercase mb-1">En Soğuk</span>
                  <div className="flex items-center gap-1">
                      <ArrowDown size={14} className="text-blue-500" />
-                     <span className="text-xl font-bold text-white">{Math.round(coldestTemp)}°</span>
+                     <span className="text-xl font-bold text-white">{Math.round(coldestTemp)}{tempUnit}</span>
                  </div>
             </button>
             <button 
@@ -344,7 +360,7 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ weather }) => {
                                 {windMax > 20 && (
                                      <div className="flex items-center gap-1 bg-teal-500/10 px-1.5 py-0.5 rounded-md">
                                         <Wind size={10} className="text-teal-500" />
-                                        <span className="text-[10px] font-bold text-teal-600 dark:text-teal-300">{windMax}km</span>
+                                        <span className="text-[10px] font-bold text-teal-600 dark:text-teal-300">{windMax}{speedUnit.replace('/s','')}</span>
                                     </div>
                                 )}
                             </div>
@@ -352,8 +368,8 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ weather }) => {
 
                         {/* Right: Temp */}
                         <div className="flex flex-col items-end w-16">
-                            <span className="text-lg font-bold text-slate-800 dark:text-white">{max}°</span>
-                            <span className="text-sm font-medium text-slate-500 dark:text-slate-400">{min}°</span>
+                            <span className="text-lg font-bold text-slate-800 dark:text-white">{max}{tempUnit}</span>
+                            <span className="text-sm font-medium text-slate-500 dark:text-slate-400">{min}{tempUnit}</span>
                         </div>
 
                         {/* Arrow */}
