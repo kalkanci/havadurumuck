@@ -334,7 +334,7 @@ const App: React.FC = () => {
 
   return (
     <div 
-      className="relative min-h-screen overflow-hidden selection:bg-blue-500/30 pb-28 text-white transition-colors duration-500"
+      className="relative min-h-screen overflow-hidden selection:bg-blue-500/30 pb-24 text-white transition-colors duration-500"
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
@@ -346,7 +346,7 @@ const App: React.FC = () => {
         cosmicUrl={cosmicData?.url}
       />
       
-      {/* Modals */}
+      {/* Global Modals */}
       {location && (
         <FavoritesModal 
             isOpen={isFavoritesOpen}
@@ -372,6 +372,12 @@ const App: React.FC = () => {
          onClose={() => setIsSettingsOpen(false)}
          settings={settings}
          onUpdate={setSettings}
+      />
+
+      {/* Auto PWA Prompt Modal */}
+      <PWAInstallBanner 
+          deferredPrompt={deferredPrompt} 
+          onInstall={handleInstallClick} 
       />
 
       <div className="relative z-10 flex flex-col min-h-screen p-4 md:max-w-md md:mx-auto transition-transform duration-300">
@@ -458,13 +464,7 @@ const App: React.FC = () => {
               <>
                 <div className="flex flex-col items-center justify-center mb-10 mt-6 text-center relative z-10">
                   
-                  {/* PWA Install Banner - NOW HERE FOR HIGH VISIBILITY */}
-                  <PWAInstallBanner 
-                      deferredPrompt={deferredPrompt} 
-                      onInstall={handleInstallClick} 
-                  />
-
-                  {/* 1. Date Pill (Top - Clickable) */}
+                  {/* Date Pill (Top - Clickable) */}
                   <button 
                     onClick={() => setIsCalendarOpen(true)}
                     className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/10 shadow-lg mb-6 active:scale-95 transition-transform"
@@ -473,7 +473,7 @@ const App: React.FC = () => {
                     <span className="text-xs font-bold text-blue-100 tracking-wide uppercase">{todayStr}</span>
                   </button>
 
-                  {/* 2. Massive Temperature (The Hero) */}
+                  {/* Massive Temperature (The Hero) */}
                   <div className="relative">
                      {/* Glow effect behind */}
                      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 bg-blue-500/20 rounded-full blur-[80px] pointer-events-none"></div>
@@ -483,7 +483,7 @@ const App: React.FC = () => {
                      </h1>
                   </div>
 
-                  {/* 3. Condition & High/Low */}
+                  {/* Condition & High/Low */}
                   <div className="mt-4 flex flex-col items-center gap-1">
                      <p className="text-2xl font-medium text-blue-100 tracking-wide drop-shadow-lg flex items-center gap-2">
                         {getWeatherLabel(weather.current.weather_code)}
@@ -495,7 +495,7 @@ const App: React.FC = () => {
                      </div>
                   </div>
 
-                  {/* 4. Location Pill (New Design) */}
+                  {/* Location Pill (New Design) */}
                   <div className="mt-6 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
                       <button 
                          onClick={() => setIsFavoritesOpen(true)}
@@ -518,7 +518,6 @@ const App: React.FC = () => {
                   <AdviceCard weather={weather} cityName={location.name} />
                   <ForecastInsight weather={weather} />
                   <HourlyForecast weather={weather} />
-                  {/* CosmicCard removed, now background */}
                   
                   <div className="grid grid-cols-1 gap-5">
                     <SpotifyCard weather={weather} />

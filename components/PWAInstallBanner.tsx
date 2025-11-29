@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { Download, Share, PlusSquare, X, Smartphone } from 'lucide-react';
+import { Download, Share, X, Smartphone, CloudSun } from 'lucide-react';
 import { triggerHapticFeedback } from '../utils/helpers';
 
 interface PWAInstallBannerProps {
@@ -13,8 +13,10 @@ const PWAInstallBanner: React.FC<PWAInstallBannerProps> = ({ deferredPrompt, onI
   const [isVisible, setIsVisible] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
   const [showIOSInstructions, setShowIOSInstructions] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
+    setIsMounted(true);
     // Check if already installed (standalone mode)
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone;
     
@@ -25,66 +27,46 @@ const PWAInstallBanner: React.FC<PWAInstallBannerProps> = ({ deferredPrompt, onI
     if (isStandalone) {
       setIsVisible(false);
     } else {
-      // If Android (deferredPrompt exists) OR iOS (always show unless dismissed)
-      if (deferredPrompt || ios) {
-         // Check if user dismissed it previously in this session (optional, kept simple for now)
-         setIsVisible(true);
-      }
+      // Show immediately if prompt exists OR if iOS (unless dismissed in this session)
+      // Small delay to allow app to render first
+      const timer = setTimeout(() => {
+          if (deferredPrompt || ios) {
+            const hasDismissed = sessionStorage.getItem('pwa_dismissed');
+            if (!hasDismissed) {
+                setIsVisible(true);
+                triggerHapticFeedback(20);
+            }
+          }
+      }, 2000); // 2 saniye sonra aç
+
+      return () => clearTimeout(timer);
     }
   }, [deferredPrompt]);
 
   const handleClose = () => {
     setIsVisible(false);
+    setShowIOSInstructions(false);
+    sessionStorage.setItem('pwa_dismissed', 'true'); // Don't show again in this session
     triggerHapticFeedback(10);
   };
 
   const handleClick = () => {
     triggerHapticFeedback(20);
     if (isIOS) {
+      setIsVisible(false);
       setShowIOSInstructions(true);
     } else {
       onInstall();
+      setIsVisible(false);
     }
   };
 
-  if (!isVisible) return null;
+  if (!isMounted) return null;
 
-  return (
-    <>
-      {/* In-Flow Banner (High Visibility) */}
-      <div className="w-full max-w-sm mx-auto mb-6 px-2 animate-fade-in-up relative z-50">
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-4 shadow-xl shadow-blue-500/20 flex items-center justify-between gap-3 border border-blue-400/30">
-           
-           <div className="flex items-center gap-3.5">
-              <div className="p-2.5 bg-white/20 rounded-xl backdrop-blur-sm shrink-0">
-                  <Download size={22} className="text-white animate-bounce" />
-              </div>
-              <div className="text-left">
-                  <h4 className="font-bold text-white text-sm leading-tight">Uygulamayı Yükle</h4>
-                  <p className="text-[11px] text-blue-100 font-medium mt-0.5">Daha hızlı ve tam ekran deneyim.</p>
-              </div>
-           </div>
-           
-           <div className="flex items-center gap-2 shrink-0">
-               <button 
-                 onClick={handleClick}
-                 className="bg-white text-blue-700 px-4 py-2 rounded-xl text-xs font-black hover:bg-blue-50 transition-transform active:scale-95 shadow-md tracking-wide"
-               >
-                 YÜKLE
-               </button>
-               <button 
-                 onClick={handleClose}
-                 className="p-1.5 text-blue-200 hover:text-white hover:bg-white/10 rounded-full transition-colors"
-               >
-                 <X size={18} />
-               </button>
-           </div>
-        </div>
-      </div>
-
-      {/* iOS Instructions Modal */}
-      {showIOSInstructions && createPortal(
-         <div className="fixed inset-0 z-[999] flex items-end justify-center sm:items-center p-4">
+  // --- iOS Instruction Modal ---
+  if (showIOSInstructions) {
+      return createPortal(
+         <div className="fixed inset-0 z-[1000] flex items-end justify-center sm:items-center p-4">
              <div className="absolute inset-0 bg-black/80 backdrop-blur-md transition-opacity" onClick={() => setShowIOSInstructions(false)} />
              
              <div className="relative w-full max-w-sm bg-slate-900 border border-white/10 rounded-3xl p-6 pb-10 sm:pb-6 shadow-2xl animate-fade-in-up">
@@ -117,9 +99,46 @@ const PWAInstallBanner: React.FC<PWAInstallBannerProps> = ({ deferredPrompt, onI
              </div>
          </div>,
          document.body
-      )}
-    </>
-  );
+      );
+  }
+
+  // --- Main Install Prompt Modal (Automatic) ---
+  if (isVisible) {
+    return createPortal(
+        <div className="fixed inset-0 z-[1000] flex items-center justify-center p-6">
+            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" onClick={handleClose} />
+            
+            <div className="relative w-full max-w-xs bg-slate-900/95 backdrop-blur-xl border border-white/10 rounded-3xl p-6 shadow-2xl animate-pop-in text-center">
+                <div className="mx-auto w-16 h-16 bg-gradient-to-tr from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/30 mb-4">
+                    <CloudSun size={32} className="text-white" />
+                </div>
+                
+                <h3 className="text-xl font-bold text-white mb-2">Atmosfer'i Yükle</h3>
+                <p className="text-sm text-slate-300 mb-6 leading-relaxed">
+                    Daha hızlı erişim ve tam ekran deneyimi için uygulamayı ana ekranınıza ekleyin.
+                </p>
+
+                <div className="flex gap-3">
+                    <button 
+                        onClick={handleClose}
+                        className="flex-1 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 font-bold text-sm transition-colors"
+                    >
+                        Daha Sonra
+                    </button>
+                    <button 
+                        onClick={handleClick}
+                        className="flex-1 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm shadow-lg shadow-blue-600/30 transition-colors"
+                    >
+                        Yükle
+                    </button>
+                </div>
+            </div>
+        </div>,
+        document.body
+    );
+  }
+
+  return null;
 };
 
 export default PWAInstallBanner;
