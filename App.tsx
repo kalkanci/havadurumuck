@@ -8,23 +8,24 @@ import { calculateDistance, checkWeatherAlerts, triggerHapticFeedback } from './
 import Background from './components/Background';
 import Search from './components/Search';
 import HourlyForecast from './components/HourlyForecast';
-import DailyForecast from './components/DailyForecast';
 import DetailsGrid from './components/DetailsGrid';
 import AirQualityCard from './components/AirQualityCard';
-import FavoritesModal from './components/FavoritesModal';
 import SkeletonLoader from './components/SkeletonLoader';
 import GoldenHourCard from './components/GoldenHourCard';
 import ActivityScore from './components/ActivityScore';
 import WeatherAlerts from './components/WeatherAlerts';
 import ForecastInsight from './components/ForecastInsight';
-import WidgetView from './components/WidgetView';
 import PWAInstallBanner from './components/PWAInstallBanner';
 import AdviceCard from './components/AdviceCard';
 import HolidayCard from './components/HolidayCard';
-import SettingsModal from './components/SettingsModal';
 import SpotifyCard from './components/SpotifyCard';
-import CalendarModal from './components/CalendarModal';
 import { getWeatherLabel } from './constants';
+
+const DailyForecast = React.lazy(() => import('./components/DailyForecast'));
+const FavoritesModal = React.lazy(() => import('./components/FavoritesModal'));
+const WidgetView = React.lazy(() => import('./components/WidgetView'));
+const SettingsModal = React.lazy(() => import('./components/SettingsModal'));
+const CalendarModal = React.lazy(() => import('./components/CalendarModal'));
 
 const App: React.FC = () => {
   // Start with NO location to show splash screen
@@ -313,12 +314,14 @@ const App: React.FC = () => {
   // RENDER WIDGET MODE
   if (isWidgetMode) {
     return (
+      <React.Suspense fallback={<div className="flex items-center justify-center h-screen bg-slate-900"><Loader2 className="animate-spin text-white" /></div>}>
         <WidgetView 
             weather={weather} 
             locationName={location?.name || ''} 
             loading={loading}
             onRefresh={() => loadWeather(true)}
         />
+      </React.Suspense>
     );
   }
 
@@ -347,32 +350,40 @@ const App: React.FC = () => {
       />
       
       {/* Global Modals */}
-      {location && (
-        <FavoritesModal 
-            isOpen={isFavoritesOpen}
-            onClose={() => setIsFavoritesOpen(false)}
-            favorites={favorites}
-            currentLocation={location}
-            onSelect={setLocation}
-            onRemove={removeFavorite}
-            onAdd={addFavorite}
-        />
+      {location && isFavoritesOpen && (
+        <React.Suspense fallback={null}>
+          <FavoritesModal
+              isOpen={isFavoritesOpen}
+              onClose={() => setIsFavoritesOpen(false)}
+              favorites={favorites}
+              currentLocation={location}
+              onSelect={setLocation}
+              onRemove={removeFavorite}
+              onAdd={addFavorite}
+          />
+        </React.Suspense>
       )}
       
-      {weather && (
-        <CalendarModal 
-            isOpen={isCalendarOpen}
-            onClose={() => setIsCalendarOpen(false)}
-            weather={weather}
-        />
+      {weather && isCalendarOpen && (
+        <React.Suspense fallback={null}>
+          <CalendarModal
+              isOpen={isCalendarOpen}
+              onClose={() => setIsCalendarOpen(false)}
+              weather={weather}
+          />
+        </React.Suspense>
       )}
 
-      <SettingsModal 
-         isOpen={isSettingsOpen}
-         onClose={() => setIsSettingsOpen(false)}
-         settings={settings}
-         onUpdate={setSettings}
-      />
+      {isSettingsOpen && (
+        <React.Suspense fallback={null}>
+          <SettingsModal
+            isOpen={isSettingsOpen}
+            onClose={() => setIsSettingsOpen(false)}
+            settings={settings}
+            onUpdate={setSettings}
+          />
+        </React.Suspense>
+      )}
 
       {/* Auto PWA Prompt Modal */}
       <PWAInstallBanner 
@@ -537,7 +548,9 @@ const App: React.FC = () => {
               </>
             ) : (
               // --- 16 DAYS FORECAST VIEW ---
-              <DailyForecast weather={weather} />
+              <React.Suspense fallback={<SkeletonLoader />}>
+                <DailyForecast weather={weather} />
+              </React.Suspense>
             )}
           </main>
         )}
