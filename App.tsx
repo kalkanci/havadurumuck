@@ -293,17 +293,17 @@ const App: React.FC = () => {
   // --- SPLASH SCREEN RENDER ---
   if (initialBoot) {
       return (
-          <div className="fixed inset-0 z-[999] bg-slate-900 flex flex-col items-center justify-center text-white p-6">
+          <div className="fixed inset-0 z-[999] bg-black flex flex-col items-center justify-center text-white p-6">
               <div className="relative mb-8">
                   <div className="w-24 h-24 bg-blue-500/20 rounded-full animate-ping absolute inset-0"></div>
-                  <div className="w-24 h-24 bg-slate-800 rounded-full flex items-center justify-center relative z-10 shadow-2xl border border-white/10">
-                       <CloudSun size={48} className="text-blue-400" />
+                  <div className="w-24 h-24 bg-zinc-900 rounded-full flex items-center justify-center relative z-10 shadow-2xl border border-white/10">
+                       <CloudSun size={48} className="text-blue-500" />
                   </div>
               </div>
               
               <h1 className="text-3xl font-bold tracking-tight mb-2">Atmosfer AI</h1>
               
-              <div className="flex items-center gap-2 text-slate-400 text-sm font-medium animate-pulse">
+              <div className="flex items-center gap-2 text-zinc-400 text-sm font-medium animate-pulse">
                   <Navigation size={16} className="animate-bounce" />
                   <span>Konum Bekleniyor...</span>
               </div>
@@ -314,7 +314,7 @@ const App: React.FC = () => {
   // RENDER WIDGET MODE
   if (isWidgetMode) {
     return (
-      <React.Suspense fallback={<div className="flex items-center justify-center h-screen bg-slate-900"><Loader2 className="animate-spin text-white" /></div>}>
+      <React.Suspense fallback={<div className="flex items-center justify-center h-screen bg-black"><Loader2 className="animate-spin text-white" /></div>}>
         <WidgetView 
             weather={weather} 
             locationName={location?.name || ''} 
@@ -396,7 +396,7 @@ const App: React.FC = () => {
         {/* Pull to Refresh Indicator */}
         {refreshing && (
            <div className="absolute top-24 left-0 right-0 flex justify-center z-50">
-             <div className="bg-slate-800/80 backdrop-blur rounded-full p-2 shadow-lg animate-spin">
+             <div className="bg-zinc-800/90 backdrop-blur rounded-full p-2 shadow-lg animate-spin">
                <RefreshCw size={20} className="text-blue-500" />
              </div>
            </div>
@@ -404,7 +404,7 @@ const App: React.FC = () => {
 
         {/* GPS Error Banner */}
         {gpsError && !loading && (
-          <div className="mt-20 mb-4 p-3 bg-red-500/80 backdrop-blur-md rounded-xl flex items-center justify-between shadow-lg animate-bounce-short text-white">
+          <div className="mt-20 mb-4 p-3 bg-red-500/20 backdrop-blur-md rounded-xl flex items-center justify-between shadow-lg animate-bounce-short text-white border border-red-500/30">
             <div className="flex items-center gap-2">
               <Navigation size={18} />
               <span className="text-sm font-medium">Konum alınamadı, varsayılan gösteriliyor.</span>
@@ -432,17 +432,17 @@ const App: React.FC = () => {
             <button 
               onClick={() => setIsFavoritesOpen(true)} 
               aria-label="Favori Konumlar"
-              className={`p-3 glass-card rounded-2xl transition-all active:scale-95 duration-200 ${isFav ? 'bg-red-500/20 border-red-500/30' : 'hover:bg-slate-800/80'}`}
+              className={`p-3 glass-card rounded-2xl transition-all active:scale-95 duration-200 ${isFav ? 'bg-red-500/20 border-red-500/30' : 'hover:bg-zinc-800/80'}`}
             >
               <Heart 
                   size={22} 
-                  className={`transition-colors duration-300 ${isFav ? 'text-red-400 fill-red-400' : 'text-slate-300'}`} 
+                  className={`transition-colors duration-300 ${isFav ? 'text-red-400 fill-red-400' : 'text-zinc-400'}`}
               />
             </button>
             <button 
                onClick={() => setIsSettingsOpen(true)}
                aria-label="Ayarlar"
-               className="p-3 glass-card rounded-2xl transition-all active:scale-95 duration-200 hover:bg-slate-800/80 text-slate-300 hover:text-white"
+               className="p-3 glass-card rounded-2xl transition-all active:scale-95 duration-200 hover:bg-zinc-800 text-zinc-400 hover:text-white"
             >
                <Settings size={22} />
             </button>
@@ -458,7 +458,7 @@ const App: React.FC = () => {
               <Navigation size={32} className="text-red-400" />
             </div>
             <p className="text-red-400 text-lg mb-2 font-bold">Bağlantı Sorunu</p>
-            <p className="text-slate-300 max-w-xs mx-auto mb-6">{error}</p>
+            <p className="text-zinc-300 max-w-xs mx-auto mb-6">{error}</p>
             <button 
               onClick={() => loadWeather()} 
               className="px-6 py-2 bg-blue-600 hover:bg-blue-500 rounded-xl font-medium transition-colors text-white"
@@ -492,7 +492,7 @@ const App: React.FC = () => {
                      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 bg-blue-500/20 rounded-full blur-[80px] pointer-events-none"></div>
                      
                      <h1 className="text-[9rem] leading-[0.85] font-thin tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white via-white to-white/70 drop-shadow-2xl select-none">
-                        {Math.round(weather.current.temperature_2m)}<span className="text-[5rem] font-light text-slate-300 align-top absolute top-2 ml-1">°</span>
+                        {Math.round(weather.current.temperature_2m)}<span className="text-[5rem] font-light text-zinc-300 align-top absolute top-2 ml-1">°</span>
                      </h1>
                   </div>
 
@@ -542,7 +542,7 @@ const App: React.FC = () => {
                   <DetailsGrid weather={weather} />
                   
                   <div className="text-center pt-4 opacity-50">
-                    <p className="text-[10px] uppercase tracking-widest text-slate-400">
+                    <p className="text-[10px] uppercase tracking-widest text-zinc-400">
                       En Yakın İstasyon: {distanceToStation} km
                     </p>
                   </div>
@@ -560,16 +560,16 @@ const App: React.FC = () => {
 
       {/* FLOATING NAVIGATION */}
       <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-full max-w-[280px]">
-        <div className="relative flex items-center bg-slate-900/60 backdrop-blur-2xl border border-white/10 rounded-full p-1.5 shadow-2xl">
+        <div className="relative flex items-center bg-zinc-900/90 backdrop-blur-xl border border-white/10 rounded-full p-1.5 shadow-2xl">
           <div 
-            className={`absolute top-1.5 bottom-1.5 w-[calc(50%-6px)] rounded-full bg-slate-700 shadow-lg shadow-black/20 transition-all duration-300 cubic-bezier(0.4, 0, 0.2, 1) ${activeTab === 'today' ? 'left-1.5' : 'left-1/2'}`}
+            className={`absolute top-1.5 bottom-1.5 w-[calc(50%-6px)] rounded-full bg-blue-600 shadow-lg shadow-blue-900/20 transition-all duration-300 cubic-bezier(0.4, 0, 0.2, 1) ${activeTab === 'today' ? 'left-1.5' : 'left-1/2'}`}
           />
 
           <button
             onClick={() => setActiveTab('today')}
             aria-current={activeTab === 'today' ? 'page' : undefined}
             className={`relative z-10 flex-1 flex items-center justify-center gap-2 py-3 rounded-full text-sm font-bold transition-colors duration-300 ${
-              activeTab === 'today' ? 'text-white' : 'text-slate-400 hover:text-slate-200'
+              activeTab === 'today' ? 'text-white' : 'text-zinc-400 hover:text-zinc-200'
             }`}
           >
               <CloudSun size={18} className={activeTab === 'today' ? "fill-white/10" : ""} />
@@ -580,7 +580,7 @@ const App: React.FC = () => {
             onClick={() => setActiveTab('forecast')}
             aria-current={activeTab === 'forecast' ? 'page' : undefined}
             className={`relative z-10 flex-1 flex items-center justify-center gap-2 py-3 rounded-full text-sm font-bold transition-colors duration-300 ${
-              activeTab === 'forecast' ? 'text-white' : 'text-slate-400 hover:text-slate-200'
+              activeTab === 'forecast' ? 'text-white' : 'text-zinc-400 hover:text-zinc-200'
             }`}
           >
               <Calendar size={18} className={activeTab === 'forecast' ? "fill-white/10" : ""} />

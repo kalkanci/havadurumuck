@@ -70,14 +70,14 @@ const Background: React.FC<BackgroundProps> = ({ city, weatherCode, isDay, cosmi
   };
 
   return (
-    <div className="fixed inset-0 w-full h-full z-0 overflow-hidden bg-slate-900 transition-colors duration-500">
+    <div className="fixed inset-0 w-full h-full z-0 overflow-hidden bg-black transition-colors duration-500">
       
       {/* 1. Mevcut Resim (Alt Katman) */}
       {currentImg && (
         <img
           src={currentImg}
           alt=""
-          className="absolute inset-0 w-full h-[65%] object-cover object-center transition-opacity duration-1000"
+          className="absolute inset-0 w-full h-[60%] object-cover object-center transition-opacity duration-1000 opacity-80"
         />
       )}
       
@@ -87,17 +87,17 @@ const Background: React.FC<BackgroundProps> = ({ city, weatherCode, isDay, cosmi
           src={nextImg}
           alt="" 
           onLoad={handleImageLoad}
-          className={`absolute inset-0 w-full h-[65%] object-cover object-center transition-opacity duration-1000 ease-in-out ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
+          className={`absolute inset-0 w-full h-[60%] object-cover object-center transition-opacity duration-1000 ease-in-out opacity-80 ${isLoaded ? 'opacity-80' : 'opacity-0'}`}
         />
       )}
       
       {/* 3. Gradient Overlays */}
-      <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-black/60 to-transparent pointer-events-none z-10" />
+      <div className="absolute top-0 left-0 right-0 h-40 bg-gradient-to-b from-black/80 to-transparent pointer-events-none z-10" />
       
-      {/* Main blending gradient - Modified for Space Background to be more subtle but still legible */}
-      <div className={`absolute inset-0 bg-gradient-to-b ${cosmicUrl ? 'from-black/40 via-black/20 to-slate-900' : 'from-transparent via-transparent via-40% to-slate-900 to-65%'} h-full pointer-events-none z-10`} />
+      {/* Main blending gradient */}
+      <div className={`absolute inset-0 bg-gradient-to-b ${cosmicUrl ? 'from-black/60 via-black/40 to-black' : 'from-transparent via-transparent via-30% to-black to-60%'} h-full pointer-events-none z-10`} />
       
-      <div className="absolute bottom-0 left-0 right-0 h-full bg-gradient-to-t from-slate-900 via-slate-900/95 to-transparent pointer-events-none z-10 opacity-100" />
+      <div className="absolute bottom-0 left-0 right-0 h-full bg-gradient-to-t from-black via-black/95 to-transparent pointer-events-none z-10 opacity-100" />
 
     </div>
   );

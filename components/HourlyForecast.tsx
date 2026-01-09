@@ -82,10 +82,10 @@ const HourlyForecast: React.FC<HourlyForecastProps> = ({ weather }) => {
 
     return createPortal(
         <div className="fixed inset-0 z-[500] flex items-center justify-center p-6">
-            <div className="absolute inset-0 bg-black/80 backdrop-blur-md transition-opacity duration-300" onClick={handleClose} />
+            <div className="absolute inset-0 bg-black/90 backdrop-blur-md transition-opacity duration-300" onClick={handleClose} />
             
-            <div className={`relative w-full max-w-sm bg-gradient-to-b from-slate-900 to-slate-950 border border-white/10 rounded-[2.5rem] p-8 shadow-2xl flex flex-col items-center overflow-hidden ${isClosing ? 'animate-pop-out' : 'animate-pop-in'}`}>
-                 <button onClick={handleClose} className="absolute top-5 right-5 p-2.5 bg-white/5 rounded-full text-slate-400 hover:text-white transition-all active:scale-90 z-20">
+            <div className={`relative w-full max-w-sm bg-[#1C1C1E] border border-white/10 rounded-[2.5rem] p-8 shadow-2xl flex flex-col items-center overflow-hidden ${isClosing ? 'animate-pop-out' : 'animate-pop-in'}`}>
+                 <button onClick={handleClose} className="absolute top-5 right-5 p-2.5 bg-zinc-800 rounded-full text-zinc-400 hover:text-white transition-all active:scale-90 z-20">
                      <X size={20} />
                  </button>
 
@@ -93,34 +93,34 @@ const HourlyForecast: React.FC<HourlyForecastProps> = ({ weather }) => {
                  <div className="absolute top-0 left-0 w-full h-1/2 bg-blue-500/10 blur-[60px] pointer-events-none rounded-t-[2.5rem]"></div>
 
                  <div className="relative z-10 flex flex-col items-center">
-                    <span className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4 bg-white/5 px-3 py-1 rounded-full">{formatTime(time)}</span>
+                    <span className="text-xs font-bold text-zinc-400 uppercase tracking-widest mb-4 bg-zinc-800 px-3 py-1 rounded-full">{formatTime(time)}</span>
                     <div className="w-32 h-32 my-2 drop-shadow-[0_0_25px_rgba(255,255,255,0.2)]">
                         {getWeatherIcon(code, isDay)}
                     </div>
                     <h2 className="text-7xl font-black text-white tracking-tighter mb-2">{Math.round(temp)}{tempUnit}</h2>
-                    <p className="text-blue-200 font-bold text-lg mb-8">{getWeatherLabel(code)}</p>
+                    <p className="text-blue-400 font-bold text-lg mb-8">{getWeatherLabel(code)}</p>
 
                     <div className="grid grid-cols-2 gap-3 w-full">
-                        <div className="bg-white/5 p-4 rounded-3xl flex flex-col items-center justify-center border border-white/5 backdrop-blur-sm">
-                            <div className="flex items-center gap-2 mb-1 text-slate-400">
+                        <div className="bg-zinc-800/50 p-4 rounded-3xl flex flex-col items-center justify-center border border-white/5">
+                            <div className="flex items-center gap-2 mb-1 text-zinc-400">
                                 <Thermometer size={16} /> <span className="text-[10px] font-bold uppercase tracking-wider">Hissedilen</span>
                             </div>
                             <span className="text-xl font-bold text-white">{Math.round(feelsLike)}{tempUnit}</span>
                         </div>
-                        <div className="bg-white/5 p-4 rounded-3xl flex flex-col items-center justify-center border border-white/5 backdrop-blur-sm">
+                        <div className="bg-zinc-800/50 p-4 rounded-3xl flex flex-col items-center justify-center border border-white/5">
                             <div className="flex items-center gap-2 mb-1 text-blue-400">
                                 <Droplets size={16} /> <span className="text-[10px] font-bold uppercase tracking-wider">Nem</span>
                             </div>
                             <span className="text-xl font-bold text-white">%{humidity}</span>
                         </div>
-                        <div className="bg-white/5 p-4 rounded-3xl flex flex-col items-center justify-center border border-white/5 backdrop-blur-sm">
+                        <div className="bg-zinc-800/50 p-4 rounded-3xl flex flex-col items-center justify-center border border-white/5">
                             <div className="flex items-center gap-2 mb-1 text-teal-400">
                                 <Wind size={16} /> <span className="text-[10px] font-bold uppercase tracking-wider">Rüzgar</span>
                             </div>
                             <span className="text-xl font-bold text-white">{Math.round(windSpeed)} <span className="text-xs font-normal opacity-70">{speedUnit}</span></span>
-                            <Navigation size={10} className="text-slate-500 mt-1" style={{ transform: `rotate(${windDir}deg)` }} />
+                            <Navigation size={10} className="text-zinc-500 mt-1" style={{ transform: `rotate(${windDir}deg)` }} />
                         </div>
-                        <div className="bg-white/5 p-4 rounded-3xl flex flex-col items-center justify-center border border-white/5 backdrop-blur-sm">
+                        <div className="bg-zinc-800/50 p-4 rounded-3xl flex flex-col items-center justify-center border border-white/5">
                             <div className="flex items-center gap-2 mb-1 text-orange-400">
                                 <Sun size={16} /> <span className="text-[10px] font-bold uppercase tracking-wider">UV</span>
                             </div>
@@ -137,10 +137,10 @@ const HourlyForecast: React.FC<HourlyForecastProps> = ({ weather }) => {
   return (
     <div className="w-full mb-6">
       <div className="flex items-center justify-between mb-2 px-2">
-        <h3 className="text-slate-400 text-xs font-semibold uppercase tracking-wider">Saatlik Akış</h3>
+        <h3 className="text-zinc-400 text-xs font-semibold uppercase tracking-wider">Saatlik Akış</h3>
         <div className="flex items-center gap-1.5">
              <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
-             <span className="text-[10px] text-slate-500 font-medium">Yağış İhtimali</span>
+             <span className="text-[10px] text-zinc-500 font-medium">Yağış İhtimali</span>
         </div>
       </div>
       
@@ -167,15 +167,15 @@ const HourlyForecast: React.FC<HourlyForecastProps> = ({ weather }) => {
                 className={`
                   relative flex flex-col items-center justify-between 
                   w-[4.5rem] h-32 p-2 rounded-[1.25rem] transition-all duration-300 ease-out
-                  backdrop-blur-md overflow-hidden group 
+                  overflow-hidden group
                   active:scale-[0.9] active:brightness-90
                   ${isNow 
-                    ? 'bg-slate-800/90 ring-1 ring-blue-500/50 shadow-xl shadow-blue-500/10 scale-105 z-10' 
-                    : 'bg-white/5 border border-white/5 hover:bg-white/10 shadow-lg'}
+                    ? 'bg-zinc-800 ring-1 ring-blue-500/50 shadow-xl shadow-blue-500/10 scale-105 z-10'
+                    : 'glass-card hover:bg-zinc-800 shadow-lg'}
                 `}
               >
                 {/* Time */}
-                <span className={`text-[10px] font-bold tracking-wide ${isNow ? 'text-white' : 'text-slate-400'}`}>
+                <span className={`text-[10px] font-bold tracking-wide ${isNow ? 'text-white' : 'text-zinc-400'}`}>
                     {isNow ? 'ŞİMDİ' : formattedTime}
                 </span>
 
@@ -208,7 +208,7 @@ const HourlyForecast: React.FC<HourlyForecastProps> = ({ weather }) => {
                          <div className="flex items-center justify-center opacity-50" title="Rüzgar Yönü">
                             <Navigation 
                                 size={12} 
-                                className="text-slate-300" 
+                                className="text-zinc-300"
                                 style={{ transform: `rotate(${windDir}deg)` }} 
                             />
                         </div>
