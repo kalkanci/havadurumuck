@@ -431,6 +431,7 @@ const App: React.FC = () => {
           <div className="flex items-center gap-2">
             <button 
               onClick={() => setIsFavoritesOpen(true)} 
+              aria-label="Favori Konumlar"
               className={`p-3 glass-card rounded-2xl transition-all active:scale-95 duration-200 ${isFav ? 'bg-red-500/20 border-red-500/30' : 'hover:bg-slate-800/80'}`}
             >
               <Heart 
@@ -440,6 +441,7 @@ const App: React.FC = () => {
             </button>
             <button 
                onClick={() => setIsSettingsOpen(true)}
+               aria-label="Ayarlar"
                className="p-3 glass-card rounded-2xl transition-all active:scale-95 duration-200 hover:bg-slate-800/80 text-slate-300 hover:text-white"
             >
                <Settings size={22} />
@@ -565,6 +567,7 @@ const App: React.FC = () => {
 
           <button
             onClick={() => setActiveTab('today')}
+            aria-current={activeTab === 'today' ? 'page' : undefined}
             className={`relative z-10 flex-1 flex items-center justify-center gap-2 py-3 rounded-full text-sm font-bold transition-colors duration-300 ${
               activeTab === 'today' ? 'text-white' : 'text-slate-400 hover:text-slate-200'
             }`}
@@ -575,6 +578,7 @@ const App: React.FC = () => {
           
           <button
             onClick={() => setActiveTab('forecast')}
+            aria-current={activeTab === 'forecast' ? 'page' : undefined}
             className={`relative z-10 flex-1 flex items-center justify-center gap-2 py-3 rounded-full text-sm font-bold transition-colors duration-300 ${
               activeTab === 'forecast' ? 'text-white' : 'text-slate-400 hover:text-slate-200'
             }`}
