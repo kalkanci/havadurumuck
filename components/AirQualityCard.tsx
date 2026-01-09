@@ -87,7 +87,7 @@ const AirQualityCard: React.FC<AirQualityCardProps> = ({ data }) => {
         if (val < 50) return 'bg-yellow-400 shadow-[0_0_10px_rgba(250,204,21,0.5)]';
         return 'bg-red-400 shadow-[0_0_10px_rgba(248,113,113,0.5)]';
     }
-    return 'bg-slate-400';
+    return 'bg-zinc-400';
   };
 
   const percentage = Math.min((aqi / 100) * 100, 100);
@@ -116,7 +116,7 @@ const AirQualityCard: React.FC<AirQualityCardProps> = ({ data }) => {
         <div className="fixed inset-0 z-[500] flex items-center justify-center p-6">
             <div className="absolute inset-0 bg-black/80 backdrop-blur-md transition-opacity duration-300" onClick={handleClose} />
             
-            <div className={`relative w-full max-w-sm bg-slate-900 border border-white/10 rounded-[2rem] p-6 shadow-2xl overflow-hidden flex flex-col max-h-[85vh] overflow-y-auto no-scrollbar ${isClosing ? 'animate-pop-out' : 'animate-pop-in'}`}>
+            <div className={`relative w-full max-w-sm bg-zinc-900 border border-white/10 rounded-[2rem] p-6 shadow-2xl overflow-hidden flex flex-col max-h-[85vh] overflow-y-auto no-scrollbar ${isClosing ? 'animate-pop-out' : 'animate-pop-in'}`}>
                 {/* Background Glow */}
                 <div className={`absolute top-0 left-0 w-full h-48 bg-gradient-to-b ${bgGradient} opacity-30 pointer-events-none`} />
 
@@ -125,13 +125,13 @@ const AirQualityCard: React.FC<AirQualityCardProps> = ({ data }) => {
                 </button>
 
                 <div className="relative z-10 flex flex-col items-center mb-8 pt-4">
-                    <div className={`p-5 rounded-full bg-slate-800/80 shadow-2xl ring-2 ${ringColor} ring-offset-2 ring-offset-slate-900 ${colorClass} mb-4 relative`}>
+                    <div className={`p-5 rounded-full bg-zinc-800/80 shadow-2xl ring-2 ${ringColor} ring-offset-2 ring-offset-zinc-900 ${colorClass} mb-4 relative`}>
                          <div className={`absolute inset-0 rounded-full ${colorClass} blur-xl opacity-20`}></div>
                         <Icon size={40} />
                     </div>
                     <span className={`text-4xl font-black ${colorClass} drop-shadow-sm`}>{status}</span>
                     <div className="flex items-center gap-2 mt-2 bg-white/5 px-3 py-1 rounded-full border border-white/5">
-                        <span className="text-xs text-slate-300 uppercase tracking-widest font-bold">AQI Skoru:</span>
+                        <span className="text-xs text-zinc-300 uppercase tracking-widest font-bold">AQI Skoru:</span>
                         <span className="text-sm font-bold text-white">{aqi}</span>
                     </div>
                 </div>
@@ -142,52 +142,52 @@ const AirQualityCard: React.FC<AirQualityCardProps> = ({ data }) => {
                             <div className={`p-2 rounded-xl ${iconBg} shrink-0`}>
                                 <Info size={20} className={colorClass} />
                             </div>
-                            <p className="text-sm text-slate-200 leading-relaxed font-medium">{advice}</p>
+                            <p className="text-sm text-zinc-200 leading-relaxed font-medium">{advice}</p>
                         </div>
                     </div>
 
                     <div className="space-y-3">
-                        <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-2 mb-1">Kirletici Seviyeleri</h4>
+                        <h4 className="text-xs font-bold text-zinc-500 uppercase tracking-wider ml-2 mb-1">Kirletici Seviyeleri</h4>
                         
                         {/* PM 2.5 Detail */}
-                        <div className="bg-slate-800/50 p-4 rounded-2xl flex items-center justify-between border border-white/5 hover:bg-slate-800 transition-colors">
+                        <div className="bg-zinc-800/50 p-4 rounded-2xl flex items-center justify-between border border-white/5 hover:bg-zinc-800 transition-colors">
                             <div className="flex items-center gap-4">
                                 <div className={`w-1.5 h-10 rounded-full ${getPollutantColor(data.pm2_5, 'pm25')}`}></div>
                                 <div>
                                     <div className="flex items-center gap-1.5 mb-0.5">
                                         <span className="text-sm font-bold text-white">PM 2.5</span>
-                                        <HelpCircle size={12} className="text-slate-500" />
+                                        <HelpCircle size={12} className="text-zinc-500" />
                                     </div>
-                                    <span className="text-[10px] text-slate-400 font-medium">İnce Partikül</span>
+                                    <span className="text-[10px] text-zinc-400 font-medium">İnce Partikül</span>
                                 </div>
                             </div>
                             <div className="text-right">
                                 <span className="text-lg font-bold text-white block leading-none">{data.pm2_5.toFixed(1)}</span>
-                                <span className="text-[9px] text-slate-500">µg/m³</span>
+                                <span className="text-[9px] text-zinc-500">µg/m³</span>
                             </div>
                         </div>
 
                          {/* PM 10 Detail */}
-                         <div className="bg-slate-800/50 p-4 rounded-2xl flex items-center justify-between border border-white/5 hover:bg-slate-800 transition-colors">
+                         <div className="bg-zinc-800/50 p-4 rounded-2xl flex items-center justify-between border border-white/5 hover:bg-zinc-800 transition-colors">
                             <div className="flex items-center gap-4">
                                 <div className={`w-1.5 h-10 rounded-full ${getPollutantColor(data.pm10, 'pm10')}`}></div>
                                 <div>
                                     <div className="flex items-center gap-1.5 mb-0.5">
                                         <span className="text-sm font-bold text-white">PM 10</span>
-                                        <HelpCircle size={12} className="text-slate-500" />
+                                        <HelpCircle size={12} className="text-zinc-500" />
                                     </div>
-                                    <span className="text-[10px] text-slate-400 font-medium">Kalın Partikül</span>
+                                    <span className="text-[10px] text-zinc-400 font-medium">Kalın Partikül</span>
                                 </div>
                             </div>
                              <div className="text-right">
                                 <span className="text-lg font-bold text-white block leading-none">{data.pm10.toFixed(1)}</span>
-                                <span className="text-[9px] text-slate-500">µg/m³</span>
+                                <span className="text-[9px] text-zinc-500">µg/m³</span>
                             </div>
                         </div>
                     </div>
 
-                    <div className="text-[10px] text-slate-400 bg-black/20 p-4 rounded-2xl leading-relaxed border border-white/5">
-                        <strong className="text-slate-300 block mb-1">Biliyor muydunuz?</strong> 
+                    <div className="text-[10px] text-zinc-400 bg-black/20 p-4 rounded-2xl leading-relaxed border border-white/5">
+                        <strong className="text-zinc-300 block mb-1">Biliyor muydunuz?</strong>
                         PM 2.5 partikülleri saç telinden yaklaşık 30 kat daha incedir ve doğrudan kan dolaşımına karışabilir.
                     </div>
                 </div>
@@ -215,7 +215,7 @@ const AirQualityCard: React.FC<AirQualityCardProps> = ({ data }) => {
                      <Icon size={28} />
                  </div>
                  <div>
-                     <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 flex items-center gap-1">
+                     <h3 className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1 flex items-center gap-1">
                          Hava Kalitesi
                      </h3>
                      <p className={`text-2xl font-black leading-none tracking-tight ${colorClass}`}>{status}</p>
@@ -232,11 +232,11 @@ const AirQualityCard: React.FC<AirQualityCardProps> = ({ data }) => {
 
         {/* Progress Bar */}
         <div className="mb-6 relative group-active:opacity-80 transition-opacity">
-             <div className="flex justify-between text-[10px] text-slate-400 mb-2 font-bold uppercase tracking-wider">
+             <div className="flex justify-between text-[10px] text-zinc-400 mb-2 font-bold uppercase tracking-wider">
                  <span>Temiz</span>
                  <span>Tehlikeli</span>
              </div>
-             <div className="h-3 w-full bg-slate-900/60 rounded-full overflow-hidden shadow-inner border border-white/5">
+             <div className="h-3 w-full bg-zinc-900/60 rounded-full overflow-hidden shadow-inner border border-white/5">
                  <div 
                     className={`h-full ${barColor} transition-all duration-1000 ease-out shadow-[0_0_15px_currentColor] relative`} 
                     style={{ width: `${percentage}%` }}
@@ -249,16 +249,16 @@ const AirQualityCard: React.FC<AirQualityCardProps> = ({ data }) => {
         {/* Pollutants Grid (Mini Preview) */}
         <div className="grid grid-cols-3 gap-3">
             <div className="bg-black/20 rounded-xl p-3 border border-white/5 flex flex-col items-center gap-2">
-                 <p className="text-[9px] text-slate-400 uppercase font-bold">PM 2.5</p>
+                 <p className="text-[9px] text-zinc-400 uppercase font-bold">PM 2.5</p>
                  <div className={`w-8 h-1.5 rounded-full ${getPollutantColor(data.pm2_5, 'pm25')}`} />
             </div>
             <div className="bg-black/20 rounded-xl p-3 border border-white/5 flex flex-col items-center gap-2">
-                 <p className="text-[9px] text-slate-400 uppercase font-bold">PM 10</p>
+                 <p className="text-[9px] text-zinc-400 uppercase font-bold">PM 10</p>
                  <div className={`w-8 h-1.5 rounded-full ${getPollutantColor(data.pm10, 'pm10')}`} />
             </div>
             <div className="bg-black/20 rounded-xl p-3 border border-white/5 flex flex-col items-center gap-2">
-                 <p className="text-[9px] text-slate-400 uppercase font-bold">Toz</p>
-                 <div className="w-8 h-1.5 rounded-full bg-slate-600" />
+                 <p className="text-[9px] text-zinc-400 uppercase font-bold">Toz</p>
+                 <div className="w-8 h-1.5 rounded-full bg-zinc-600" />
             </div>
         </div>
       </div>

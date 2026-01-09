@@ -69,7 +69,7 @@ const PWAInstallBanner: React.FC<PWAInstallBannerProps> = ({ deferredPrompt, onI
          <div className="fixed inset-0 z-[1000] flex items-end justify-center sm:items-center p-4">
              <div className="absolute inset-0 bg-black/80 backdrop-blur-md transition-opacity" onClick={() => setShowIOSInstructions(false)} />
              
-             <div className="relative w-full max-w-sm bg-slate-900 border border-white/10 rounded-3xl p-6 pb-10 sm:pb-6 shadow-2xl animate-fade-in-up">
+             <div className="relative w-full max-w-sm bg-zinc-900 border border-white/10 rounded-3xl p-6 pb-10 sm:pb-6 shadow-2xl animate-fade-in-up">
                  <div className="flex items-center justify-between mb-5">
                      <div className="flex items-center gap-2">
                         <div className="p-2 bg-white/10 rounded-lg">
@@ -77,12 +77,12 @@ const PWAInstallBanner: React.FC<PWAInstallBannerProps> = ({ deferredPrompt, onI
                         </div>
                         <h3 className="text-lg font-bold text-white">iOS Kurulumu</h3>
                      </div>
-                     <button onClick={() => setShowIOSInstructions(false)} className="bg-white/5 p-2 rounded-full text-slate-400 hover:text-white transition-colors">
+                     <button onClick={() => setShowIOSInstructions(false)} className="bg-white/5 p-2 rounded-full text-zinc-400 hover:text-white transition-colors">
                          <X size={20} />
                      </button>
                  </div>
 
-                 <div className="space-y-4 text-sm text-slate-300">
+                 <div className="space-y-4 text-sm text-zinc-300">
                      <div className="flex items-start gap-4">
                          <span className="flex items-center justify-center w-6 h-6 rounded-full bg-blue-600 text-white text-xs font-bold shrink-0 mt-0.5">1</span>
                          <p>Tarayıcının alt menüsündeki <span className="text-blue-400 font-bold">Paylaş</span> butonuna dokunun.</p>
@@ -108,20 +108,20 @@ const PWAInstallBanner: React.FC<PWAInstallBannerProps> = ({ deferredPrompt, onI
         <div className="fixed inset-0 z-[1000] flex items-center justify-center p-6">
             <div className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" onClick={handleClose} />
             
-            <div className="relative w-full max-w-xs bg-slate-900/95 backdrop-blur-xl border border-white/10 rounded-3xl p-6 shadow-2xl animate-pop-in text-center">
+            <div className="relative w-full max-w-xs bg-zinc-900/95 backdrop-blur-xl border border-white/10 rounded-3xl p-6 shadow-2xl animate-pop-in text-center">
                 <div className="mx-auto w-16 h-16 bg-gradient-to-tr from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/30 mb-4">
                     <CloudSun size={32} className="text-white" />
                 </div>
                 
                 <h3 className="text-xl font-bold text-white mb-2">Atmosfer'i Yükle</h3>
-                <p className="text-sm text-slate-300 mb-6 leading-relaxed">
+                <p className="text-sm text-zinc-300 mb-6 leading-relaxed">
                     Daha hızlı erişim ve tam ekran deneyimi için uygulamayı ana ekranınıza ekleyin.
                 </p>
 
                 <div className="flex gap-3">
                     <button 
                         onClick={handleClose}
-                        className="flex-1 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 font-bold text-sm transition-colors"
+                        className="flex-1 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-300 font-bold text-sm transition-colors"
                     >
                         Daha Sonra
                     </button>

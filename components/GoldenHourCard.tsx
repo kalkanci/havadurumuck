@@ -60,13 +60,13 @@ const GoldenHourCard: React.FC<GoldenHourCardProps> = ({ weather }) => {
       <div className="fixed inset-0 z-[500] flex items-center justify-center p-6">
          <div className="absolute inset-0 bg-black/80 backdrop-blur-md transition-opacity" onClick={handleClose} />
          
-         <div className={`relative w-full max-w-sm bg-slate-900/95 backdrop-blur-xl border border-white/10 rounded-3xl p-6 shadow-2xl overflow-hidden ${isClosing ? 'animate-pop-out' : 'animate-pop-in'}`}>
-             <button onClick={handleClose} className="absolute top-4 right-4 p-2 bg-white/5 rounded-full text-slate-400 hover:text-white z-50">
+         <div className={`relative w-full max-w-sm bg-zinc-900/95 backdrop-blur-xl border border-white/10 rounded-3xl p-6 shadow-2xl overflow-hidden ${isClosing ? 'animate-pop-out' : 'animate-pop-in'}`}>
+             <button onClick={handleClose} className="absolute top-4 right-4 p-2 bg-white/5 rounded-full text-zinc-400 hover:text-white z-50">
                  <X size={20} />
              </button>
 
              {/* Background Gradient */}
-             <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 via-purple-900/20 to-slate-900 z-0" />
+             <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 via-purple-900/20 to-zinc-900 z-0" />
 
              <div className="relative z-10">
                  <div className="flex items-center gap-3 mb-6">
@@ -81,13 +81,13 @@ const GoldenHourCard: React.FC<GoldenHourCardProps> = ({ weather }) => {
                         <h3 className="text-orange-300 font-bold mb-2 flex items-center gap-2">
                             <Sun size={16} /> Altın Saat (Golden Hour)
                         </h3>
-                        <p className="text-sm text-slate-300 mb-4 leading-relaxed">
+                        <p className="text-sm text-zinc-300 mb-4 leading-relaxed">
                             Güneşin doğuşundan hemen sonra ve batışından hemen önceki süredir. Işık yumuşak, sıcak ve difüzdür. Portre ve manzara çekimleri için idealdir.
                         </p>
-                        <div className="flex justify-between text-sm font-mono bg-black/20 p-3 rounded-xl text-slate-300 border border-white/5">
+                        <div className="flex justify-between text-sm font-mono bg-black/20 p-3 rounded-xl text-zinc-300 border border-white/5">
                              <span>Sabah: {morningGoldenStart} - {morningGoldenEnd}</span>
                         </div>
-                        <div className="flex justify-between text-sm font-mono bg-black/20 p-3 rounded-xl mt-2 text-slate-300 border border-white/5">
+                        <div className="flex justify-between text-sm font-mono bg-black/20 p-3 rounded-xl mt-2 text-zinc-300 border border-white/5">
                              <span>Akşam: {eveningGoldenStart} - {eveningGoldenEnd}</span>
                         </div>
                     </div>
@@ -96,7 +96,7 @@ const GoldenHourCard: React.FC<GoldenHourCardProps> = ({ weather }) => {
                         <h3 className="text-blue-300 font-bold mb-2 flex items-center gap-2">
                             <Moon size={16} /> Mavi Saat (Blue Hour)
                         </h3>
-                        <p className="text-sm text-slate-300 mb-2 leading-relaxed">
+                        <p className="text-sm text-zinc-300 mb-2 leading-relaxed">
                             Altın saatten hemen önce (sabah) veya sonra (akşam). Gökyüzü derin mavi bir renk alır. Şehir ışıklarıyla harika kontrast oluşturur.
                         </p>
                     </div>
@@ -128,7 +128,7 @@ const GoldenHourCard: React.FC<GoldenHourCardProps> = ({ weather }) => {
             <h3 className="text-xs font-bold text-orange-300 uppercase tracking-widest flex items-center gap-2">
             <Camera size={14} /> Golden Hour
             </h3>
-            <span className="text-[10px] text-slate-400 bg-white/5 px-2 py-1 rounded-full group-hover:bg-white/10 transition-colors font-medium">Detaylar</span>
+            <span className="text-[10px] text-zinc-400 bg-white/5 px-2 py-1 rounded-full group-hover:bg-white/10 transition-colors font-medium">Detaylar</span>
         </div>
 
         <div className="relative z-10 flex justify-between items-center gap-4">
@@ -141,7 +141,7 @@ const GoldenHourCard: React.FC<GoldenHourCardProps> = ({ weather }) => {
                 <div className="flex items-center justify-between">
                     <span className="text-sm font-bold text-white">{morningGoldenStart}</span>
                     <span className="text-xs text-orange-400/50">-</span>
-                    <span className="text-sm font-bold text-slate-300">{morningGoldenEnd}</span>
+                    <span className="text-sm font-bold text-zinc-300">{morningGoldenEnd}</span>
                 </div>
             </div>
 
@@ -152,7 +152,7 @@ const GoldenHourCard: React.FC<GoldenHourCardProps> = ({ weather }) => {
                     <span className="text-xs text-purple-200 font-semibold">Akşam</span>
                 </div>
                 <div className="flex items-center justify-between">
-                    <span className="text-sm font-bold text-slate-300">{eveningGoldenStart}</span>
+                    <span className="text-sm font-bold text-zinc-300">{eveningGoldenStart}</span>
                     <span className="text-xs text-purple-300/50">-</span>
                     <span className="text-sm font-bold text-white">{eveningGoldenEnd}</span>
                 </div>
@@ -160,12 +160,12 @@ const GoldenHourCard: React.FC<GoldenHourCardProps> = ({ weather }) => {
         </div>
         
         {/* Visual Timeline Bar */}
-        <div className="relative z-10 mt-5 h-2 w-full bg-slate-700/50 rounded-full overflow-hidden flex ring-1 ring-black/20">
-            <div className="h-full bg-slate-800 w-[20%]" /> {/* Night */}
+        <div className="relative z-10 mt-5 h-2 w-full bg-zinc-700/50 rounded-full overflow-hidden flex ring-1 ring-black/20">
+            <div className="h-full bg-zinc-800 w-[20%]" /> {/* Night */}
             <div className="h-full bg-gradient-to-r from-orange-500 to-yellow-300 w-[10%]" /> {/* Golden Morning */}
             <div className="h-full bg-blue-400/20 w-[40%]" /> {/* Day */}
             <div className="h-full bg-gradient-to-r from-yellow-300 to-purple-600 w-[10%]" /> {/* Golden Evening */}
-            <div className="h-full bg-slate-800 w-[20%]" /> {/* Night */}
+            <div className="h-full bg-zinc-800 w-[20%]" /> {/* Night */}
         </div>
         </button>
         {renderModal()}

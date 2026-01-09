@@ -29,7 +29,7 @@ const SpotifyCard: React.FC<SpotifyCardProps> = ({ weather }) => {
               context: "Fırtınalı havanın en ikonik eşlikçisi.",
               link: "https://open.spotify.com/track/14XWXWv5FoCbFzLksawpEe",
               icon: <CloudLightning size={18} className="text-purple-300" />,
-              bgGradient: "from-indigo-900 via-purple-900 to-slate-900"
+              bgGradient: "from-indigo-900 via-purple-900 to-zinc-900"
           };
       }
       // 2. Kar
@@ -40,7 +40,7 @@ const SpotifyCard: React.FC<SpotifyCardProps> = ({ weather }) => {
               context: "Lapa lapa kar yağarken huzur bulman için.",
               link: "https://open.spotify.com/track/6E2h1lVpMAyHw1V9t2nQ9n",
               icon: <CloudSnow size={18} className="text-sky-200" />,
-              bgGradient: "from-slate-700 via-slate-600 to-slate-800"
+              bgGradient: "from-zinc-700 via-zinc-600 to-zinc-800"
           };
       }
       // 3. Yağmur
@@ -51,7 +51,7 @@ const SpotifyCard: React.FC<SpotifyCardProps> = ({ weather }) => {
               context: "Yağmurun sesiyle bütünleşen bir klasik.",
               link: "https://open.spotify.com/track/3YxJe4qRFk0p0k0x9k9x99",
               icon: <Coffee size={18} className="text-amber-200" />,
-              bgGradient: "from-blue-900 via-slate-800 to-black"
+              bgGradient: "from-blue-900 via-zinc-800 to-black"
           };
       }
       // 4. Gece (Açık/Bulutlu fark etmez)
@@ -81,7 +81,7 @@ const SpotifyCard: React.FC<SpotifyCardProps> = ({ weather }) => {
           artist: "The Beatles",
           context: "Bulutların arkasında güneş hep var.",
           icon: <Sun size={18} className="text-orange-100" />,
-          bgGradient: "from-teal-800 via-emerald-900 to-slate-900"
+          bgGradient: "from-teal-800 via-emerald-900 to-zinc-900"
       };
   };
 
@@ -126,7 +126,7 @@ const SpotifyCard: React.FC<SpotifyCardProps> = ({ weather }) => {
             
             <div className="flex items-center gap-3">
                  <div className="flex-1 bg-white/10 p-3 rounded-xl border border-white/5 backdrop-blur-sm">
-                    <p className="text-xs text-slate-200 leading-relaxed italic line-clamp-2">
+                    <p className="text-xs text-zinc-200 leading-relaxed italic line-clamp-2">
                         "{rec.context}"
                     </p>
                  </div>

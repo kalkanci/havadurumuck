@@ -44,7 +44,7 @@ const CalendarModal: React.FC<CalendarModalProps> = ({ isOpen, onClose, weather 
         onClick={handleClose}
       />
       
-      <div className={`relative w-full max-w-sm bg-slate-900/95 backdrop-blur-xl border border-white/10 rounded-3xl p-6 shadow-2xl overflow-hidden flex flex-col max-h-[80vh] ${isClosing ? 'animate-pop-out' : 'animate-pop-in'}`}>
+      <div className={`relative w-full max-w-sm bg-zinc-900/95 backdrop-blur-xl border border-white/10 rounded-3xl p-6 shadow-2xl overflow-hidden flex flex-col max-h-[80vh] ${isClosing ? 'animate-pop-out' : 'animate-pop-in'}`}>
         
         {/* Header */}
         <div className="flex items-center justify-between mb-6 shrink-0">
@@ -54,10 +54,10 @@ const CalendarModal: React.FC<CalendarModalProps> = ({ isOpen, onClose, weather 
                </div>
                <div>
                    <h2 className="text-lg font-bold text-white leading-tight">Takvim</h2>
-                   <p className="text-xs text-slate-400">15 Günlük Plan</p>
+                   <p className="text-xs text-zinc-400">15 Günlük Plan</p>
                </div>
            </div>
-           <button onClick={handleClose} className="p-2 bg-white/5 rounded-full text-slate-400 hover:text-white transition-colors border border-white/5 hover:bg-white/10">
+           <button onClick={handleClose} className="p-2 bg-white/5 rounded-full text-zinc-400 hover:text-white transition-colors border border-white/5 hover:bg-white/10">
                <X size={20} />
            </button>
         </div>
@@ -80,7 +80,7 @@ const CalendarModal: React.FC<CalendarModalProps> = ({ isOpen, onClose, weather 
                      >
                          <div className="w-full flex justify-between items-start mb-2">
                              <div className="flex flex-col items-start">
-                                 <span className={`text-xs font-bold uppercase ${isToday ? 'text-blue-300' : 'text-slate-400'}`}>{dayName}</span>
+                                 <span className={`text-xs font-bold uppercase ${isToday ? 'text-blue-300' : 'text-zinc-400'}`}>{dayName}</span>
                                  <span className="text-xl font-black text-white">{dayNum}</span>
                              </div>
                              <div className="w-8 h-8">
@@ -89,7 +89,7 @@ const CalendarModal: React.FC<CalendarModalProps> = ({ isOpen, onClose, weather 
                          </div>
                          
                          <div className="w-full flex items-center justify-between bg-black/20 rounded-lg px-2 py-1.5 mt-1">
-                             <span className="flex items-center gap-1 text-xs font-bold text-slate-300">
+                             <span className="flex items-center gap-1 text-xs font-bold text-zinc-300">
                                  <ArrowDown size={10} className="text-blue-400" /> {min}°
                              </span>
                              <span className="flex items-center gap-1 text-xs font-bold text-white">

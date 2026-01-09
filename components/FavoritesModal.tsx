@@ -35,7 +35,7 @@ const FavoritesModal: React.FC<FavoritesModalProps> = ({
       />
 
       {/* Modal Card */}
-      <div className="relative w-full max-w-sm bg-slate-900/90 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl overflow-hidden animate-fade-in-up">
+      <div className="relative w-full max-w-sm bg-zinc-900/90 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl overflow-hidden animate-fade-in-up">
         
         {/* Header */}
         <div className="p-5 border-b border-white/5 flex items-center justify-between bg-white/5">
@@ -47,22 +47,22 @@ const FavoritesModal: React.FC<FavoritesModalProps> = ({
           </div>
           <button 
             onClick={onClose}
-            className="p-2 bg-white/5 hover:bg-white/10 rounded-full transition-colors text-slate-400"
+            className="p-2 bg-white/5 hover:bg-white/10 rounded-full transition-colors text-zinc-400"
           >
             <X size={20} />
           </button>
         </div>
 
         {/* Action Area (Add/Remove Current) */}
-        <div className="p-5 bg-gradient-to-b from-slate-800/50 to-transparent">
+        <div className="p-5 bg-gradient-to-b from-zinc-800/50 to-transparent">
             <div className="flex items-center justify-between mb-3 px-1">
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Şu Anki Konum</span>
+                <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Şu Anki Konum</span>
             </div>
             
             <div className="glass-card p-4 rounded-xl flex items-center justify-between group">
                 <div>
                     <h3 className="font-bold text-white">{currentLocation.name}</h3>
-                    <p className="text-xs text-slate-400">{currentLocation.country}</p>
+                    <p className="text-xs text-zinc-400">{currentLocation.country}</p>
                 </div>
                 
                 {!isCurrentFavorite ? (
@@ -86,11 +86,11 @@ const FavoritesModal: React.FC<FavoritesModalProps> = ({
         {/* List */}
         <div className="p-5 pt-0 max-h-[50vh] overflow-y-auto no-scrollbar space-y-3">
           <div className="flex items-center justify-between mb-2 px-1">
-             <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Kayıtlı Şehirler ({favorites.length})</span>
+             <span className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Kayıtlı Şehirler ({favorites.length})</span>
           </div>
 
           {favorites.length === 0 ? (
-            <div className="text-center py-8 text-slate-500 border border-dashed border-slate-700 rounded-2xl">
+            <div className="text-center py-8 text-zinc-500 border border-dashed border-zinc-700 rounded-2xl">
               <MapPin size={32} className="mx-auto mb-3 opacity-30" />
               <p className="text-sm">Henüz favori eklenmedi.</p>
             </div>
@@ -104,12 +104,12 @@ const FavoritesModal: React.FC<FavoritesModalProps> = ({
                   className="flex-1 cursor-pointer flex items-center gap-3"
                   onClick={() => { onSelect(fav); onClose(); }}
                 >
-                  <div className="p-2 bg-slate-800 rounded-full">
-                      <Navigation size={14} className="text-slate-400" />
+                  <div className="p-2 bg-zinc-800 rounded-full">
+                      <Navigation size={14} className="text-zinc-400" />
                   </div>
                   <div>
                     <h4 className="font-bold text-white text-sm">{fav.name}</h4>
-                    <p className="text-[10px] text-slate-400">{fav.admin1 ? `${fav.admin1}, ` : ''}{fav.country}</p>
+                    <p className="text-[10px] text-zinc-400">{fav.admin1 ? `${fav.admin1}, ` : ''}{fav.country}</p>
                   </div>
                 </div>
                 
@@ -117,7 +117,7 @@ const FavoritesModal: React.FC<FavoritesModalProps> = ({
                 {fav.id !== currentLocation.id && (
                     <button 
                     onClick={() => onRemove(fav.id)}
-                    className="p-2 text-slate-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all"
+                    className="p-2 text-zinc-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all"
                     >
                     <Trash2 size={16} />
                     </button>
@@ -128,8 +128,8 @@ const FavoritesModal: React.FC<FavoritesModalProps> = ({
         </div>
 
         {/* Footer info */}
-        <div className="p-4 border-t border-white/5 bg-slate-900/50 text-center">
-            <p className="text-[10px] text-slate-600">Favorileri yönetmek için listeyi kullanın.</p>
+        <div className="p-4 border-t border-white/5 bg-zinc-900/50 text-center">
+            <p className="text-[10px] text-zinc-600">Favorileri yönetmek için listeyi kullanın.</p>
         </div>
 
       </div>

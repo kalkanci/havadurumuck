@@ -51,18 +51,18 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ weather }) => {
   const endAvg = (temperature_2m_max[limit-1] + temperature_2m_min[limit-1]) / 2;
   const trendDiff = endAvg - startAvg;
   
-  let trendIcon = <Minus size={20} className="text-slate-400" />;
+  let trendIcon = <Minus size={20} className="text-zinc-400" />;
   let trendText = "Sıcaklıklar dengeli seyredecek.";
-  let trendColor = "from-slate-800 to-slate-900";
+  let trendColor = "from-zinc-800 to-zinc-900";
 
   if (trendDiff > 2) {
       trendIcon = <TrendingUp size={20} className="text-orange-400" />;
       trendText = "Hava kademeli olarak ısınıyor.";
-      trendColor = "from-orange-900/40 to-slate-900";
+      trendColor = "from-orange-900/40 to-zinc-900";
   } else if (trendDiff < -2) {
       trendIcon = <TrendingDown size={20} className="text-blue-400" />;
       trendText = "Hava kademeli olarak soğuyor.";
-      trendColor = "from-blue-900/40 to-slate-900";
+      trendColor = "from-blue-900/40 to-zinc-900";
   }
 
   // Helper to determine card background based on weather
@@ -70,7 +70,7 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ weather }) => {
       // Sunny
       if (code <= 1) return "from-orange-500/10 to-yellow-500/5 border-orange-500/20";
       // Cloudy
-      if (code <= 3) return "from-slate-700/20 to-slate-800/10 border-white/10";
+      if (code <= 3) return "from-zinc-700/20 to-zinc-800/10 border-white/10";
       // Rain
       if (code >= 50 && code <= 67) return "from-blue-600/10 to-indigo-600/5 border-blue-500/20";
       // Snow
@@ -133,7 +133,7 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ weather }) => {
                 onClick={closeDayDetail}
             />
             
-            <div className={`relative w-full max-w-sm bg-gradient-to-b from-slate-900 to-slate-950 border border-white/10 rounded-[2rem] p-6 shadow-2xl overflow-hidden flex flex-col ${isDetailClosing ? 'animate-pop-out' : 'animate-pop-in'}`}>
+            <div className={`relative w-full max-w-sm bg-gradient-to-b from-zinc-900 to-zinc-950 border border-white/10 rounded-[2rem] p-6 shadow-2xl overflow-hidden flex flex-col ${isDetailClosing ? 'animate-pop-out' : 'animate-pop-in'}`}>
                  {/* Top Glow */}
                  <div className="absolute top-0 left-0 w-full h-32 bg-indigo-500/10 blur-[50px] pointer-events-none"></div>
 
@@ -143,7 +143,7 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ weather }) => {
 
                  {/* Header */}
                  <div className="text-center mb-8 pt-4 relative z-10">
-                     <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">
+                     <p className="text-xs font-bold text-zinc-400 uppercase tracking-widest mb-1">
                          {date.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })}
                      </p>
                      <h2 className="text-4xl font-bold text-white mb-2">
@@ -166,7 +166,7 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ weather }) => {
                              </div>
                              <div className="flex items-end gap-2">
                                  <span className="text-5xl font-black text-white tracking-tighter">{maxT}{tempUnit}</span>
-                                 <span className="text-2xl text-slate-400 mb-1 font-light">/ {minT}{tempUnit}</span>
+                                 <span className="text-2xl text-zinc-400 mb-1 font-light">/ {minT}{tempUnit}</span>
                              </div>
                              <span className="text-xs text-indigo-300 mt-2 font-medium">Hissedilen: {feels}{tempUnit}</span>
                          </div>
@@ -178,8 +178,8 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ weather }) => {
                      {/* Wind */}
                      <div className="bg-white/5 p-4 rounded-3xl border border-white/5 flex flex-col items-center justify-center text-center backdrop-blur-sm">
                          <Wind size={24} className="text-teal-400 mb-2" />
-                         <span className="text-xl font-bold text-white">{wind} <span className="text-xs font-normal text-slate-400">{speedUnit}</span></span>
-                         <span className="text-[10px] text-slate-400 uppercase font-bold mt-1 tracking-wider">{getWindDirection(windDir)}</span>
+                         <span className="text-xl font-bold text-white">{wind} <span className="text-xs font-normal text-zinc-400">{speedUnit}</span></span>
+                         <span className="text-[10px] text-zinc-400 uppercase font-bold mt-1 tracking-wider">{getWindDirection(windDir)}</span>
                      </div>
 
                      {/* Rain/UV */}
@@ -188,13 +188,13 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ weather }) => {
                              <>
                                 <Droplets size={24} className="text-blue-400 mb-2" />
                                 <span className="text-xl font-bold text-white">%{rain}</span>
-                                <span className="text-[10px] text-slate-400 uppercase font-bold mt-1 tracking-wider">Yağış</span>
+                                <span className="text-[10px] text-zinc-400 uppercase font-bold mt-1 tracking-wider">Yağış</span>
                              </>
                          ) : (
                              <>
                                 <Sun size={24} className="text-orange-400 mb-2" />
                                 <span className="text-xl font-bold text-white">{uv?.toFixed(0)}</span>
-                                <span className="text-[10px] text-slate-400 uppercase font-bold mt-1 tracking-wider">UV İndeks</span>
+                                <span className="text-[10px] text-zinc-400 uppercase font-bold mt-1 tracking-wider">UV İndeks</span>
                              </>
                          )}
                      </div>
@@ -205,7 +205,7 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ weather }) => {
                      <div className="flex items-center gap-3">
                          <div className="p-2.5 bg-yellow-500/20 rounded-full text-yellow-400"><Sunrise size={20} /></div>
                          <div>
-                             <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Gün Doğumu</p>
+                             <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">Gün Doğumu</p>
                              <p className="text-sm font-bold text-white">{formatTime(sr)}</p>
                          </div>
                      </div>
@@ -213,7 +213,7 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ weather }) => {
                      <div className="flex items-center gap-3">
                          <div className="p-2.5 bg-indigo-500/20 rounded-full text-indigo-400"><Sunset size={20} /></div>
                          <div>
-                             <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Gün Batımı</p>
+                             <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">Gün Batımı</p>
                              <p className="text-sm font-bold text-white">{formatTime(ss)}</p>
                          </div>
                      </div>
@@ -237,7 +237,7 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ weather }) => {
                 </div>
                 <div>
                     <h2 className="text-2xl font-bold text-white">Gelecek 15 Gün</h2>
-                    <p className="text-xs text-slate-400 font-medium">Detaylı Atmosfer Raporu</p>
+                    <p className="text-xs text-zinc-400 font-medium">Detaylı Atmosfer Raporu</p>
                 </div>
             </div>
 
@@ -258,23 +258,23 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ weather }) => {
                 <div className="relative z-10 grid grid-cols-3 gap-3">
                     <div className="bg-black/20 rounded-2xl p-3 backdrop-blur-sm border border-white/5 flex flex-col items-center justify-center text-center">
                         <ThermometerSun size={18} className="text-orange-300 mb-1" />
-                        <span className="text-[10px] font-bold text-slate-400 uppercase">En Yüksek</span>
+                        <span className="text-[10px] font-bold text-zinc-400 uppercase">En Yüksek</span>
                         <span className="text-xl font-black text-white">{globalMax}{tempUnit}</span>
-                        <span className="text-[9px] text-slate-500">{new Date(time[hottestDayIndex]).getDate()} {new Date(time[hottestDayIndex]).toLocaleDateString('tr-TR', { month: 'short' })}</span>
+                        <span className="text-[9px] text-zinc-500">{new Date(time[hottestDayIndex]).getDate()} {new Date(time[hottestDayIndex]).toLocaleDateString('tr-TR', { month: 'short' })}</span>
                     </div>
 
                     <div className="bg-black/20 rounded-2xl p-3 backdrop-blur-sm border border-white/5 flex flex-col items-center justify-center text-center">
                         <ThermometerSnowflake size={18} className="text-blue-300 mb-1" />
-                        <span className="text-[10px] font-bold text-slate-400 uppercase">En Düşük</span>
+                        <span className="text-[10px] font-bold text-zinc-400 uppercase">En Düşük</span>
                         <span className="text-xl font-black text-white">{globalMin}{tempUnit}</span>
-                         <span className="text-[9px] text-slate-500">{new Date(time[coldestDayIndex]).getDate()} {new Date(time[coldestDayIndex]).toLocaleDateString('tr-TR', { month: 'short' })}</span>
+                         <span className="text-[9px] text-zinc-500">{new Date(time[coldestDayIndex]).getDate()} {new Date(time[coldestDayIndex]).toLocaleDateString('tr-TR', { month: 'short' })}</span>
                     </div>
 
                     <div className="bg-black/20 rounded-2xl p-3 backdrop-blur-sm border border-white/5 flex flex-col items-center justify-center text-center">
                         <Droplets size={18} className="text-blue-400 mb-1" />
-                        <span className="text-[10px] font-bold text-slate-400 uppercase">Yağışlı Gün</span>
+                        <span className="text-[10px] font-bold text-zinc-400 uppercase">Yağışlı Gün</span>
                         <span className="text-xl font-black text-white">{rainyDaysCount}</span>
-                        <span className="text-[9px] text-slate-500">Toplam</span>
+                        <span className="text-[9px] text-zinc-500">Toplam</span>
                     </div>
                 </div>
             </div>
@@ -306,7 +306,7 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ weather }) => {
                         {/* 1. Date */}
                         <div className="flex flex-col w-16 flex-shrink-0 text-left">
                             <span className="text-sm font-bold text-white leading-tight">{dayName}</span>
-                            <span className="text-xs text-slate-400 font-medium">{dateNum} {month}</span>
+                            <span className="text-xs text-zinc-400 font-medium">{dateNum} {month}</span>
                         </div>
 
                         {/* 2. Icon & Rain */}
@@ -335,7 +335,7 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ weather }) => {
                             {/* Labels below bar for better readability */}
                             <div className="relative w-full h-4 mt-1">
                                 <span 
-                                    className="absolute text-[10px] font-bold text-slate-400 transform -translate-x-1/2" 
+                                    className="absolute text-[10px] font-bold text-zinc-400 transform -translate-x-1/2"
                                     style={{ left: `${leftPos}%` }}
                                 >
                                     {min}°
