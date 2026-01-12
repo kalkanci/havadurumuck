@@ -49,7 +49,7 @@ const CosmicCard: React.FC<CosmicCardProps> = ({ data }) => {
       <div className="fixed inset-0 z-[500] flex items-center justify-center p-6">
          <div className="absolute inset-0 bg-black/80 backdrop-blur-md transition-opacity" onClick={handleClose} />
          
-         <div className={`relative w-full max-w-lg bg-zinc-900 border border-white/10 rounded-[2rem] overflow-hidden shadow-2xl flex flex-col max-h-[85vh] ${isClosing ? 'animate-pop-out' : 'animate-pop-in'}`}>
+         <div className={`relative w-full max-w-lg bg-slate-950 border border-white/10 rounded-[2rem] overflow-hidden shadow-2xl flex flex-col max-h-[85vh] ${isClosing ? 'animate-pop-out' : 'animate-pop-in'}`}>
              
              {/* Close Button */}
              <button onClick={handleClose} className="absolute top-4 right-4 p-2 bg-black/40 backdrop-blur-md rounded-full text-white hover:bg-white/20 z-50 border border-white/10 transition-colors">
@@ -81,19 +81,19 @@ const CosmicCard: React.FC<CosmicCardProps> = ({ data }) => {
                      <span className="px-2 py-1 bg-purple-500/20 text-purple-300 text-[10px] font-bold uppercase rounded-md border border-purple-500/20">
                          NASA APOD
                      </span>
-                     <span className="text-xs text-zinc-400 font-mono">{data.date}</span>
+                     <span className="text-xs text-slate-400 font-mono">{data.date}</span>
                  </div>
                  
                  <h2 className="text-2xl font-bold text-white mb-4 leading-tight">{data.title}</h2>
                  
                  <div className="bg-white/5 p-4 rounded-xl border border-white/5 mb-4 leading-relaxed">
-                     <p className="text-sm text-zinc-300 font-light">
+                     <p className="text-sm text-slate-300 font-light">
                          {data.explanation}
                      </p>
                  </div>
 
                  {data.copyright && (
-                     <p className="text-xs text-zinc-500 text-center">
+                     <p className="text-xs text-slate-500 text-center">
                          &copy; {data.copyright}
                      </p>
                  )}
@@ -119,13 +119,13 @@ const CosmicCard: React.FC<CosmicCardProps> = ({ data }) => {
             />
         ) : (
             // Fallback for video thumbnail if API doesn't provide one (NASA APOD usually just gives video URL)
-            <div className="absolute inset-0 w-full h-full bg-zinc-900 flex items-center justify-center">
+            <div className="absolute inset-0 w-full h-full bg-slate-900 flex items-center justify-center">
                 <Rocket size={48} className="text-purple-500/50" />
             </div>
         )}
 
         {/* Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/60 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/60 to-transparent" />
 
         {/* Content Preview */}
         <div className="relative z-10 p-5 w-full">
@@ -138,7 +138,7 @@ const CosmicCard: React.FC<CosmicCardProps> = ({ data }) => {
             <h3 className="text-lg font-bold text-white line-clamp-1 group-hover:text-purple-200 transition-colors">
                 {data.title}
             </h3>
-            <div className="flex items-center gap-1 mt-2 text-[10px] font-medium text-zinc-400 group-hover:text-white transition-colors">
+            <div className="flex items-center gap-1 mt-2 text-[10px] font-medium text-slate-400 group-hover:text-white transition-colors">
                 <span>Keşfetmek için dokun</span>
                 <ExternalLink size={10} />
             </div>

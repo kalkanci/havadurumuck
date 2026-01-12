@@ -47,7 +47,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, settings
         onClick={handleClose}
       />
       
-      <div className={`relative w-full max-w-sm bg-zinc-900/95 backdrop-blur-xl border border-white/10 rounded-3xl p-6 shadow-2xl overflow-hidden ${isClosing ? 'animate-pop-out' : 'animate-pop-in'}`}>
+      <div className={`relative w-full max-w-sm bg-slate-950/95 backdrop-blur-xl border border-white/10 rounded-3xl p-6 shadow-2xl overflow-hidden ${isClosing ? 'animate-pop-out' : 'animate-pop-in'}`}>
         
         <div className="flex items-center justify-between mb-6">
            <div className="flex items-center gap-3">
@@ -56,7 +56,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, settings
                </div>
                <h2 className="text-xl font-bold text-white">Ayarlar</h2>
            </div>
-           <button onClick={handleClose} className="p-2 bg-white/5 rounded-full text-zinc-400 hover:text-white transition-colors">
+           <button onClick={handleClose} className="p-2 bg-white/5 rounded-full text-slate-400 hover:text-white transition-colors">
                <X size={20} />
            </button>
         </div>
@@ -65,26 +65,26 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, settings
             {/* Haptics */}
             <button 
                 onClick={toggleHaptics}
-                className="w-full bg-zinc-800/50 p-4 rounded-2xl border border-white/5 flex items-center justify-between group active:scale-[0.98] transition-all"
+                className="w-full bg-slate-900/50 p-4 rounded-2xl border border-white/5 flex items-center justify-between group active:scale-[0.98] transition-all"
             >
                 <div className="flex items-center gap-3">
-                    <div className={`p-2 rounded-lg transition-colors ${settings.hapticsEnabled ? 'bg-green-500/20 text-green-400' : 'bg-zinc-700/50 text-zinc-500'}`}>
+                    <div className={`p-2 rounded-lg transition-colors ${settings.hapticsEnabled ? 'bg-green-500/20 text-green-400' : 'bg-slate-800/50 text-slate-500'}`}>
                         <Vibrate size={18} />
                     </div>
                     <div className="text-left">
-                        <span className="block text-zinc-200 font-bold text-sm">Titreşim</span>
-                        <span className="text-xs text-zinc-500">Dokunsal geri bildirim</span>
+                        <span className="block text-slate-200 font-bold text-sm">Titreşim</span>
+                        <span className="text-xs text-slate-500">Dokunsal geri bildirim</span>
                     </div>
                 </div>
                 
-                <div className={`w-12 h-7 rounded-full p-1 transition-colors ${settings.hapticsEnabled ? 'bg-blue-600' : 'bg-zinc-700'}`}>
+                <div className={`w-12 h-7 rounded-full p-1 transition-colors ${settings.hapticsEnabled ? 'bg-blue-600' : 'bg-slate-700'}`}>
                     <div className={`w-5 h-5 bg-white rounded-full shadow-md transition-transform ${settings.hapticsEnabled ? 'translate-x-5' : 'translate-x-0'}`} />
                 </div>
             </button>
         </div>
 
         <div className="mt-6 text-center">
-            <p className="text-[10px] text-zinc-600">
+            <p className="text-[10px] text-slate-600">
                 Veri Sağlayıcı: <a href="https://open-meteo.com/" target="_blank" className="text-blue-400 hover:underline">Open-Meteo</a>
                 <br />Atmosfer AI v1.4
             </p>

@@ -27,9 +27,9 @@ const WeatherAlerts: React.FC<WeatherAlertsProps> = ({ alerts }) => {
 
   const getStyles = (level: string) => {
       switch(level) {
-          case 'critical': return 'bg-red-500/90 border-red-400 text-white shadow-red-900/20';
-          case 'warning': return 'bg-orange-500/90 border-orange-400 text-white shadow-orange-900/20';
-          default: return 'bg-blue-500/90 border-blue-400 text-white shadow-blue-900/20';
+          case 'critical': return 'bg-red-500/80 backdrop-blur-md border-red-400 text-white shadow-red-900/20';
+          case 'warning': return 'bg-orange-500/80 backdrop-blur-md border-orange-400 text-white shadow-orange-900/20';
+          default: return 'bg-blue-500/80 backdrop-blur-md border-blue-400 text-white shadow-blue-900/20';
       }
   };
 
@@ -46,7 +46,7 @@ const WeatherAlerts: React.FC<WeatherAlertsProps> = ({ alerts }) => {
             return (
                 <div 
                     key={index} 
-                    className={`relative p-4 rounded-2xl border backdrop-blur-md shadow-lg flex items-start gap-4 animate-fade-in-up ${getStyles(alert.level)}`}
+                    className={`relative p-4 rounded-2xl border flex items-start gap-4 animate-fade-in-up ${getStyles(alert.level)}`}
                 >
                     <div className="p-2 bg-white/20 rounded-full shrink-0">
                         {getIcon(alert.type)}

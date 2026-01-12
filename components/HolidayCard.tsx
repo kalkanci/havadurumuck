@@ -25,25 +25,25 @@ const HolidayCard: React.FC<HolidayCardProps> = ({ holidays }) => {
        <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none"></div>
 
        <div className="flex items-center gap-4 relative z-10">
-           <div className={`p-3 rounded-full shadow-inner ${isToday ? 'bg-amber-500 text-white animate-pulse' : 'bg-zinc-800 dark:bg-white/10 text-amber-500'}`}>
+           <div className={`p-3 rounded-full shadow-inner ${isToday ? 'bg-amber-500 text-white animate-pulse' : 'bg-slate-800 dark:bg-white/10 text-amber-500'}`}>
                {isToday ? <PartyPopper size={24} /> : <Gift size={24} />}
            </div>
            
            <div className="flex flex-col">
-               <span className={`text-[10px] font-bold uppercase tracking-widest mb-0.5 ${isToday ? 'text-amber-500' : 'text-zinc-500 dark:text-zinc-400'}`}>
+               <span className={`text-[10px] font-bold uppercase tracking-widest mb-0.5 ${isToday ? 'text-amber-500' : 'text-slate-500 dark:text-slate-400'}`}>
                    {isToday ? 'Bugün Bayram!' : 'Yaklaşan Tatil'}
                </span>
-               <h3 className="text-lg font-bold text-zinc-900 dark:text-white leading-tight">
+               <h3 className="text-lg font-bold text-slate-900 dark:text-white leading-tight">
                    {holiday.localName}
                </h3>
-               <p className="text-xs text-zinc-600 dark:text-zinc-300 font-medium mt-0.5">
+               <p className="text-xs text-slate-600 dark:text-slate-300 font-medium mt-0.5">
                    {dateStr}
                </p>
            </div>
        </div>
 
        {!isToday && (
-           <div className="p-2 bg-zinc-100 dark:bg-white/5 rounded-xl text-zinc-400">
+           <div className="p-2 bg-slate-100 dark:bg-white/5 rounded-xl text-slate-400">
                <Calendar size={18} />
            </div>
        )}

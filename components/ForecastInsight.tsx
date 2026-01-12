@@ -176,7 +176,7 @@ const ForecastInsight: React.FC<ForecastInsightProps> = ({ weather }) => {
       const nextWinds = hourly.wind_speed_10m.slice(startIndex, startIndex + 4);
       const maxWind = Math.max(...nextWinds);
 
-      let trendIcon = <Minus size={18} className="text-zinc-400" />;
+      let trendIcon = <Minus size={18} className="text-slate-400" />;
       let trendText = "Sıcaklık sabit";
       
       if (diff > 1.5) {
@@ -215,11 +215,11 @@ const ForecastInsight: React.FC<ForecastInsightProps> = ({ weather }) => {
                 <div className="snap-center min-w-full">
                     <div className={`glass-card p-4 rounded-2xl flex items-center justify-between gap-4 h-full bg-gradient-to-br ${targetEvent.colorClass} transition-transform duration-200 active:scale-95`}>
                         <div className="flex items-center gap-3">
-                            <div className="p-2.5 bg-zinc-100/10 dark:bg-white/10 rounded-full shrink-0 shadow-inner backdrop-blur-md">
+                            <div className="p-2.5 bg-slate-100/10 dark:bg-white/10 rounded-full shrink-0 shadow-inner backdrop-blur-md">
                                 {targetEvent.icon}
                             </div>
                             <div className="flex flex-col">
-                                <span className="text-xs font-bold text-zinc-300 uppercase tracking-widest mb-0.5 opacity-80">
+                                <span className="text-xs font-bold text-slate-300 uppercase tracking-widest mb-0.5 opacity-80">
                                     {targetEvent.label}
                                 </span>
                                 <div className="flex items-center gap-2">
@@ -228,13 +228,13 @@ const ForecastInsight: React.FC<ForecastInsightProps> = ({ weather }) => {
                                     </span>
                                 </div>
                                 {targetEvent.secondaryMessage && (
-                                    <span className="text-[10px] text-zinc-200 mt-1 font-medium opacity-90">{targetEvent.secondaryMessage}</span>
+                                    <span className="text-[10px] text-slate-200 mt-1 font-medium opacity-90">{targetEvent.secondaryMessage}</span>
                                 )}
                             </div>
                         </div>
                         
                         <div className="flex flex-col items-end justify-center border-l border-white/10 pl-4 h-full">
-                            <div className="flex items-center gap-1 text-zinc-300 mb-1 opacity-80">
+                            <div className="flex items-center gap-1 text-slate-300 mb-1 opacity-80">
                                 <Timer size={12} />
                                 <span className="text-[10px] font-bold uppercase">Hedef</span>
                             </div>
@@ -249,9 +249,9 @@ const ForecastInsight: React.FC<ForecastInsightProps> = ({ weather }) => {
             {/* CARD 2: 4-HOUR SUMMARY - This is naturally the RIGHT card */}
             {summary && (
                 <div className="snap-center min-w-full">
-                     <div className="glass-card p-4 rounded-2xl flex items-center justify-between gap-2 h-full bg-gradient-to-br from-zinc-700/40 to-zinc-800/40 border-white/10 transition-transform duration-200 active:scale-95">
+                     <div className="glass-card p-4 rounded-2xl flex items-center justify-between gap-2 h-full bg-gradient-to-br from-slate-700/40 to-slate-800/40 border-white/10 transition-transform duration-200 active:scale-95">
                         <div className="flex flex-col gap-1">
-                             <span className="text-xs font-bold text-zinc-400 uppercase tracking-widest flex items-center gap-1">
+                             <span className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1">
                                  Önümüzdeki 4 Saat
                              </span>
                              <p className="text-sm font-bold text-white leading-tight mt-1 pr-2">
@@ -260,14 +260,14 @@ const ForecastInsight: React.FC<ForecastInsightProps> = ({ weather }) => {
                              <div className="flex items-center gap-2 mt-2">
                                  <div className="flex items-center gap-1 bg-white/5 px-2 py-1 rounded-lg border border-white/5">
                                      {summary.trendIcon}
-                                     <span className="text-xs text-zinc-200 font-medium">{summary.trendText}</span>
+                                     <span className="text-xs text-slate-200 font-medium">{summary.trendText}</span>
                                  </div>
                              </div>
                         </div>
 
                         <div className="flex flex-col items-end gap-2 pl-4 border-l border-white/10 shrink-0">
                             <div className="flex items-center gap-2">
-                                <span className="text-xs text-zinc-400 font-bold">Rüzgar</span>
+                                <span className="text-xs text-slate-400 font-bold">Rüzgar</span>
                                 <div className="flex items-center gap-1">
                                     <Wind size={14} className="text-teal-400" />
                                     <span className="text-sm font-bold text-white">{Math.round(summary.maxWind)}</span>
@@ -275,7 +275,7 @@ const ForecastInsight: React.FC<ForecastInsightProps> = ({ weather }) => {
                             </div>
                             {summary.maxRain > 0 && (
                                 <div className="flex items-center gap-2">
-                                    <span className="text-xs text-zinc-400 font-bold">Yağış</span>
+                                    <span className="text-xs text-slate-400 font-bold">Yağış</span>
                                     <div className="flex items-center gap-1">
                                         <CloudRain size={14} className="text-blue-400" />
                                         <span className="text-sm font-bold text-white">%{summary.maxRain}</span>

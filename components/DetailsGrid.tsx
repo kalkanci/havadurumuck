@@ -84,12 +84,12 @@ const DetailsGrid: React.FC<DetailsGridProps> = ({ weather }) => {
   const renderWindContent = () => (
       <div className="flex flex-col h-full">
           <div className="flex flex-col items-center justify-center py-6 shrink-0">
-               <div className="relative w-40 h-40 rounded-full border-4 border-zinc-700 bg-zinc-800/50 flex items-center justify-center shadow-2xl ring-1 ring-white/5">
+               <div className="relative w-40 h-40 rounded-full border-4 border-slate-700 bg-slate-800/50 flex items-center justify-center shadow-2xl ring-1 ring-white/5 backdrop-blur-sm">
                    {/* Cardinal Points */}
-                   <span className="absolute top-2 text-xs font-bold text-zinc-400">K</span>
-                   <span className="absolute bottom-2 text-xs font-bold text-zinc-400">G</span>
-                   <span className="absolute left-2 text-xs font-bold text-zinc-400">B</span>
-                   <span className="absolute right-2 text-xs font-bold text-zinc-400">D</span>
+                   <span className="absolute top-2 text-xs font-bold text-slate-400">K</span>
+                   <span className="absolute bottom-2 text-xs font-bold text-slate-400">G</span>
+                   <span className="absolute left-2 text-xs font-bold text-slate-400">B</span>
+                   <span className="absolute right-2 text-xs font-bold text-slate-400">D</span>
                    
                    {/* Arrow */}
                    <div 
@@ -101,28 +101,28 @@ const DetailsGrid: React.FC<DetailsGridProps> = ({ weather }) => {
                        </div>
                    </div>
 
-                   <div className="text-center z-10 bg-zinc-900/90 p-4 rounded-full backdrop-blur-md border border-white/10 shadow-xl">
+                   <div className="text-center z-10 bg-slate-900/90 p-4 rounded-full backdrop-blur-md border border-white/10 shadow-xl">
                        <span className="block text-2xl font-bold text-white leading-none">{current.wind_speed_10m}</span>
-                       <span className="block text-[10px] text-zinc-400 mt-1">{speedUnit}</span>
+                       <span className="block text-[10px] text-slate-400 mt-1">{speedUnit}</span>
                    </div>
                </div>
                <p className="mt-4 text-teal-400 font-bold text-lg">{getWindDirection(current.wind_direction_10m)} Yönünden</p>
           </div>
 
-          <div className="bg-zinc-800/30 rounded-3xl p-5 flex-1 overflow-hidden flex flex-col min-h-0 border border-white/5">
-              <h4 className="text-xs font-bold text-zinc-400 uppercase mb-4 flex items-center gap-2 shrink-0 tracking-wider">
+          <div className="bg-white/5 rounded-3xl p-5 flex-1 overflow-hidden flex flex-col min-h-0 border border-white/5 shadow-inner">
+              <h4 className="text-xs font-bold text-slate-400 uppercase mb-4 flex items-center gap-2 shrink-0 tracking-wider">
                   <Clock size={14} /> Saatlik Tahmin
               </h4>
               <div className="space-y-3 overflow-y-auto no-scrollbar pr-1">
                   {hourlyData.map((h, i) => (
                       <div key={i} className="flex items-center justify-between py-1.5 border-b border-white/5 last:border-0">
-                          <span className="text-xs font-medium text-zinc-400 w-12">{formatTime(h.time)}</span>
+                          <span className="text-xs font-medium text-slate-400 w-12">{formatTime(h.time)}</span>
                           <div className="flex-1 px-4">
-                               <div className="w-full h-1.5 bg-zinc-700/50 rounded-full overflow-hidden">
+                               <div className="w-full h-1.5 bg-slate-700/50 rounded-full overflow-hidden">
                                    <div className="h-full bg-teal-500 rounded-full shadow-[0_0_8px_rgba(20,184,166,0.5)]" style={{ width: `${Math.min(h.windSpeed * 3, 100)}%` }}></div>
                                </div>
                           </div>
-                          <span className="text-xs font-bold text-white w-14 text-right">{h.windSpeed} <span className="text-[9px] font-normal text-zinc-500">{speedUnit}</span></span>
+                          <span className="text-xs font-bold text-white w-14 text-right">{h.windSpeed} <span className="text-[9px] font-normal text-slate-500">{speedUnit}</span></span>
                       </div>
                   ))}
               </div>
@@ -134,12 +134,12 @@ const DetailsGrid: React.FC<DetailsGridProps> = ({ weather }) => {
       <div className="flex flex-col h-full gap-6">
           <div className="flex items-center justify-center gap-8 py-4 shrink-0">
               <div className="text-center">
-                  <p className="text-[10px] text-zinc-400 uppercase font-bold mb-2">Bağıl Nem</p>
+                  <p className="text-[10px] text-slate-400 uppercase font-bold mb-2">Bağıl Nem</p>
                   <p className="text-4xl font-black text-blue-400 drop-shadow-lg">%{current.relative_humidity_2m}</p>
               </div>
               <div className="w-[1px] h-12 bg-white/10"></div>
               <div className="text-center">
-                  <p className="text-[10px] text-zinc-400 uppercase font-bold mb-2">Çiy Noktası</p>
+                  <p className="text-[10px] text-slate-400 uppercase font-bold mb-2">Çiy Noktası</p>
                   <p className="text-4xl font-black text-cyan-400 drop-shadow-lg">{Math.round(current.dew_point_2m)}{tempUnit}</p>
               </div>
           </div>
@@ -150,15 +150,15 @@ const DetailsGrid: React.FC<DetailsGridProps> = ({ weather }) => {
               </p>
           </div>
 
-          <div className="bg-zinc-800/30 rounded-3xl p-5 flex-1 overflow-hidden flex flex-col min-h-0 border border-white/5">
-              <h4 className="text-xs font-bold text-zinc-400 uppercase mb-4 flex items-center gap-2 shrink-0 tracking-wider">
+          <div className="bg-white/5 rounded-3xl p-5 flex-1 overflow-hidden flex flex-col min-h-0 border border-white/5 shadow-inner">
+              <h4 className="text-xs font-bold text-slate-400 uppercase mb-4 flex items-center gap-2 shrink-0 tracking-wider">
                   <Droplets size={14} /> Saatlik Nem
               </h4>
               <div className="space-y-3 overflow-y-auto no-scrollbar pr-1">
                   {hourlyData.map((h, i) => (
                       <div key={i} className="flex items-center justify-between text-xs py-1">
-                          <span className="text-zinc-400 w-12">{formatTime(h.time)}</span>
-                          <div className="flex-1 mx-3 h-1.5 bg-zinc-700/50 rounded-full overflow-hidden">
+                          <span className="text-slate-400 w-12">{formatTime(h.time)}</span>
+                          <div className="flex-1 mx-3 h-1.5 bg-slate-700/50 rounded-full overflow-hidden">
                               <div className="h-full bg-blue-500 rounded-full shadow-[0_0_8px_rgba(59,130,246,0.5)]" style={{ width: `${h.humidity}%` }}></div>
                           </div>
                           <span className="font-bold text-white w-10 text-right">%{h.humidity || '-'}</span>
@@ -177,7 +177,7 @@ const DetailsGrid: React.FC<DetailsGridProps> = ({ weather }) => {
     const nowP = hourlyData[0]?.pressure || currentP;
     const futureP = hourlyData.length > 3 ? hourlyData[3].pressure : nowP;
     
-    let trendIcon = <Minus size={40} className="text-zinc-500" />;
+    let trendIcon = <Minus size={40} className="text-slate-500" />;
     let trendText = "Dengeli";
     let trendDesc = "Basınç seviyesi stabil seyrediyor.";
 
@@ -199,7 +199,7 @@ const DetailsGrid: React.FC<DetailsGridProps> = ({ weather }) => {
                     <div className="text-7xl font-black tracking-tighter text-white drop-shadow-2xl mb-2">
                         {Math.round(currentP)}
                     </div>
-                    <span className="text-xl font-medium text-zinc-400">hPa <span className="text-[10px] bg-white/10 px-2 py-0.5 rounded ml-1 align-middle font-bold tracking-wider">{isMSL ? 'MSL' : 'YÜZEY'}</span></span>
+                    <span className="text-xl font-medium text-slate-400">hPa <span className="text-[10px] bg-white/10 px-2 py-0.5 rounded ml-1 align-middle font-bold tracking-wider">{isMSL ? 'MSL' : 'YÜZEY'}</span></span>
                 </div>
             </div>
 
@@ -208,7 +208,7 @@ const DetailsGrid: React.FC<DetailsGridProps> = ({ weather }) => {
                     {trendIcon}
                 </div>
                 <span className="block text-xl font-bold text-white mb-2">{trendText}</span>
-                <span className="block text-sm text-center text-zinc-400 leading-relaxed">{trendDesc}</span>
+                <span className="block text-sm text-center text-slate-400 leading-relaxed">{trendDesc}</span>
             </div>
         </div>
     );
@@ -234,7 +234,7 @@ const DetailsGrid: React.FC<DetailsGridProps> = ({ weather }) => {
                  style={{ left: `${percentage}%` }}
                ></div>
                
-               <div className="flex justify-between mt-3 text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
+               <div className="flex justify-between mt-3 text-[10px] font-bold text-slate-500 uppercase tracking-widest">
                    <span>Düşük</span>
                    <span>Orta</span>
                    <span>Yüksek</span>
@@ -247,20 +247,20 @@ const DetailsGrid: React.FC<DetailsGridProps> = ({ weather }) => {
                <span className="px-4 py-1.5 bg-orange-500/20 text-orange-200 rounded-full text-sm font-bold border border-orange-500/20">
                    {uv > 7 ? 'Çok Yüksek' : uv > 5 ? 'Yüksek' : uv > 2 ? 'Orta' : 'Düşük'}
                </span>
-               <div className="mt-6 flex items-start gap-3 text-zinc-300 text-sm leading-relaxed bg-white/5 p-5 rounded-2xl border border-white/5 text-left">
+               <div className="mt-6 flex items-start gap-3 text-slate-300 text-sm leading-relaxed bg-white/5 p-5 rounded-2xl border border-white/5 text-left">
                    <HelpCircle size={20} className="text-orange-400 shrink-0 mt-0.5" />
                    <p>{advice}</p>
                </div>
            </div>
 
-           <div className="bg-zinc-800/30 rounded-2xl p-5 border border-white/5">
-              <h4 className="text-xs font-bold text-zinc-400 uppercase mb-4 flex items-center gap-2">
+           <div className="bg-white/5 rounded-2xl p-5 border border-white/5 shadow-inner">
+              <h4 className="text-xs font-bold text-slate-400 uppercase mb-4 flex items-center gap-2">
                   <Sun size={14} /> Saatlik UV Tahmini
               </h4>
               <div className="flex overflow-x-auto gap-3 no-scrollbar pb-2">
                   {hourlyData.map((h, i) => (
                       <div key={i} className="flex flex-col items-center min-w-[3.5rem] p-2.5 bg-black/20 rounded-xl border border-white/5">
-                          <span className="text-[10px] text-zinc-400 mb-1 font-medium">{formatTime(h.time)}</span>
+                          <span className="text-[10px] text-slate-400 mb-1 font-medium">{formatTime(h.time)}</span>
                           <span className={`text-base font-bold ${h.uv > 5 ? 'text-orange-400' : 'text-white'}`}>{h.uv?.toFixed(0) || '-'}</span>
                       </div>
                   ))}
@@ -273,7 +273,7 @@ const DetailsGrid: React.FC<DetailsGridProps> = ({ weather }) => {
   const renderSunriseContent = () => (
       <div className="flex flex-col h-full">
           {/* Dawn Visual */}
-          <div className="relative w-full aspect-[2/1] rounded-[1.5rem] overflow-hidden bg-gradient-to-t from-orange-300 via-indigo-600 to-zinc-900 mb-6 shrink-0 shadow-2xl border border-white/10">
+          <div className="relative w-full aspect-[2/1] rounded-[1.5rem] overflow-hidden bg-gradient-to-t from-orange-300 via-indigo-600 to-slate-900 mb-6 shrink-0 shadow-2xl border border-white/10">
                <div className="absolute inset-0 flex items-end justify-center pb-2">
                    <div className="w-32 h-32 bg-orange-400 rounded-full blur-[50px] opacity-60 animate-pulse"></div>
                </div>
@@ -288,9 +288,9 @@ const DetailsGrid: React.FC<DetailsGridProps> = ({ weather }) => {
 
           <div className="space-y-6 px-2">
                <div className="text-center">
-                    <p className="text-xs font-bold text-zinc-400 uppercase tracking-[0.2em] mb-2">Gün Doğumu</p>
+                    <p className="text-xs font-bold text-slate-400 uppercase tracking-[0.2em] mb-2">Gün Doğumu</p>
                     <p className="text-6xl font-black text-white tracking-tighter drop-shadow-xl">{formatTime(daily.sunrise[0])}</p>
-                    <p className="text-sm text-zinc-400 mt-2 font-medium">Yeni bir gün.</p>
+                    <p className="text-sm text-slate-400 mt-2 font-medium">Yeni bir gün.</p>
                </div>
 
                <div className="bg-gradient-to-r from-orange-500/10 to-yellow-500/10 p-5 rounded-3xl border border-orange-500/20 flex items-center justify-between">
@@ -327,9 +327,9 @@ const DetailsGrid: React.FC<DetailsGridProps> = ({ weather }) => {
 
           <div className="space-y-6 px-2">
                <div className="text-center">
-                    <p className="text-xs font-bold text-zinc-400 uppercase tracking-[0.2em] mb-2">Gün Batımı</p>
+                    <p className="text-xs font-bold text-slate-400 uppercase tracking-[0.2em] mb-2">Gün Batımı</p>
                     <p className="text-6xl font-black text-white tracking-tighter drop-shadow-xl">{formatTime(daily.sunset[0])}</p>
-                    <p className="text-sm text-zinc-400 mt-2 font-medium">Akşam oluyor.</p>
+                    <p className="text-sm text-slate-400 mt-2 font-medium">Akşam oluyor.</p>
                </div>
 
                <div className="bg-gradient-to-r from-indigo-500/10 to-purple-500/10 p-5 rounded-3xl border border-indigo-500/20 flex items-center justify-between">
@@ -354,12 +354,12 @@ const DetailsGrid: React.FC<DetailsGridProps> = ({ weather }) => {
           <div className="relative">
               <div className="absolute inset-0 bg-blue-500/20 blur-3xl rounded-full"></div>
               <div className="text-8xl font-black tracking-tighter text-white drop-shadow-2xl relative z-10">
-                  {value}<span className="text-4xl text-zinc-400 font-light ml-2">{unit}</span>
+                  {value}<span className="text-4xl text-slate-400 font-light ml-2">{unit}</span>
               </div>
           </div>
           <div className="bg-white/5 p-6 rounded-3xl border border-white/5 max-w-[90%]">
               <p className="text-2xl font-bold text-blue-300 mb-2">{desc}</p>
-              <p className="text-sm text-zinc-400 leading-relaxed">{sub}</p>
+              <p className="text-sm text-slate-400 leading-relaxed">{sub}</p>
           </div>
       </div>
   );
@@ -387,7 +387,7 @@ const DetailsGrid: React.FC<DetailsGridProps> = ({ weather }) => {
       unit: ' ' + speedUnit,
       icon: <Wind size={24} className="text-teal-400" />,
       subtext: (
-        <div className="flex items-center gap-1 mt-1 text-[10px] text-zinc-400">
+        <div className="flex items-center gap-1 mt-1 text-[10px] text-slate-400">
            <Navigation size={10} style={{ transform: `rotate(${current.wind_direction_10m}deg)` }} />
            <span>{getWindDirection(current.wind_direction_10m)}</span>
         </div>
@@ -409,7 +409,7 @@ const DetailsGrid: React.FC<DetailsGridProps> = ({ weather }) => {
       value: Math.round(current.dew_point_2m),
       unit: tempUnit,
       icon: <Droplets size={24} className="text-cyan-300" />,
-      subtext: <span className="text-[10px] text-zinc-400 mt-1 block">{getDewPointDesc(current.dew_point_2m)}</span>,
+      subtext: <span className="text-[10px] text-slate-400 mt-1 block">{getDewPointDesc(current.dew_point_2m)}</span>,
       render: renderHumidityContent
     },
     {
@@ -471,10 +471,10 @@ const DetailsGrid: React.FC<DetailsGridProps> = ({ weather }) => {
                     </div>
                 </div>
                 <div className="relative z-10">
-                    <span className="text-zinc-400 text-[10px] font-bold uppercase tracking-widest">{item.label}</span>
+                    <span className="text-slate-400 text-[10px] font-bold uppercase tracking-widest">{item.label}</span>
                     <div className="flex items-baseline gap-1 mt-1">
                         <span className="text-2xl font-bold text-white tracking-tight drop-shadow-sm">{item.value}</span>
-                        <span className="text-sm font-normal text-zinc-400">{item.unit}</span>
+                        <span className="text-sm font-normal text-slate-400">{item.unit}</span>
                     </div>
                     {item.subtext && item.subtext}
                 </div>
@@ -487,13 +487,13 @@ const DetailsGrid: React.FC<DetailsGridProps> = ({ weather }) => {
         {selectedDetail && createPortal(
             <div className="fixed inset-0 z-[400] flex items-center justify-center p-6">
                 <div 
-                    className={`absolute inset-0 bg-black/80 backdrop-blur-md transition-opacity duration-300 ${isClosing ? 'opacity-0' : 'opacity-100'}`}
+                    className={`absolute inset-0 bg-slate-950/80 backdrop-blur-md transition-opacity duration-300 ${isClosing ? 'opacity-0' : 'opacity-100'}`}
                     onClick={closeModal}
                 />
 
                 <div 
                     className={`
-                        relative w-full max-w-sm bg-zinc-900 border border-white/10
+                        relative w-full max-w-sm bg-slate-900 border border-white/10
                         rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col h-[75vh]
                         transform transition-all duration-300 cubic-bezier(0.32, 0.72, 0, 1)
                         ${isClosing ? 'animate-pop-out' : 'animate-pop-in'}
@@ -514,7 +514,7 @@ const DetailsGrid: React.FC<DetailsGridProps> = ({ weather }) => {
                     </div>
 
                     {/* Gradient Background for Modal */}
-                    <div className="absolute inset-0 bg-gradient-to-b from-zinc-800 to-zinc-950 pointer-events-none"></div>
+                    <div className="absolute inset-0 bg-gradient-to-b from-slate-800 to-slate-950 pointer-events-none"></div>
 
                     {/* Content */}
                     <div className="relative z-10 flex-1 overflow-y-auto p-6 pt-16 no-scrollbar">
