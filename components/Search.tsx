@@ -62,6 +62,7 @@ const Search: React.FC<SearchProps> = ({ onSelect, onCurrentLocation }) => {
         </div>
         <input
           type="text"
+          aria-label="Konum Ara"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Konum, sokak, mahalle..."
@@ -75,10 +76,14 @@ const Search: React.FC<SearchProps> = ({ onSelect, onCurrentLocation }) => {
         ) : query ? (
           <button 
             onClick={() => setQuery('')}
+ palette-search-a11y-11602169281189284223
+            aria-label="Aramayı Temizle"
+
  palette-search-ux-14072754919355003748
             aria-label="Aramayı Temizle"
 
             aria-label="Aramayı temizle"
+ main
  main
             className="absolute right-3 text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
           >
@@ -87,11 +92,15 @@ const Search: React.FC<SearchProps> = ({ onSelect, onCurrentLocation }) => {
         ) : (
           <button 
             onClick={onCurrentLocation}
+ palette-search-a11y-11602169281189284223
+            aria-label="Mevcut Konumu Kullan"
+
 palette-search-ux-14072754919355003748
             aria-label="Mevcut Konum"
 
             aria-label="Mevcut konumu kullan"
 main
+ main
             className="absolute right-3 text-zinc-500 hover:text-blue-600 dark:text-zinc-400 dark:hover:text-blue-400 transition-colors"
           >
             <MapPin size={20} />
