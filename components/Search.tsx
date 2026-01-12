@@ -65,12 +65,21 @@ const Search: React.FC<SearchProps> = ({ onSelect, onCurrentLocation }) => {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Konum, sokak, mahalle..."
+          aria-label="Şehir ara"
           className="w-full bg-white/70 dark:bg-zinc-800/80 backdrop-blur-md text-zinc-900 dark:text-white pl-10 pr-12 py-3 rounded-2xl border border-zinc-200 dark:border-zinc-700/50 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 placeholder-zinc-500 dark:placeholder-zinc-400 transition-all shadow-lg"
         />
-        {query ? (
+        {loading ? (
+          <div className="absolute right-3 text-blue-500 animate-spin">
+            <Loader2 size={18} />
+          </div>
+        ) : query ? (
           <button 
             onClick={() => setQuery('')}
+ palette-search-ux-14072754919355003748
             aria-label="Aramayı Temizle"
+
+            aria-label="Aramayı temizle"
+ main
             className="absolute right-3 text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
           >
             <X size={18} />
@@ -78,7 +87,11 @@ const Search: React.FC<SearchProps> = ({ onSelect, onCurrentLocation }) => {
         ) : (
           <button 
             onClick={onCurrentLocation}
+palette-search-ux-14072754919355003748
             aria-label="Mevcut Konum"
+
+            aria-label="Mevcut konumu kullan"
+main
             className="absolute right-3 text-zinc-500 hover:text-blue-600 dark:text-zinc-400 dark:hover:text-blue-400 transition-colors"
           >
             <MapPin size={20} />
