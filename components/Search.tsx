@@ -54,7 +54,11 @@ const Search: React.FC<SearchProps> = ({ onSelect, onCurrentLocation }) => {
     <div ref={wrapperRef} className="relative w-full z-50">
       <div className="relative flex items-center">
         <div className="absolute left-3 text-zinc-500 dark:text-zinc-400">
-          <SearchIcon size={20} />
+          {loading ? (
+             <Loader2 size={20} className="animate-spin text-blue-500" />
+          ) : (
+             <SearchIcon size={20} />
+          )}
         </div>
         <input
           type="text"
@@ -71,7 +75,11 @@ const Search: React.FC<SearchProps> = ({ onSelect, onCurrentLocation }) => {
         ) : query ? (
           <button 
             onClick={() => setQuery('')}
+ palette-search-ux-14072754919355003748
+            aria-label="Aramayı Temizle"
+
             aria-label="Aramayı temizle"
+ main
             className="absolute right-3 text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
           >
             <X size={18} />
@@ -79,7 +87,11 @@ const Search: React.FC<SearchProps> = ({ onSelect, onCurrentLocation }) => {
         ) : (
           <button 
             onClick={onCurrentLocation}
+palette-search-ux-14072754919355003748
+            aria-label="Mevcut Konum"
+
             aria-label="Mevcut konumu kullan"
+main
             className="absolute right-3 text-zinc-500 hover:text-blue-600 dark:text-zinc-400 dark:hover:text-blue-400 transition-colors"
           >
             <MapPin size={20} />
@@ -92,13 +104,17 @@ const Search: React.FC<SearchProps> = ({ onSelect, onCurrentLocation }) => {
           {results.map((loc) => (
             <li
               key={loc.id}
-              onClick={() => handleSelect(loc)}
-              className="px-4 py-3 hover:bg-black/5 dark:hover:bg-white/10 cursor-pointer flex flex-col border-b border-zinc-100 dark:border-zinc-700/50 last:border-none transition-colors"
+              className="border-b border-zinc-100 dark:border-zinc-700/50 last:border-none"
             >
-              <span className="font-medium text-zinc-900 dark:text-white">{loc.name}</span>
-              <span className="text-xs text-zinc-500 dark:text-zinc-400">
-                {loc.subtext || loc.country}
-              </span>
+              <button
+                onClick={() => handleSelect(loc)}
+                className="w-full text-left px-4 py-3 hover:bg-black/5 dark:hover:bg-white/10 cursor-pointer flex flex-col transition-colors focus:outline-none focus:bg-black/5 dark:focus:bg-white/10"
+              >
+                <span className="font-medium text-zinc-900 dark:text-white">{loc.name}</span>
+                <span className="text-xs text-zinc-500 dark:text-zinc-400">
+                  {loc.subtext || loc.country}
+                </span>
+              </button>
             </li>
           ))}
         </ul>
