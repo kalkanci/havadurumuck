@@ -337,7 +337,7 @@ const App: React.FC = () => {
 
   return (
     <div 
-      className="relative min-h-screen overflow-hidden selection:bg-blue-500/30 pb-24 text-white transition-colors duration-500"
+      className="relative min-h-screen overflow-x-hidden selection:bg-blue-500/30 pb-24 text-white transition-colors duration-500"
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
@@ -432,17 +432,17 @@ const App: React.FC = () => {
             <button 
               onClick={() => setIsFavoritesOpen(true)} 
               aria-label="Favori Konumlar"
-              className={`p-3 glass-card rounded-2xl transition-all active:scale-95 duration-200 ${isFav ? 'bg-red-500/20 border-red-500/30' : 'hover:bg-zinc-800/80'}`}
+              className={`p-3 glass-card rounded-2xl transition-all active:scale-95 duration-200 ${isFav ? 'bg-red-500/20 border-red-500/30' : 'hover:bg-white/10'}`}
             >
               <Heart 
                   size={22} 
-                  className={`transition-colors duration-300 ${isFav ? 'text-red-400 fill-red-400' : 'text-zinc-400'}`}
+                  className={`transition-colors duration-300 ${isFav ? 'text-red-400 fill-red-400' : 'text-white/70 hover:text-white'}`}
               />
             </button>
             <button 
                onClick={() => setIsSettingsOpen(true)}
                aria-label="Ayarlar"
-               className="p-3 glass-card rounded-2xl transition-all active:scale-95 duration-200 hover:bg-zinc-800 text-zinc-400 hover:text-white"
+               className="p-3 glass-card rounded-2xl transition-all active:scale-95 duration-200 hover:bg-white/10 text-white/70 hover:text-white"
             >
                <Settings size={22} />
             </button>
@@ -480,10 +480,10 @@ const App: React.FC = () => {
                   {/* Date Pill (Top - Clickable) */}
                   <button 
                     onClick={() => setIsCalendarOpen(true)}
-                    className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/10 shadow-lg mb-6 active:scale-95 transition-transform"
+                    className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 hover:bg-white/10 backdrop-blur-md border border-white/10 shadow-lg mb-6 active:scale-95 transition-transform"
                   >
-                    <Calendar size={12} className="text-blue-300" />
-                    <span className="text-xs font-bold text-blue-100 tracking-wide uppercase">{todayStr}</span>
+                    <Calendar size={12} className="text-blue-400" />
+                    <span className="text-xs font-bold text-white tracking-wide uppercase">{todayStr}</span>
                   </button>
 
                   {/* Massive Temperature (The Hero) */}
@@ -560,19 +560,19 @@ const App: React.FC = () => {
 
       {/* FLOATING NAVIGATION */}
       <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-full max-w-[280px]">
-        <div className="relative flex items-center bg-zinc-900/90 backdrop-blur-xl border border-white/10 rounded-full p-1.5 shadow-2xl">
+        <div className="relative flex items-center bg-black/40 backdrop-blur-2xl border border-white/10 rounded-full p-1.5 shadow-2xl">
           <div 
-            className={`absolute top-1.5 bottom-1.5 w-[calc(50%-6px)] rounded-full bg-blue-600 shadow-lg shadow-blue-900/20 transition-all duration-300 cubic-bezier(0.4, 0, 0.2, 1) ${activeTab === 'today' ? 'left-1.5' : 'left-1/2'}`}
+            className={`absolute top-1.5 bottom-1.5 w-[calc(50%-6px)] rounded-full bg-blue-500 shadow-lg shadow-blue-500/20 transition-all duration-300 cubic-bezier(0.4, 0, 0.2, 1) ${activeTab === 'today' ? 'left-1.5' : 'left-1/2'}`}
           />
 
           <button
             onClick={() => setActiveTab('today')}
             aria-current={activeTab === 'today' ? 'page' : undefined}
             className={`relative z-10 flex-1 flex items-center justify-center gap-2 py-3 rounded-full text-sm font-bold transition-colors duration-300 ${
-              activeTab === 'today' ? 'text-white' : 'text-zinc-400 hover:text-zinc-200'
+              activeTab === 'today' ? 'text-white' : 'text-white/60 hover:text-white'
             }`}
           >
-              <CloudSun size={18} className={activeTab === 'today' ? "fill-white/10" : ""} />
+              <CloudSun size={18} className={activeTab === 'today' ? "fill-white/20" : ""} />
               Bugün
           </button>
           
@@ -580,10 +580,10 @@ const App: React.FC = () => {
             onClick={() => setActiveTab('forecast')}
             aria-current={activeTab === 'forecast' ? 'page' : undefined}
             className={`relative z-10 flex-1 flex items-center justify-center gap-2 py-3 rounded-full text-sm font-bold transition-colors duration-300 ${
-              activeTab === 'forecast' ? 'text-white' : 'text-zinc-400 hover:text-zinc-200'
+              activeTab === 'forecast' ? 'text-white' : 'text-white/60 hover:text-white'
             }`}
           >
-              <Calendar size={18} className={activeTab === 'forecast' ? "fill-white/10" : ""} />
+              <Calendar size={18} className={activeTab === 'forecast' ? "fill-white/20" : ""} />
               Uzun Vade
           </button>
         </div>

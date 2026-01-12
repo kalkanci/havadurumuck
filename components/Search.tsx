@@ -66,8 +66,12 @@ const Search: React.FC<SearchProps> = ({ onSelect, onCurrentLocation }) => {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Konum, sokak, mahalle..."
+ ui/ios-dark-theme-refactor-5430853737151243203
+          className="w-full bg-white/10 backdrop-blur-xl text-white pl-10 pr-12 py-3 rounded-2xl border border-white/10 focus:outline-none focus:border-white/30 focus:ring-1 focus:ring-white/20 placeholder-white/50 transition-all shadow-lg"
+
           aria-label="Şehir ara"
           className="w-full bg-white/70 dark:bg-zinc-800/80 backdrop-blur-md text-zinc-900 dark:text-white pl-10 pr-12 py-3 rounded-2xl border border-zinc-200 dark:border-zinc-700/50 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 placeholder-zinc-500 dark:placeholder-zinc-400 transition-all shadow-lg"
+ main
         />
         {loading ? (
           <div className="absolute right-3 text-blue-500 animate-spin">
@@ -76,6 +80,8 @@ const Search: React.FC<SearchProps> = ({ onSelect, onCurrentLocation }) => {
         ) : query ? (
           <button 
             onClick={() => setQuery('')}
+ui/ios-dark-theme-refactor-5430853737151243203
+
  palette-search-a11y-11602169281189284223
             aria-label="Aramayı Temizle"
 
@@ -86,12 +92,16 @@ const Search: React.FC<SearchProps> = ({ onSelect, onCurrentLocation }) => {
  main
  main
             className="absolute right-3 text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
+main
           >
             <X size={18} />
           </button>
         ) : (
           <button 
             onClick={onCurrentLocation}
+ ui/ios-dark-theme-refactor-5430853737151243203
+            className="absolute right-3 text-white/50 hover:text-blue-400 transition-colors"
+
  palette-search-a11y-11602169281189284223
             aria-label="Mevcut Konumu Kullan"
 
@@ -102,6 +112,7 @@ palette-search-ux-14072754919355003748
 main
  main
             className="absolute right-3 text-zinc-500 hover:text-blue-600 dark:text-zinc-400 dark:hover:text-blue-400 transition-colors"
+ main
           >
             <MapPin size={20} />
           </button>
@@ -109,10 +120,19 @@ main
       </div>
 
       {isOpen && results.length > 0 && (
-        <ul className="absolute top-full left-0 right-0 mt-2 bg-white/95 dark:bg-zinc-800/90 backdrop-blur-xl border border-zinc-200 dark:border-zinc-700 rounded-2xl shadow-2xl max-h-60 overflow-y-auto no-scrollbar overflow-hidden">
+        <ul className="absolute top-full left-0 right-0 mt-2 bg-slate-900/90 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl max-h-60 overflow-y-auto no-scrollbar overflow-hidden z-[60]">
           {results.map((loc) => (
             <li
               key={loc.id}
+ ui/ios-dark-theme-refactor-5430853737151243203
+              onClick={() => handleSelect(loc)}
+              className="px-4 py-3 hover:bg-white/10 cursor-pointer flex flex-col border-b border-white/5 last:border-none transition-colors"
+            >
+              <span className="font-medium text-white">{loc.name}</span>
+              <span className="text-xs text-white/50">
+                {loc.subtext || loc.country}
+              </span>
+
               className="border-b border-zinc-100 dark:border-zinc-700/50 last:border-none"
             >
               <button
@@ -124,6 +144,7 @@ main
                   {loc.subtext || loc.country}
                 </span>
               </button>
+ main
             </li>
           ))}
         </ul>
