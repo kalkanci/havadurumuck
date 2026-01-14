@@ -66,6 +66,7 @@ const Search: React.FC<SearchProps> = ({ onSelect, onCurrentLocation }) => {
         {query ? (
           <button 
             onClick={() => setQuery('')}
+            aria-label="Aramayı temizle"
             className="absolute right-3 text-white/50 hover:text-white"
           >
             <X size={18} />
@@ -73,6 +74,7 @@ const Search: React.FC<SearchProps> = ({ onSelect, onCurrentLocation }) => {
         ) : (
           <button 
             onClick={onCurrentLocation}
+            aria-label="Mevcut konum"
             className="absolute right-3 text-white/50 hover:text-blue-400 transition-colors"
           >
             <MapPin size={20} />
@@ -85,13 +87,18 @@ const Search: React.FC<SearchProps> = ({ onSelect, onCurrentLocation }) => {
           {results.map((loc) => (
             <li
               key={loc.id}
-              onClick={() => handleSelect(loc)}
-              className="px-4 py-3 hover:bg-white/10 cursor-pointer flex flex-col border-b border-white/5 last:border-none transition-colors"
+              className="border-b border-white/5 last:border-none"
             >
-              <span className="font-medium text-white">{loc.name}</span>
-              <span className="text-xs text-white/50">
-                {loc.subtext || loc.country}
-              </span>
+              <button
+                type="button"
+                onClick={() => handleSelect(loc)}
+                className="w-full text-left px-4 py-3 hover:bg-white/10 cursor-pointer flex flex-col transition-colors focus:outline-none focus:bg-white/10"
+              >
+                <span className="font-medium text-white">{loc.name}</span>
+                <span className="text-xs text-white/50">
+                  {loc.subtext || loc.country}
+                </span>
+              </button>
             </li>
           ))}
         </ul>
