@@ -6,14 +6,35 @@ const WEATHER_API_URL = 'https://api.open-meteo.com/v1/forecast';
 const AIR_QUALITY_API_URL = 'https://air-quality-api.open-meteo.com/v1/air-quality';
 const HOLIDAY_API_URL = 'https://date.nager.at/api/v3/PublicHolidays';
 
+// Helper: Fetch with Timeout to prevent hanging
+const fetchWithTimeout = async (url: string, options: RequestInit = {}, timeout = 8000) => {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeout);
+  try {
+    const response = await fetch(url, {
+      ...options,
+      signal: controller.signal
+    });
+    clearTimeout(id);
+    return response;
+  } catch (error) {
+    clearTimeout(id);
+    throw error;
+  }
+};
+
 // Sokak/Mahalle detayını bulmak için Nominatim servisi (OpenStreetMap)
 export const getDetailedAddress = async (lat: number, lon: number): Promise<{ city: string, address: string, country: string, countryCode: string }> => {
   try {
-    const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1`, {
+    // 5 seconds timeout for geocoding
+    const res = await fetchWithTimeout(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1`, {
       headers: {
         'User-Agent': 'AtmosferAI/1.0'
       }
-    });
+    }, 5000);
+
+    if (!res.ok) throw new Error('Geocoding service error');
+
     const data = await res.json();
     const addr = data.address || {};
     
@@ -68,6 +89,7 @@ export const getDetailedAddress = async (lat: number, lon: number): Promise<{ ci
     return { city: mainName, address: subText, country: country, countryCode };
   } catch (error) {
     console.warn("Reverse geocoding failed", error);
+    // Return empty on failure so app doesn't crash
     return { city: 'Konum Bulunamadı', address: '', country: '', countryCode: '' };
   }
 };
@@ -78,11 +100,14 @@ export const searchCity = async (query: string): Promise<GeoLocation[]> => {
   try {
     // addressdetails=1: Detaylı adres parçalarını getirir
     // limit=5: En fazla 5 sonuç
-    const res = await fetch(`${SEARCH_API_URL}?q=${encodeURIComponent(query)}&format=json&addressdetails=1&limit=5&accept-language=tr`, {
+    const res = await fetchWithTimeout(`${SEARCH_API_URL}?q=${encodeURIComponent(query)}&format=json&addressdetails=1&limit=5&accept-language=tr`, {
         headers: {
             'User-Agent': 'AtmosferAI/1.0'
         }
-    });
+    }, 5000);
+
+    if (!res.ok) return [];
+
     const data = await res.json();
     
     if (!data || data.length === 0) return [];
@@ -144,11 +169,17 @@ export const fetchWeather = async (lat: number, lon: number): Promise<WeatherDat
   });
 
   try {
-    const [weatherRes, aqiRes] = await Promise.all([
-      fetch(`${WEATHER_API_URL}?${weatherParams.toString()}`),
-      fetch(`${AIR_QUALITY_API_URL}?${aqiParams.toString()}`)
+    // Use Promise.allSettled to allow AQI to fail without breaking Weather
+    const [weatherResult, aqiResult] = await Promise.allSettled([
+      fetchWithTimeout(`${WEATHER_API_URL}?${weatherParams.toString()}`, {}, 10000), // 10s for weather
+      fetchWithTimeout(`${AIR_QUALITY_API_URL}?${aqiParams.toString()}`, {}, 5000)  // 5s for AQI
     ]);
 
+    // Check Weather Result (Critical)
+    if (weatherResult.status === 'rejected') {
+        throw new Error(`Weather fetch failed: ${weatherResult.reason}`);
+    }
+    const weatherRes = weatherResult.value;
     if (!weatherRes.ok) {
         const errorText = await weatherRes.text();
         console.error("Open-Meteo API Error:", errorText);
@@ -158,11 +189,18 @@ export const fetchWeather = async (lat: number, lon: number): Promise<WeatherDat
     const weatherData = await weatherRes.json();
     let aqiData: AirQuality | undefined;
 
-    if (aqiRes.ok) {
-      const aqiJson = await aqiRes.json();
-      if (aqiJson.current) {
-        aqiData = aqiJson.current;
+    // Check AQI Result (Optional)
+    if (aqiResult.status === 'fulfilled' && aqiResult.value.ok) {
+      try {
+          const aqiJson = await aqiResult.value.json();
+          if (aqiJson.current) {
+            aqiData = aqiJson.current;
+          }
+      } catch (e) {
+          console.warn("AQI parse error", e);
       }
+    } else {
+        console.warn("AQI fetch failed, continuing without it.");
     }
 
     return {
@@ -179,7 +217,7 @@ export const fetchWeather = async (lat: number, lon: number): Promise<WeatherDat
 export const fetchHolidays = async (year: number, countryCode: string): Promise<PublicHoliday[]> => {
     if (!countryCode) return [];
     try {
-        const res = await fetch(`${HOLIDAY_API_URL}/${year}/${countryCode}`);
+        const res = await fetchWithTimeout(`${HOLIDAY_API_URL}/${year}/${countryCode}`, {}, 5000);
         if (!res.ok) return [];
         const data = await res.json();
         return data || [];

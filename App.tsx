@@ -39,6 +39,9 @@ const App: React.FC = () => {
   const [upcomingHolidays, setUpcomingHolidays] = useState<PublicHoliday[]>([]);
   const [cosmicData, setCosmicData] = useState<AstronomyData | null>(null);
   
+  // State for Splash Screen Manual Override
+  const [showManualLocationBtn, setShowManualLocationBtn] = useState(false);
+
   // Settings State
   const [settings, setSettings] = useState<AppSettings>(() => {
       const saved = localStorage.getItem('atmosfer_settings');
@@ -99,8 +102,16 @@ const App: React.FC = () => {
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
 
+    // Failsafe for splash screen
+    const timer = setTimeout(() => {
+        if (initialBoot) {
+            setShowManualLocationBtn(true);
+        }
+    }, 4000);
+
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      clearTimeout(timer);
     };
   }, []);
 
@@ -215,7 +226,7 @@ const App: React.FC = () => {
       },
       {
         enableHighAccuracy: true,
-        timeout: 10000,
+        timeout: 5000, // Reduced from 10000ms
         maximumAge: 0
       }
     );
@@ -303,9 +314,20 @@ const App: React.FC = () => {
               
               <h1 className="text-3xl font-bold tracking-tight mb-2">Atmosfer AI</h1>
               
-              <div className="flex items-center gap-2 text-zinc-400 text-sm font-medium animate-pulse">
-                  <Navigation size={16} className="animate-bounce" />
-                  <span>Konum Bekleniyor...</span>
+              <div className="flex flex-col items-center gap-4">
+                  <div className="flex items-center gap-2 text-zinc-400 text-sm font-medium animate-pulse">
+                      <Navigation size={16} className="animate-bounce" />
+                      <span>Konum Bekleniyor...</span>
+                  </div>
+
+                  {showManualLocationBtn && (
+                      <button
+                        onClick={() => handleLocationError("GPS zaman aşımı")}
+                        className="mt-4 px-4 py-2 bg-white/10 rounded-full text-sm font-bold text-white hover:bg-white/20 transition-colors animate-fade-in-up"
+                      >
+                        Konum Bulunamadıysa Tıkla
+                      </button>
+                  )}
               </div>
           </div>
       );
