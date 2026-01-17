@@ -56,7 +56,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, settings
                </div>
                <h2 className="text-xl font-bold text-white">Ayarlar</h2>
            </div>
-           <button onClick={handleClose} className="p-2 bg-white/5 rounded-full text-slate-400 hover:text-white transition-colors">
+           <button onClick={handleClose} aria-label="Kapat" className="p-2 bg-white/5 rounded-full text-slate-400 hover:text-white transition-colors">
                <X size={20} />
            </button>
         </div>
