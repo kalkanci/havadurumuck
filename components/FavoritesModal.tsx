@@ -47,6 +47,7 @@ const FavoritesModal: React.FC<FavoritesModalProps> = ({
           </div>
           <button 
             onClick={onClose}
+            aria-label="Kapat"
             className="p-2 bg-white/5 hover:bg-white/10 rounded-full transition-colors text-slate-400"
           >
             <X size={20} />
@@ -68,6 +69,7 @@ const FavoritesModal: React.FC<FavoritesModalProps> = ({
                 {!isCurrentFavorite ? (
                     <button 
                         onClick={() => onAdd(currentLocation)}
+                        aria-label="Favorilere ekle"
                         className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-lg flex items-center gap-2 transition-colors shadow-lg shadow-blue-500/20"
                     >
                         <Plus size={14} /> Ekle
@@ -75,6 +77,7 @@ const FavoritesModal: React.FC<FavoritesModalProps> = ({
                 ) : (
                     <button 
                         onClick={() => onRemove(currentLocation.id)}
+                        aria-label="Favorilerden kaldır"
                         className="px-4 py-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 text-xs font-bold rounded-lg flex items-center gap-2 transition-colors"
                     >
                         <Trash2 size={14} /> Kaldır
@@ -100,9 +103,11 @@ const FavoritesModal: React.FC<FavoritesModalProps> = ({
                 key={fav.id} 
                 className={`glass-card p-3 rounded-xl flex justify-between items-center transition-all hover:bg-white/5 border border-white/5 ${fav.id === currentLocation.id ? 'ring-1 ring-blue-500/50' : ''}`}
               >
-                <div 
-                  className="flex-1 cursor-pointer flex items-center gap-3"
+                <button
+                  type="button"
+                  className="flex-1 cursor-pointer flex items-center gap-3 text-left"
                   onClick={() => { onSelect(fav); onClose(); }}
+                  aria-label={`${fav.name} konumunu seç`}
                 >
                   <div className="p-2 bg-slate-800 rounded-full">
                       <Navigation size={14} className="text-slate-400" />
@@ -111,12 +116,13 @@ const FavoritesModal: React.FC<FavoritesModalProps> = ({
                     <h4 className="font-bold text-white text-sm">{fav.name}</h4>
                     <p className="text-[10px] text-slate-400">{fav.admin1 ? `${fav.admin1}, ` : ''}{fav.country}</p>
                   </div>
-                </div>
+                </button>
                 
                 {/* Mevcut konum favoriler listesindeyse silme butonu burada görünmesin, yukarıdan yönetilsin. Sadece diğerleri için göster. */}
                 {fav.id !== currentLocation.id && (
                     <button 
                     onClick={() => onRemove(fav.id)}
+                    aria-label={`${fav.name} konumunu favorilerden kaldır`}
                     className="p-2 text-slate-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all"
                     >
                     <Trash2 size={16} />
