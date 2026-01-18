@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Search as SearchIcon, MapPin, X } from 'lucide-react';
 import { GeoLocation } from '../types';
@@ -61,11 +60,13 @@ const Search: React.FC<SearchProps> = ({ onSelect, onCurrentLocation }) => {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Konum, sokak, mahalle..."
+          aria-label="Şehir veya konum ara"
           className="w-full bg-white/10 backdrop-blur-xl text-white pl-10 pr-12 py-3 rounded-2xl border border-white/10 focus:outline-none focus:border-white/30 focus:ring-1 focus:ring-white/20 placeholder-white/50 transition-all shadow-lg"
         />
         {query ? (
           <button 
             onClick={() => setQuery('')}
+            aria-label="Aramayı temizle"
             className="absolute right-3 text-white/50 hover:text-white"
           >
             <X size={18} />
@@ -73,6 +74,7 @@ const Search: React.FC<SearchProps> = ({ onSelect, onCurrentLocation }) => {
         ) : (
           <button 
             onClick={onCurrentLocation}
+            aria-label="Mevcut konum"
             className="absolute right-3 text-white/50 hover:text-blue-400 transition-colors"
           >
             <MapPin size={20} />
@@ -85,13 +87,17 @@ const Search: React.FC<SearchProps> = ({ onSelect, onCurrentLocation }) => {
           {results.map((loc) => (
             <li
               key={loc.id}
-              onClick={() => handleSelect(loc)}
-              className="px-4 py-3 hover:bg-white/10 cursor-pointer flex flex-col border-b border-white/5 last:border-none transition-colors"
+              className="border-b border-white/5 last:border-none"
             >
-              <span className="font-medium text-white">{loc.name}</span>
-              <span className="text-xs text-white/50">
-                {loc.subtext || loc.country}
-              </span>
+              <button
+                onClick={() => handleSelect(loc)}
+                className="w-full text-left px-4 py-3 hover:bg-white/10 focus:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-500 cursor-pointer flex flex-col transition-colors"
+              >
+                <span className="font-medium text-white">{loc.name}</span>
+                <span className="text-xs text-white/50">
+                  {loc.subtext || loc.country}
+                </span>
+              </button>
             </li>
           ))}
         </ul>
