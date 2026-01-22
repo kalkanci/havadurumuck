@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Search as SearchIcon, MapPin, X } from 'lucide-react';
 import { GeoLocation } from '../types';
@@ -56,7 +55,9 @@ const Search: React.FC<SearchProps> = ({ onSelect, onCurrentLocation }) => {
         <div className="absolute left-3 text-zinc-500 dark:text-zinc-400">
           <SearchIcon size={20} />
         </div>
+        <label htmlFor="search-input" className="sr-only">Konum ara</label>
         <input
+          id="search-input"
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
@@ -65,15 +66,19 @@ const Search: React.FC<SearchProps> = ({ onSelect, onCurrentLocation }) => {
         />
         {query ? (
           <button 
+            type="button"
             onClick={() => setQuery('')}
             className="absolute right-3 text-white/50 hover:text-white"
+            aria-label="Aramayı temizle"
           >
             <X size={18} />
           </button>
         ) : (
           <button 
+            type="button"
             onClick={onCurrentLocation}
             className="absolute right-3 text-white/50 hover:text-blue-400 transition-colors"
+            aria-label="Mevcut konum"
           >
             <MapPin size={20} />
           </button>
@@ -83,15 +88,17 @@ const Search: React.FC<SearchProps> = ({ onSelect, onCurrentLocation }) => {
       {isOpen && results.length > 0 && (
         <ul className="absolute top-full left-0 right-0 mt-2 bg-slate-900/90 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl max-h-60 overflow-y-auto no-scrollbar overflow-hidden z-[60]">
           {results.map((loc) => (
-            <li
-              key={loc.id}
-              onClick={() => handleSelect(loc)}
-              className="px-4 py-3 hover:bg-white/10 cursor-pointer flex flex-col border-b border-white/5 last:border-none transition-colors"
-            >
-              <span className="font-medium text-white">{loc.name}</span>
-              <span className="text-xs text-white/50">
-                {loc.subtext || loc.country}
-              </span>
+            <li key={loc.id} className="border-b border-white/5 last:border-none">
+              <button
+                type="button"
+                onClick={() => handleSelect(loc)}
+                className="w-full text-left px-4 py-3 hover:bg-white/10 cursor-pointer flex flex-col transition-colors focus:outline-none focus:bg-white/10"
+              >
+                <span className="font-medium text-white">{loc.name}</span>
+                <span className="text-xs text-white/50">
+                  {loc.subtext || loc.country}
+                </span>
+              </button>
             </li>
           ))}
         </ul>
