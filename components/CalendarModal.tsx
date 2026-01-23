@@ -57,7 +57,7 @@ const CalendarModal: React.FC<CalendarModalProps> = ({ isOpen, onClose, weather 
                    <p className="text-xs text-slate-400">15 Günlük Plan</p>
                </div>
            </div>
-           <button onClick={handleClose} className="p-2 bg-white/5 rounded-full text-slate-400 hover:text-white transition-colors border border-white/5 hover:bg-white/10">
+           <button onClick={handleClose} className="p-2 bg-white/5 rounded-full text-slate-400 hover:text-white transition-colors border border-white/5 hover:bg-white/10" aria-label="Kapat">
                <X size={20} />
            </button>
         </div>

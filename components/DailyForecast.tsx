@@ -137,7 +137,7 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ weather }) => {
                  {/* Top Glow */}
                  <div className="absolute top-0 left-0 w-full h-32 bg-blue-500/10 blur-[50px] pointer-events-none"></div>
 
-                 <button onClick={closeDayDetail} className="absolute top-4 right-4 p-2 bg-white/5 rounded-full text-white/60 hover:text-white transition-colors z-20">
+                 <button onClick={closeDayDetail} className="absolute top-4 right-4 p-2 bg-white/5 rounded-full text-white/60 hover:text-white transition-colors z-20" aria-label="Kapat">
                      <X size={20} />
                  </button>
 
