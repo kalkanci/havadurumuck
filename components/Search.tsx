@@ -53,7 +53,7 @@ const Search: React.FC<SearchProps> = ({ onSelect, onCurrentLocation }) => {
   return (
     <div ref={wrapperRef} className="relative w-full z-50">
       <div className="relative flex items-center">
-        <div className="absolute left-3 text-zinc-500 dark:text-zinc-400">
+        <div className="absolute left-3 text-zinc-500 dark:text-zinc-400" aria-hidden="true">
           <SearchIcon size={20} />
         </div>
         <input
@@ -67,6 +67,7 @@ const Search: React.FC<SearchProps> = ({ onSelect, onCurrentLocation }) => {
           <button 
             onClick={() => setQuery('')}
             className="absolute right-3 text-white/50 hover:text-white"
+            aria-label="Aramayı temizle"
           >
             <X size={18} />
           </button>
@@ -74,6 +75,7 @@ const Search: React.FC<SearchProps> = ({ onSelect, onCurrentLocation }) => {
           <button 
             onClick={onCurrentLocation}
             className="absolute right-3 text-white/50 hover:text-blue-400 transition-colors"
+            aria-label="Mevcut konumu kullan"
           >
             <MapPin size={20} />
           </button>

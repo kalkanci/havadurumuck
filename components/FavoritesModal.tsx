@@ -48,6 +48,7 @@ const FavoritesModal: React.FC<FavoritesModalProps> = ({
           <button 
             onClick={onClose}
             className="p-2 bg-white/5 hover:bg-white/10 rounded-full transition-colors text-slate-400"
+            aria-label="Kapat"
           >
             <X size={20} />
           </button>
@@ -118,6 +119,7 @@ const FavoritesModal: React.FC<FavoritesModalProps> = ({
                     <button 
                     onClick={() => onRemove(fav.id)}
                     className="p-2 text-slate-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all"
+                    aria-label={`${fav.name} favorilerden kaldır`}
                     >
                     <Trash2 size={16} />
                     </button>

@@ -85,7 +85,7 @@ const HourlyForecast: React.FC<HourlyForecastProps> = ({ weather }) => {
             <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-md transition-opacity duration-300" onClick={handleClose} />
             
             <div className={`relative w-full max-w-sm bg-slate-900/90 border border-white/10 rounded-[2.5rem] p-8 shadow-2xl flex flex-col items-center overflow-hidden backdrop-blur-xl ${isClosing ? 'animate-pop-out' : 'animate-pop-in'}`}>
-                 <button onClick={handleClose} className="absolute top-5 right-5 p-2.5 bg-white/5 rounded-full text-slate-400 hover:text-white transition-all active:scale-90 z-20 border border-white/5">
+                 <button onClick={handleClose} className="absolute top-5 right-5 p-2.5 bg-white/5 rounded-full text-slate-400 hover:text-white transition-all active:scale-90 z-20 border border-white/5" aria-label="Kapat">
                      <X size={20} />
                  </button>
 
