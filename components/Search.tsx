@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Search as SearchIcon, MapPin, X } from 'lucide-react';
+import { Search as SearchIcon, MapPin, X, Loader2 } from 'lucide-react';
 import { GeoLocation } from '../types';
 import { searchCity } from '../services/weatherService';
 
@@ -20,10 +20,10 @@ const Search: React.FC<SearchProps> = ({ onSelect, onCurrentLocation }) => {
     const delayDebounce = setTimeout(async () => {
       if (query.length >= 2) {
         setLoading(true);
+        setIsOpen(true);
         const data = await searchCity(query);
         setResults(data);
         setLoading(false);
-        setIsOpen(true);
       } else {
         setResults([]);
         setIsOpen(false);
@@ -61,11 +61,14 @@ const Search: React.FC<SearchProps> = ({ onSelect, onCurrentLocation }) => {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Konum, sokak, mahalle..."
+          aria-label="Şehir veya konum ara"
           className="w-full bg-white/10 backdrop-blur-xl text-white pl-10 pr-12 py-3 rounded-2xl border border-white/10 focus:outline-none focus:border-white/30 focus:ring-1 focus:ring-white/20 placeholder-white/50 transition-all shadow-lg"
         />
         {query ? (
           <button 
             onClick={() => setQuery('')}
+            aria-label="Aramayı temizle"
+            title="Aramayı temizle"
             className="absolute right-3 text-white/50 hover:text-white"
           >
             <X size={18} />
@@ -73,6 +76,8 @@ const Search: React.FC<SearchProps> = ({ onSelect, onCurrentLocation }) => {
         ) : (
           <button 
             onClick={onCurrentLocation}
+            aria-label="Mevcut konumu kullan"
+            title="Mevcut konumu kullan"
             className="absolute right-3 text-white/50 hover:text-blue-400 transition-colors"
           >
             <MapPin size={20} />
@@ -80,20 +85,27 @@ const Search: React.FC<SearchProps> = ({ onSelect, onCurrentLocation }) => {
         )}
       </div>
 
-      {isOpen && results.length > 0 && (
+      {isOpen && (results.length > 0 || loading) && (
         <ul className="absolute top-full left-0 right-0 mt-2 bg-slate-900/90 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl max-h-60 overflow-y-auto no-scrollbar overflow-hidden z-[60]">
-          {results.map((loc) => (
-            <li
-              key={loc.id}
-              onClick={() => handleSelect(loc)}
-              className="px-4 py-3 hover:bg-white/10 cursor-pointer flex flex-col border-b border-white/5 last:border-none transition-colors"
-            >
-              <span className="font-medium text-white">{loc.name}</span>
-              <span className="text-xs text-white/50">
-                {loc.subtext || loc.country}
-              </span>
+          {loading ? (
+            <li className="px-4 py-4 flex items-center justify-center gap-3 text-white/50">
+              <Loader2 size={18} className="animate-spin text-blue-400" />
+              <span className="text-sm font-medium">Aranıyor...</span>
             </li>
-          ))}
+          ) : (
+            results.map((loc) => (
+              <li
+                key={loc.id}
+                onClick={() => handleSelect(loc)}
+                className="px-4 py-3 hover:bg-white/10 cursor-pointer flex flex-col border-b border-white/5 last:border-none transition-colors"
+              >
+                <span className="font-medium text-white">{loc.name}</span>
+                <span className="text-xs text-white/50">
+                  {loc.subtext || loc.country}
+                </span>
+              </li>
+            ))
+          )}
         </ul>
       )}
     </div>
