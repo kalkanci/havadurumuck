@@ -8,8 +8,20 @@ export default defineConfig(({ mode }) => {
       server: {
         port: 3000,
         host: '0.0.0.0',
+        cors: true,
+        headers: {
+          'Cache-Control': 'no-cache',
+        }
       },
-      plugins: [react()],
+      plugins: [
+        react({
+          babel: {
+            plugins: [
+              ['@babel/plugin-proposal-decorators', { legacy: true }],
+            ],
+          },
+        })
+      ],
       define: {
         'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
         'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY)
@@ -18,6 +30,38 @@ export default defineConfig(({ mode }) => {
         alias: {
           '@': path.resolve(__dirname, '.'),
         }
+      },
+      build: {
+        target: 'ES2020',
+        minify: 'terser',
+        terserOptions: {
+          compress: {
+            drop_console: mode === 'production',
+            pure_funcs: ['console.log', 'console.info'],
+          },
+        },
+        rollupOptions: {
+          output: {
+            manualChunks: {
+              'weather-api': ['./src/services/weatherService'],
+              'astronomy': ['./src/services/astronomyService'],
+              'components': ['./src/components/Background', './src/components/Search', './src/components/HourlyForecast'],
+            },
+            entryFileNames: 'js/[name].[hash].js',
+            chunkFileNames: 'js/[name].[hash].js',
+            assetFileNames: 'assets/[name].[hash][extname]'
+          },
+        },
+        sourcemap: mode === 'development',
+        reportCompressedSize: true,
+      },
+      preview: {
+        port: 4173,
+        strictPort: false,
+      },
+      optimizeDeps: {
+        include: ['react', 'react-dom', 'lucide-react'],
+        exclude: ['node_modules/.vite'],
       }
     };
 });

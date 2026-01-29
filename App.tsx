@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { Heart, Navigation, MapPin, ArrowUp, ArrowDown, RefreshCw, Calendar, CloudSun, Loader2, Settings } from 'lucide-react';
 import { GeoLocation, WeatherData, WeatherAlert, PublicHoliday, AppSettings, AstronomyData } from './types';
 import { fetchWeather, getDetailedAddress, fetchHolidays } from './services/weatherService';
@@ -112,18 +112,18 @@ const App: React.FC = () => {
     }
   }, [location]);
 
-  const haptic = (pattern?: number | number[]) => {
+  const haptic = useCallback((pattern?: number | number[]) => {
       if (settings.hapticsEnabled) {
           triggerHapticFeedback(pattern);
       }
-  };
+  }, [settings.hapticsEnabled]);
 
-  const loadAstronomy = async () => {
+  const loadAstronomy = useCallback(async () => {
       const data = await fetchAstronomyPicture();
       if (data) setCosmicData(data);
-  };
+  }, []);
 
-  const loadHolidays = async () => {
+  const loadHolidays = useCallback(async () => {
       if (!location || !location.countryCode) return;
       
       const year = new Date().getFullYear();
@@ -142,9 +142,9 @@ const App: React.FC = () => {
       });
 
       setUpcomingHolidays(relevant);
-  };
+  }, [location]);
 
-  const loadWeather = async (isRefresh = false) => {
+  const loadWeather = useCallback(async (isRefresh = false) => {
     if (!location) return;
     
     if (!isRefresh && !initialBoot) setLoading(true);
@@ -177,9 +177,9 @@ const App: React.FC = () => {
           }, 800);
       }
     }
-  };
+  }, [location, initialBoot, haptic]);
 
-  const handleCurrentLocation = () => {
+  const handleCurrentLocation = useCallback(() => {
     // If manually triggered later, show loading
     if (!initialBoot) setLoading(true);
     
@@ -219,9 +219,9 @@ const App: React.FC = () => {
         maximumAge: 0
       }
     );
-  };
+  }, [initialBoot, haptic]);
 
-  const handleLocationError = (msg: string) => {
+  const handleLocationError = useCallback((msg: string) => {
       // Fallback to Istanbul if GPS fails on boot
       if (initialBoot) {
           const defaultLoc = {
@@ -234,21 +234,21 @@ const App: React.FC = () => {
           setLoading(false);
           setGpsError(true);
       }
-  };
+  }, [initialBoot]);
 
-  const addFavorite = (loc: GeoLocation) => {
+  const addFavorite = useCallback((loc: GeoLocation) => {
      if (!favorites.some(f => f.id === loc.id)) {
         setFavorites([...favorites, loc]);
         haptic(30);
      }
-  };
+  }, [favorites, haptic]);
 
-  const removeFavorite = (id: number) => {
+  const removeFavorite = useCallback((id: number) => {
      setFavorites(favorites.filter(f => f.id !== id));
      haptic(30);
-  };
+  }, [favorites, haptic]);
 
-  const handleInstallClick = () => {
+  const handleInstallClick = useCallback(() => {
     if (deferredPrompt) {
       haptic(20);
       deferredPrompt.prompt();
@@ -259,16 +259,16 @@ const App: React.FC = () => {
         setDeferredPrompt(null);
       });
     }
-  };
+  }, [deferredPrompt, haptic]);
 
   // Pull to Refresh Logic
-  const handleTouchStart = (e: React.TouchEvent) => {
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
     if (window.scrollY === 0) {
       startY.current = e.touches[0].clientY;
     }
-  };
+  }, []);
 
-  const handleTouchMove = (e: React.TouchEvent) => {
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
     if (startY.current === 0) return;
     const currentY = e.touches[0].clientY;
     const diff = currentY - startY.current;
@@ -276,9 +276,8 @@ const App: React.FC = () => {
     if (diff > 0 && window.scrollY === 0) {
       pullDistance.current = diff;
     }
-  };
-
-  const handleTouchEnd = () => {
+  }, []);
+  const handleTouchEnd = useCallback(() => {
     if (pullDistance.current > PULL_THRESHOLD && window.scrollY === 0) {
       setRefreshing(true);
       haptic(50);
@@ -288,7 +287,7 @@ const App: React.FC = () => {
     }
     startY.current = 0;
     pullDistance.current = 0;
-  };
+  }, [haptic, loadWeather, loadHolidays, loadAstronomy]);
 
   // --- SPLASH SCREEN RENDER ---
   if (initialBoot) {
