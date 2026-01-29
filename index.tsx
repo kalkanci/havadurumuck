@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import './styles/responsive.css';
+import './src/styles/responsive.css';
 import App from './App';
 
 const rootElement = document.getElementById('root');
