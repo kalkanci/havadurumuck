@@ -497,10 +497,10 @@ const App: React.FC = () => {
 
                   {/* Condition & High/Low */}
                   <div className="mt-4 flex flex-col items-center gap-1">
-                     <p className="text-2xl font-medium text-blue-100 tracking-wide drop-shadow-lg flex items-center gap-2">
+                     <p className="text-xl font-medium text-blue-100 tracking-wide drop-shadow-lg flex items-center gap-2">
                         {getWeatherLabel(weather.current.weather_code)}
                      </p>
-                     <div className="flex items-center gap-4 text-sm font-semibold text-white/80 bg-black/10 px-4 py-1.5 rounded-xl backdrop-blur-sm border border-white/5 mt-2">
+                     <div className="flex items-center gap-4 text-base font-medium text-white/80 bg-black/10 px-4 py-1.5 rounded-xl backdrop-blur-sm border border-white/5 mt-2">
                          <span className="flex items-center gap-1"><ArrowUp size={14} className="text-red-400" /> {Math.round(weather.daily.temperature_2m_max[0])}°</span>
                          <div className="w-px h-3 bg-white/20"></div>
                          <span className="flex items-center gap-1"><ArrowDown size={14} className="text-blue-400" /> {Math.round(weather.daily.temperature_2m_min[0])}°</span>
@@ -514,7 +514,7 @@ const App: React.FC = () => {
                          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/10 hover:bg-white/15 active:scale-95 transition-all backdrop-blur-md border border-white/10 shadow-xl group"
                       >
                          <MapPin size={16} className="text-red-400 group-hover:animate-bounce" />
-                         <span className="text-sm font-bold text-white tracking-wide shadow-sm">
+                         <span className="text-base font-medium text-white tracking-wide shadow-sm">
                              {location.name}
                              {location.admin1 && location.name !== location.admin1 && (
                                  <span className="opacity-80 font-normal">, {location.admin1}</span>
@@ -586,19 +586,6 @@ const App: React.FC = () => {
           >
               <Calendar size={18} className={activeTab === 'forecast' ? "fill-white/20" : ""} />
               Uzun Vade
-          </button>
-
-          <button
-            onClick={() => {
-              triggerHapticFeedback(settings.hapticsEnabled);
-              window.open('https://futbol-tahmin-mvp.vercel.app', '_blank');
-            }}
-            title="Futbol Tahmin (Yeni Sekme)"
-            aria-label="Futbol Tahmin Sayfasını Aç"
-            className={`relative z-10 flex-1 flex items-center justify-center gap-2 py-3 rounded-full text-sm font-bold transition-colors duration-300 text-white/60 hover:text-white`}
-          >
-              <span className="text-lg">⚽</span>
-              Futbol
           </button>
         </div>
       </div>
