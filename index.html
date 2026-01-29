@@ -3,53 +3,105 @@
 <html lang="tr" class="dark">
   <head>
     <meta charset="UTF-8" />
-    <!-- Modern 3D Glassmorphism Weather Icon -->
-    <link rel="icon" type="image/png" href="/icon-192.png" />
-    <link rel="apple-touch-icon" href="/icon-192.png" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     
-    <!-- PWA Manifest Link (Critical for Installability) -->
+    <!-- SEO & Description -->
+    <meta name="description" content="Sinematik, mobil öncelikli ve akıllı tavsiyeler sunan gerçek zamanlı hava durumu deneyimi. Detaylı tahmin, hava uyarıları ve aktivite önerileri." />
+    <meta name="keywords" content="hava durumu, tahmin, weather, meteoroloji, atmosfer" />
+    <meta name="author" content="Atmosfer AI" />
+    
+    <!-- Viewport for Notch Support & No Zoom -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=5.0, user-scalable=yes" />
+    <meta name="color-scheme" content="dark light" />
+    
+    <!-- PWA Icons -->
+    <link rel="icon" type="image/png" href="/icon-192.png" sizes="192x192" />
+    <link rel="icon" type="image/png" href="/icon-512.png" sizes="512x512" />
+    <link rel="apple-touch-icon" href="/icon-192.png" />
+    <link rel="apple-touch-icon" href="/icon-512.png" sizes="512x512" />
+    
+    <!-- PWA Manifest (Critical for Installability) -->
     <link rel="manifest" href="/manifest.json" />
 
-    <!-- Viewport for Notch Support & No Zoom -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    
-    <!-- Translucent Status Bar Settings -->
-    <meta name="theme-color" content="#020617" />
+    <!-- Theme & Status Bar -->
+    <meta name="theme-color" content="#020617" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-title" content="Atmosfer">
+    <meta name="apple-mobile-web-app-title" content="Atmosfer" />
+    <meta name="msapplication-TileColor" content="#020617" />
+    <meta name="msapplication-TileImage" content="/icon-512.png" />
     
-    <title>Atmosfer AI Hava Durumu</title>
+    <!-- Performance -->
+    <link rel="preconnect" href="https://api.open-meteo.com" />
+    <link rel="preconnect" href="https://nominatim.openstreetmap.org" />
+    <link rel="dns-prefetch" href="https://air-quality-api.open-meteo.com" />
+    <link rel="dns-prefetch" href="https://date.nager.at" />
+    <link rel="dns-prefetch" href="https://apod.nasa.gov" />
+    
+    <title>Atmosfer AI - Hava Durumu</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
-        darkMode: 'class', // Enable class-based dark mode
+        darkMode: 'class',
         theme: {
           extend: {
             colors: {
               iosBlue: '#0A84FF',
-              iosDarkBg: '#020617', // Slate 950
+              iosDarkBg: '#020617'
+            },
+            animation: {
+              'fade-in-up': 'fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+              'pop-in': 'popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards',
+              'pop-out': 'popOut 0.2s cubic-bezier(0.4, 0, 0.2, 1) forwards',
+              'alert-pulse': 'alertPulse 2s infinite'
+            },
+            keyframes: {
+              fadeInUp: {
+                '0%': { opacity: '0', transform: 'translateY(20px) scale(0.98)' },
+                '100%': { opacity: '1', transform: 'translateY(0) scale(1)' }
+              },
+              popIn: {
+                '0%': { opacity: '0', transform: 'scale(0.85)' },
+                '50%': { opacity: '1', transform: 'scale(1.02)' },
+                '100%': { opacity: '1', transform: 'scale(1)' }
+              },
+              popOut: {
+                '0%': { opacity: '1', transform: 'scale(1)' },
+                '100%': { opacity: '0', transform: 'scale(0.9)' }
+              },
+              alertPulse: {
+                '0%': { boxShadow: '0 0 0 0 rgba(239, 68, 68, 0.4)' },
+                '70%': { boxShadow: '0 0 0 10px rgba(239, 68, 68, 0)' },
+                '100%': { boxShadow: '0 0 0 0 rgba(239, 68, 68, 0)' }
+              }
             }
           }
         }
       }
     </script>
     <style>
-      /* Hide scrollbar */
+      /* Scrollbar Hiding */
       .no-scrollbar::-webkit-scrollbar { display: none; }
       .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
       
+      /* Global Styles */
+      html { scroll-behavior: smooth; }
       body {
-        background-color: #020617; /* Rich Slate 950 */
+        background-color: #020617;
         color: white;
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         overscroll-behavior-y: none;
         -webkit-tap-highlight-color: transparent;
+        -webkit-user-select: none;
+        user-select: none;
+        -webkit-touch-callout: none;
       }
 
-      /* --- IOS Style Rich Glass Card (White/Translucent) --- */
+      /* Glass Card Effect */
       .glass-card {
-        background-color: rgba(30, 41, 59, 0.4); /* Slate-800 with transparency */
+        background-color: rgba(30, 41, 59, 0.4);
         backdrop-filter: blur(20px);
         -webkit-backdrop-filter: blur(20px);
         border: 1px solid rgba(255, 255, 255, 0.1);
@@ -57,8 +109,11 @@
         color: white;
         transition: transform 0.2s ease, background-color 0.2s ease;
       }
+      
+      .glass-card:active {
+        transform: scale(0.98);
+      }
 
-      /* Lighter variant for specific emphasis if needed */
       .glass-card-light {
         background-color: rgba(255, 255, 255, 0.08);
         backdrop-filter: blur(24px);
@@ -66,36 +121,41 @@
         border: 1px solid rgba(255, 255, 255, 0.15);
       }
 
-      /* --- Animations --- */
-      @keyframes fadeInUp {
-        0% { opacity: 0; transform: translateY(20px) scale(0.98); }
-        100% { opacity: 1; transform: translateY(0) scale(1); }
+      /* Safe Area Support */
+      @supports (padding: max(0px)) {
+        body { padding-left: max(0px, env(safe-area-inset-left)); padding-right: max(0px, env(safe-area-inset-right)); }
+        .safe-top { padding-top: max(1rem, env(safe-area-inset-top)); }
+        .safe-bottom { padding-bottom: max(1rem, env(safe-area-inset-bottom)); }
       }
-      .animate-fade-in-up { animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
 
-      @keyframes popIn {
-        0% { opacity: 0; transform: scale(0.85); }
-        50% { opacity: 1; transform: scale(1.02); }
-        100% { opacity: 1; transform: scale(1); }
+      /* Loading State */
+      .loading-shimmer {
+        animation: shimmer 2s infinite;
+        background: linear-gradient(90deg, rgba(255,255,255,.1), rgba(255,255,255,.05), rgba(255,255,255,.1));
+        background-size: 200% 100%;
       }
-      .animate-pop-in { animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
-
-      @keyframes popOut {
-        0% { opacity: 1; transform: scale(1); }
-        100% { opacity: 0; transform: scale(0.9); }
-      }
-      .animate-pop-out { animation: popOut 0.2s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
       
-      @keyframes alertPulse {
-        0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
-        70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
-        100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+      @keyframes shimmer {
+        0% { background-position: -200% 0; }
+        100% { background-position: 200% 0; }
       }
-      .animate-alert-pulse { animation: alertPulse 2s infinite; }
 
-      .weather-sun-glow {
-         background: radial-gradient(circle, rgba(255, 215, 0, 0.15) 0%, transparent 70%);
-         animation: sun-rotate 30s infinite linear;
+      /* Responsive Images */
+      img { max-width: 100%; height: auto; }
+
+      /* Smooth Transitions */
+      * { transition: background-color 0.2s ease, border-color 0.2s ease; }
+      button, a { transition: transform 0.1s ease, opacity 0.2s ease; }
+      
+      /* Mobile Optimizations */
+      @media (max-width: 640px) {
+        body { font-size: 16px; }
+        .glass-card { border-radius: 16px; }
+      }
+
+      /* High DPI Screen Support */
+      @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+        body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
       }
     </style>
 </head>
@@ -104,13 +164,26 @@
     <script type="module" src="/index.tsx"></script>
     
     <script>
+      // Service Worker Registration with improved error handling
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
           navigator.serviceWorker.register('/sw.js')
-            .then(reg => console.log('SW registered'))
-            .catch(err => console.log('SW failed', err));
+            .then(reg => {
+              console.log('✓ SW registered');
+              // Check for updates periodically
+              setInterval(() => reg.update(), 60000);
+            })
+            .catch(err => console.warn('✗ SW registration failed:', err));
         });
       }
+
+      // Prevent zooming on double tap
+      let lastTouchEnd = 0;
+      document.addEventListener('touchend', (event) => {
+        const now = Date.now();
+        if (now - lastTouchEnd <= 300) event.preventDefault();
+        lastTouchEnd = now;
+      }, false);
     </script>
   </body>
 </html>
