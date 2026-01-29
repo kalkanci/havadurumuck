@@ -34,11 +34,6 @@ export default defineConfig(({ mode }) => {
         },
         rollupOptions: {
           output: {
-            manualChunks: {
-              'weather-api': ['./src/services/weatherService'],
-              'astronomy': ['./src/services/astronomyService'],
-              'components': ['./src/components/Background', './src/components/Search', './src/components/HourlyForecast'],
-            },
             entryFileNames: 'js/[name].[hash].js',
             chunkFileNames: 'js/[name].[hash].js',
             assetFileNames: 'assets/[name].[hash][extname]'
