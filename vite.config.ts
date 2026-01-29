@@ -25,13 +25,7 @@ export default defineConfig(({ mode }) => {
       },
       build: {
         target: 'ES2020',
-        minify: 'terser',
-        terserOptions: {
-          compress: {
-            drop_console: mode === 'production',
-            pure_funcs: ['console.log', 'console.info'],
-          },
-        },
+        minify: 'esbuild',
         rollupOptions: {
           output: {
             entryFileNames: 'js/[name].[hash].js',
