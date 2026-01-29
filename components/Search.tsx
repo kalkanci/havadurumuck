@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Search as SearchIcon, MapPin, X } from 'lucide-react';
+import { Search as SearchIcon, MapPin, X, Loader2 } from 'lucide-react';
 import { GeoLocation } from '../types';
 import { searchCity } from '../services/weatherService';
 
@@ -53,19 +53,25 @@ const Search: React.FC<SearchProps> = ({ onSelect, onCurrentLocation }) => {
   return (
     <div ref={wrapperRef} className="relative w-full z-50">
       <div className="relative flex items-center">
-        <div className="absolute left-3 text-zinc-500 dark:text-zinc-400">
-          <SearchIcon size={20} />
-        </div>
         <input
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Konum, sokak, mahalle..."
+          aria-label="Şehir veya bölge ara"
           className="w-full bg-white/10 backdrop-blur-xl text-white pl-10 pr-12 py-3 rounded-2xl border border-white/10 focus:outline-none focus:border-white/30 focus:ring-1 focus:ring-white/20 placeholder-white/50 transition-all shadow-lg"
         />
+        <div className="absolute left-3 text-zinc-500 dark:text-zinc-400 pointer-events-none">
+          {loading ? (
+            <Loader2 size={20} className="animate-spin text-blue-400" />
+          ) : (
+            <SearchIcon size={20} />
+          )}
+        </div>
         {query ? (
           <button 
             onClick={() => setQuery('')}
+            aria-label="Aramayı temizle"
             className="absolute right-3 text-white/50 hover:text-white"
           >
             <X size={18} />
@@ -73,6 +79,7 @@ const Search: React.FC<SearchProps> = ({ onSelect, onCurrentLocation }) => {
         ) : (
           <button 
             onClick={onCurrentLocation}
+            aria-label="Mevcut konumu kullan"
             className="absolute right-3 text-white/50 hover:text-blue-400 transition-colors"
           >
             <MapPin size={20} />
