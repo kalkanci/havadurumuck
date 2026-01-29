@@ -82,56 +82,155 @@
       }
     </script>
     <style>
+      /* CSS Custom Properties */
+      :root {
+        /* Colors - Weather Context */
+        --color-clear: #FFD700;        /* Sunny */
+        --color-cloudy: #A0AEC0;       /* Cloudy */
+        --color-rainy: #3B82F6;        /* Rainy */
+        --color-severe: #EF4444;       /* Severe Weather */
+        --color-bg: #020617;
+        --color-bg-secondary: #0f172a;
+        --color-text: #ffffff;
+        --color-text-secondary: #cbd5e1;
+        --color-text-muted: #94a3b8;
+        
+        /* Spacing */
+        --space-xs: 0.25rem;
+        --space-sm: 0.5rem;
+        --space-md: 1rem;
+        --space-lg: 1.5rem;
+        --space-xl: 2rem;
+        --space-2xl: 3rem;
+        
+        /* Typography */
+        --font-size-xs: 0.75rem;
+        --font-size-sm: 0.875rem;
+        --font-size-base: 1rem;
+        --font-size-lg: 1.125rem;
+        --font-size-xl: 1.25rem;
+        --font-size-2xl: 1.5rem;
+        --font-size-3xl: 1.875rem;
+        --font-size-4xl: 2.25rem;
+        --font-size-5xl: 3rem;
+        
+        --font-weight-light: 300;
+        --font-weight-normal: 400;
+        --font-weight-medium: 500;
+        --font-weight-semibold: 600;
+        --font-weight-bold: 700;
+        
+        /* Line Height */
+        --line-height-tight: 1.25;
+        --line-height-normal: 1.5;
+        --line-height-relaxed: 1.75;
+      }
+
       /* Scrollbar Hiding */
       .no-scrollbar::-webkit-scrollbar { display: none; }
       .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
       
       /* Global Styles */
-      html { scroll-behavior: smooth; }
+      html { 
+        scroll-behavior: smooth;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+      
       body {
-        background-color: #020617;
-        color: white;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        background-color: var(--color-bg);
+        color: var(--color-text);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        font-size: var(--font-size-base);
+        line-height: var(--line-height-normal);
+        font-weight: var(--font-weight-normal);
         overscroll-behavior-y: none;
         -webkit-tap-highlight-color: transparent;
         -webkit-user-select: none;
         user-select: none;
         -webkit-touch-callout: none;
+        letter-spacing: 0.3px;
       }
 
-      /* Glass Card Effect */
+      /* Typography */
+      h1, h2, h3, h4, h5, h6 {
+        font-weight: var(--font-weight-bold);
+        line-height: var(--line-height-tight);
+        margin: 0;
+        letter-spacing: -0.5px;
+      }
+
+      h1 { font-size: var(--font-size-5xl); }
+      h2 { font-size: var(--font-size-4xl); }
+      h3 { font-size: var(--font-size-3xl); }
+      h4 { font-size: var(--font-size-2xl); }
+      h5 { font-size: var(--font-size-xl); }
+      h6 { font-size: var(--font-size-lg); }
+
+      p {
+        margin: 0;
+        color: var(--color-text-secondary);
+      }
+
+      .text-muted { color: var(--color-text-muted); }
+      .text-sm { font-size: var(--font-size-sm); }
+      .text-xs { font-size: var(--font-size-xs); }
+
+      /* Glass Card Effect - Improved */
       .glass-card {
-        background-color: rgba(30, 41, 59, 0.4);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        background-color: rgba(30, 41, 59, 0.5);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 20px;
+        box-shadow: 
+          0 8px 32px rgba(0, 0, 0, 0.3),
+          inset 1px 1px 0 rgba(255, 255, 255, 0.05);
         color: white;
-        transition: transform 0.2s ease, background-color 0.2s ease;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        will-change: transform;
+        padding: var(--space-lg);
+      }
+      
+      .glass-card:hover {
+        background-color: rgba(30, 41, 59, 0.6);
+        border-color: rgba(255, 255, 255, 0.15);
+        box-shadow: 
+          0 12px 40px rgba(0, 0, 0, 0.4),
+          inset 1px 1px 0 rgba(255, 255, 255, 0.08);
       }
       
       .glass-card:active {
         transform: scale(0.98);
+        transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
       }
 
       .glass-card-light {
-        background-color: rgba(255, 255, 255, 0.08);
-        backdrop-filter: blur(24px);
-        -webkit-backdrop-filter: blur(24px);
-        border: 1px solid rgba(255, 255, 255, 0.15);
+        background-color: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(28px);
+        -webkit-backdrop-filter: blur(28px);
+        border: 1px solid rgba(255, 255, 255, 0.18);
       }
 
       /* Safe Area Support */
       @supports (padding: max(0px)) {
-        body { padding-left: max(0px, env(safe-area-inset-left)); padding-right: max(0px, env(safe-area-inset-right)); }
-        .safe-top { padding-top: max(1rem, env(safe-area-inset-top)); }
-        .safe-bottom { padding-bottom: max(1rem, env(safe-area-inset-bottom)); }
+        body { 
+          padding-left: max(0px, env(safe-area-inset-left)); 
+          padding-right: max(0px, env(safe-area-inset-right)); 
+        }
+        .safe-top { padding-top: max(var(--space-md), env(safe-area-inset-top)); }
+        .safe-bottom { padding-bottom: max(var(--space-md), env(safe-area-inset-bottom)); }
       }
 
-      /* Loading State */
+      /* Loading State - Enhanced Shimmer */
       .loading-shimmer {
         animation: shimmer 2s infinite;
-        background: linear-gradient(90deg, rgba(255,255,255,.1), rgba(255,255,255,.05), rgba(255,255,255,.1));
+        background: linear-gradient(
+          90deg, 
+          transparent,
+          rgba(255, 255, 255, 0.08),
+          transparent
+        );
         background-size: 200% 100%;
       }
       
@@ -141,11 +240,69 @@
       }
 
       /* Responsive Images */
-      img { max-width: 100%; height: auto; }
+      img { 
+        max-width: 100%; 
+        height: auto;
+        display: block;
+      }
+
+      /* Button Styles */
+      button {
+        background-color: rgba(10, 132, 255, 0.9);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        padding: var(--space-md) var(--space-lg);
+        font-size: var(--font-size-base);
+        font-weight: var(--font-weight-medium);
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        min-height: 44px;
+        min-width: 44px;
+      }
+
+      button:hover {
+        background-color: rgba(10, 132, 255, 1);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 16px rgba(10, 132, 255, 0.4);
+      }
+
+      button:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 8px rgba(10, 132, 255, 0.3);
+      }
+
+      /* Input Styles */
+      input, textarea {
+        background-color: rgba(30, 41, 59, 0.6);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 12px;
+        padding: var(--space-md);
+        font-size: var(--font-size-base);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        font-family: inherit;
+      }
+
+      input:focus, textarea:focus {
+        outline: none;
+        background-color: rgba(30, 41, 59, 0.8);
+        border-color: rgba(10, 132, 255, 0.6);
+        box-shadow: 0 0 0 2px rgba(10, 132, 255, 0.1);
+      }
 
       /* Smooth Transitions */
-      * { transition: background-color 0.2s ease, border-color 0.2s ease; }
-      button, a { transition: transform 0.1s ease, opacity 0.2s ease; }
+      * { 
+        transition: background-color 0.3s ease, 
+                    border-color 0.3s ease,
+                    color 0.3s ease;
+      }
+      
+      button, a {
+        transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), 
+                    opacity 0.3s ease,
+                    box-shadow 0.3s ease;
+      }
       
       /* Mobile Optimizations */
       @media (max-width: 640px) {
@@ -156,6 +313,80 @@
       /* High DPI Screen Support */
       @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
         body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+      }
+
+      /* Accessibility - Focus Visible */
+      :focus-visible {
+        outline: 2px solid #0A84FF;
+        outline-offset: 2px;
+      }
+
+      button:focus-visible, a:focus-visible, input:focus-visible {
+        outline: 2px solid #0A84FF;
+        outline-offset: 2px;
+      }
+
+      /* Reduced Motion Support */
+      @media (prefers-reduced-motion: reduce) {
+        * {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+          scroll-behavior: auto !important;
+        }
+      }
+
+      /* Dark Mode Explicit */
+      @media (prefers-color-scheme: dark) {
+        body {
+          background-color: var(--color-bg);
+          color: var(--color-text);
+        }
+      }
+
+      /* Touch Device Optimizations */
+      @media (hover: none) and (pointer: coarse) {
+        button, a, input {
+          min-height: 48px;
+          min-width: 48px;
+        }
+
+        .glass-card {
+          -webkit-tap-highlight-color: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Larger touch targets */
+        [role="button"] {
+          padding: var(--space-md) var(--space-lg);
+        }
+      }
+
+      /* Print Styles */
+      @media print {
+        .no-print { display: none !important; }
+        
+        body { background-color: white; color: black; }
+        .glass-card { background-color: white; border: 1px solid #ccc; }
+        
+        .glass-card, a {
+          page-break-inside: avoid;
+        }
+      }
+
+      /* Skip to Content Link */
+      .skip-link {
+        position: absolute;
+        top: -40px;
+        left: 0;
+        background: #0A84FF;
+        color: white;
+        padding: 8px;
+        text-decoration: none;
+        z-index: 100;
+      }
+
+      .skip-link:focus {
+        top: 0;
       }
     </style>
 </head>

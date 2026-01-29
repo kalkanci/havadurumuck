@@ -1,5 +1,61 @@
 /* Mobile-First Responsive Design */
 
+/* Enhanced Animations for Weather App */
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    opacity: 1;
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+  }
+  50% {
+    opacity: 0.8;
+    box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+  }
+}
+
+@keyframes weatherSlideRight {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
 /* Base Styles for Mobile */
 :root {
   --safe-area-top: env(safe-area-inset-top, 0);
@@ -7,13 +63,21 @@
   --safe-area-left: env(safe-area-inset-left, 0);
   --safe-area-right: env(safe-area-inset-right, 0);
   
-  /* Color Variables */
+  /* Color Variables - Weather Context */
   --color-bg: #020617;
   --color-bg-secondary: #0f172a;
-  --color-glass: rgba(30, 41, 59, 0.4);
-  --color-glass-light: rgba(255, 255, 255, 0.08);
+  --color-glass: rgba(30, 41, 59, 0.5);
+  --color-glass-light: rgba(255, 255, 255, 0.1);
   --color-text: #ffffff;
-  --color-text-secondary: #d1d5db;
+  --color-text-secondary: #cbd5e1;
+  --color-text-muted: #94a3b8;
+  
+  /* Weather Colors */
+  --color-sunny: #FFD700;
+  --color-cloudy: #A0AEC0;
+  --color-rainy: #3B82F6;
+  --color-severe: #EF4444;
+  --color-warning: #F59E0B;
   
   /* Spacing */
   --spacing-xs: 0.25rem;
@@ -37,6 +101,11 @@
   --font-size-xl: 1.25rem;
   --font-size-2xl: 1.5rem;
   --font-size-3xl: 1.875rem;
+  
+  /* Transitions */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 500ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Container Queries for Responsive Behavior */
@@ -59,7 +128,10 @@
 /* Mobile Optimizations */
 @media (max-width: 640px) {
   html { font-size: 16px; } /* Prevent iOS zoom */
-  body { padding-left: var(--safe-area-left); padding-right: var(--safe-area-right); }
+  body { 
+    padding-left: var(--safe-area-left); 
+    padding-right: var(--safe-area-right); 
+  }
   
   .safe-area-top { padding-top: var(--safe-area-top, 1rem); }
   .safe-area-bottom { padding-bottom: var(--safe-area-bottom, 1rem); }
@@ -67,34 +139,79 @@
   /* Glass cards for mobile */
   .glass-card {
     border-radius: var(--radius-lg);
-    padding: var(--spacing-md);
+    padding: var(--spacing-lg);
     margin-bottom: var(--spacing-md);
+    animation: slideInUp var(--transition-base);
+  }
+
+  /* Interactive state for cards */
+  .glass-card:active {
+    background-color: rgba(30, 41, 59, 0.7);
+    transform: scale(0.98);
+    transition: all var(--transition-fast);
   }
 
   /* Text sizing for mobile */
-  .heading-mobile { font-size: var(--font-size-2xl); font-weight: 700; }
+  .heading-mobile { 
+    font-size: var(--font-size-2xl); 
+    font-weight: 700;
+    animation: slideInDown var(--transition-base);
+  }
   .text-mobile { font-size: var(--font-size-md); }
   .text-small-mobile { font-size: var(--font-size-sm); }
   
   /* Spacing for mobile */
   .gap-mobile { gap: var(--spacing-md); }
-  .p-mobile { padding: var(--spacing-md); }
-  .px-mobile { padding-left: var(--spacing-md); padding-right: var(--spacing-md); }
+  .p-mobile { padding: var(--spacing-lg); }
+  .px-mobile { padding-left: var(--spacing-lg); padding-right: var(--spacing-lg); }
   .py-mobile { padding-top: var(--spacing-md); padding-bottom: var(--spacing-md); }
   
-  /* Button sizing for mobile (minimum 44x44 touch target) */
+  /* Button sizing for mobile (minimum 48x48 touch target) */
   .btn-mobile {
-    min-height: 44px;
-    min-width: 44px;
+    min-height: 48px;
+    min-width: 48px;
     padding: var(--spacing-md) var(--spacing-lg);
     font-size: var(--font-size-md);
+    border-radius: var(--radius-lg);
+    font-weight: 600;
+    transition: all var(--transition-base);
+  }
+
+  .btn-mobile:active {
+    transform: scale(0.95);
   }
 
   /* Grid for mobile (single column) */
   .grid-mobile {
     display: grid;
     grid-template-columns: 1fr;
-    gap: var(--spacing-md);
+    gap: var(--spacing-lg);
+  }
+
+  /* Weather card specific */
+  .weather-card {
+    animation: fadeInScale var(--transition-base);
+  }
+
+  /* Staggered animations for lists */
+  .weather-list > * {
+    animation: slideInUp var(--transition-base);
+  }
+
+  .weather-list > *:nth-child(1) { animation-delay: 0ms; }
+  .weather-list > *:nth-child(2) { animation-delay: 50ms; }
+  .weather-list > *:nth-child(3) { animation-delay: 100ms; }
+  .weather-list > *:nth-child(4) { animation-delay: 150ms; }
+  .weather-list > *:nth-child(5) { animation-delay: 200ms; }
+
+  /* Alert specific styling */
+  .alert-severe {
+    animation: pulseGlow 3s infinite;
+    border-left: 4px solid var(--color-severe);
+  }
+
+  .alert-warning {
+    border-left: 4px solid var(--color-warning);
   }
 
   /* Flex column for mobile */
