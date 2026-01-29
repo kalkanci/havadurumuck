@@ -1,261 +1,261 @@
-# 🌦️ Havadurumuck - Premium Weather Application
+# 🌦️ Havadurumuck - Premium Hava Durumu Uygulaması
 
 <div align="center">
-  <h3>Advanced Weather Intelligence with Forecasting & Real-time Monitoring</h3>
+  <h3>Gelişmiş Hava Tahmini, Tahminler ve Gerçek Zamanlı Takip</h3>
   <p>
     <strong>React 19</strong> • <strong>TypeScript</strong> • <strong>Vite</strong> • <strong>Tailwind CSS</strong> • <strong>PWA</strong>
   </p>
   <p>
-    <a href="https://havadurumuck.vercel.app" target="_blank">🌐 Live Demo</a> •
-    <a href="#features">✨ Features</a> •
-    <a href="#installation">⚙️ Setup</a> •
-    <a href="#api">🔌 APIs</a>
+    <a href="https://havadurumuck.vercel.app" target="_blank">🌐 Canlı Demo</a> •
+    <a href="#özellikler">✨ Özellikler</a> •
+    <a href="#kurulum">⚙️ Kurulum</a> •
+    <a href="#api">🔌 API'lar</a>
   </p>
 </div>
 
 ---
 
-## 🎯 Overview
+## 🎯 Hakkında
 
-**Havadurumuck** (Turkish: "What's the weather like?") is a cutting-edge weather application providing real-time weather data, 16-day forecasts, air quality monitoring, and integrated sports prediction tools. Built with modern web technologies and optimized for mobile-first experiences.
+**Havadurumuck** (Türkçe: "Hava nasıl?") gerçek zamanlı hava durumu verileri, 16 günlük tahminler, hava kalitesi takibi ve entegre spor tahmin araçları sağlayan son teknoloji hava durumu uygulamasıdır. Modern web teknolojileri ile oluşturulmuş ve mobil cihazlara tam olarak uyarlanmıştır.
 
-### Key Highlights
-- 🎨 **Modern Design**: Glass-morphism UI with smooth animations
-- 📱 **Mobile-First**: Fully responsive across all devices
-- ♿ **Accessible**: WCAG 2.1 AA compliant
-- 🚀 **High Performance**: 60fps animations, optimized bundles
-- 🔒 **Privacy-First**: No user tracking, local storage only
-- ⚽ **Multi-Feature**: Weather + Sports predictions integration
-
----
-
-## ✨ Features
-
-### Core Weather Features
-- **Current Weather**: Real-time conditions with detailed metrics
-- **16-Day Forecast**: Detailed daily forecasts with precipitation probability
-- **Hourly Forecast**: Hour-by-hour breakdown for the next 48 hours
-- **Air Quality**: AQI index, pollutants (PM2.5, PM10, O3, NO2)
-- **Weather Alerts**: Real-time severe weather notifications
-- **Location Search**: Global location search with autocomplete
-- **Favorite Locations**: Save and manage multiple weather locations
-
-### Advanced Insights
-- **Golden Hour Calculation**: Perfect photography time predictions
-- **Holiday Calendar**: Upcoming public holidays (30+ countries)
-- **Activity Score**: Personalized activity recommendations
-- **Weather Advice**: AI-powered weather insights & clothing suggestions
-- **Astronomy**: Daily NASA APOD (Astronomy Picture of the Day)
-- **Spotify Integration**: Weather-based playlist recommendations
-
-### Technical Features
-- **Progressive Web App**: Installable on any device
-- **Offline Support**: Service Worker with multi-strategy caching
-- **Dark Mode**: Automatic dark/light mode switching
-- **Accessibility**: Full keyboard navigation, screen reader support
-- **Responsive Design**: Perfect on mobile, tablet, and desktop
-- **Performance**: Optimized animations, lazy loading, code splitting
-
-### Sports Integration
-- **⚽ Football Predictions**: Integrated futbol-tahmin-mvp link
-- **One-Click Navigation**: Direct access to sports betting predictions
-- **Haptic Feedback**: Mobile vibration on app interactions
+### Temel Özellikler
+- 🎨 **Modern Tasarım**: Cam morfoloji UI ile yumuşak animasyonlar
+- 📱 **Mobil Uyumlu**: Tüm cihazlarda tamamen responsive
+- ♿ **Erişilebilir**: WCAG 2.1 AA uyumluluk
+- 🚀 **Yüksek Performans**: 60fps animasyonlar, optimize edilmiş paketler
+- 🔒 **Gizlilik Odaklı**: Kullanıcı takibi yok, yerel depolama
+- ⚽ **Multi-Özellik**: Hava durumu + Futbol tahminleri entegrasyonu
 
 ---
 
-## 🚀 Quick Start
+## ✨ Özellikler
 
-### Prerequisites
-- **Node.js** 18+ 
-- **npm** or **pnpm**
-- **Gemini API Key** (optional, for AI features)
+### Temel Hava Durumu Özellikleri
+- **Güncel Hava Durumu**: Gerçek zamanlı koşullar ile detaylı metrikler
+- **16 Günlük Tahmin**: Her gün için detaylı tahminler ve yağış olasılığı
+- **Saatlik Tahmin**: Sonraki 48 saat için saatlik tahminler
+- **Hava Kalitesi**: AQI indeksi, kirleticiler (PM2.5, PM10, O3, NO2)
+- **Hava Uyarıları**: Gerçek zamanlı şiddetli hava uyarıları
+- **Konum Arama**: Küresel konum araması otomatik tamamlama ile
+- **Favori Konumlar**: Birden fazla konum kaydet ve yönet
 
-### Installation
+### Gelişmiş İçgörüler
+- **Golden Hour Hesaplaması**: Mükemmel fotoğrafçılık zamanları
+- **Tatil Takvimi**: Gelecek tatiller (30+ ülke)
+- **Aktivite Puanı**: Kişiselleştirilmiş aktivite önerileri
+- **Hava Tavsiyeleri**: Yapay zeka tahminli hava içgörüleri
+- **Astronomi**: Günlük NASA APOD (Astronomy Picture of the Day)
+- **Spotify Entegrasyonu**: Havaya göre playlista önerileri
+
+### Teknik Özellikler
+- **Progressive Web App**: Herhangi bir cihaza kurulabilir
+- **Çevrimdışı Destek**: Service Worker ile çok stratejili caching
+- **Karanlık Mod**: Otomatik ışık/karanlık mod değişimi
+- **Erişilebilirlik**: Tam klavye navigasyonu, ekran okuyucu desteği
+- **Responsive Tasarım**: Mobil, tablet ve masaüstünde mükemmel
+- **Performans**: Optimize edilmiş animasyonlar, lazy loading, kod bölündü
+
+### Spor Entegrasyonu
+- **⚽ Futbol Tahminleri**: futbol-tahmin-mvp uygulamasına direkt erişim
+- **Bir Tıkla Erişim**: Spor tahmin uygulamasına kolay navigasyon
+- **Haptik Geri Bildirim**: Mobil cihazlarda titreşim geri bildirimi
+
+---
+
+## 🚀 Hızlı Başlangıç
+
+### Gereksinimler
+- **Node.js** 18+
+- **npm** veya **pnpm**
+- **Gemini API Anahtarı** (opsiyonel, AI özellikleri için)
+
+### Kurulum
 
 ```bash
-# Clone the repository
+# Repoyu klonla
 git clone https://github.com/kalkanci/havadurumuck.git
 cd havadurumuck
 
-# Install dependencies
+# Bağımlılıkları yükle
 npm install
 
-# Set up environment variables
-# Copy .env.local.example to .env.local
+# Ortam değişkenlerini ayarla
+# .env.local.example'ı .env.local'a kopyala
 cp .env.local.example .env.local
 
-# Add your Gemini API key
-# Edit .env.local and set: VITE_GEMINI_API_KEY=your_key_here
+# Gemini API anahtarını ekle
+# .env.local'ı düzenle ve ayarla: VITE_GEMINI_API_KEY=senin_anahtarın
 
-# Start development server
+# Geliştirme sunucusunu başlat
 npm run dev
 
-# Build for production
+# Üretim için build et
 npm run build
 
-# Preview production build
+# Üretim build'i önizle
 npm run preview
 ```
 
-### Environment Variables
+### Ortam Değişkenleri
 
 ```env
-VITE_GEMINI_API_KEY=your_gemini_api_key
+VITE_GEMINI_API_KEY=gemini_api_anahtarın
 VITE_API_BASE_URL=https://api.open-meteo.com/v1
 ```
 
 ---
 
-## 🔌 API Integration
+## 🔌 API Entegrasyonu
 
-### External APIs
-| API | Purpose | Free Tier |
-|-----|---------|-----------|
-| [Open-Meteo](https://open-meteo.com) | Weather Data, Forecasts, Air Quality | ✅ Yes |
-| [Nominatim](https://nominatim.org) | Location Search & Geocoding | ✅ Yes |
-| [Nager.at](https://nager.at) | Public Holidays (40+ countries) | ✅ Yes |
-| [NASA APIs](https://api.nasa.gov) | Astronomy Picture of the Day | ✅ Yes |
-| [Google Gemini](https://ai.google.dev) | AI Weather Insights | 🆓 Free Trial |
+### Harici API'lar
+| API | Amaç | Ücretsiz |
+|-----|------|---------|
+| [Open-Meteo](https://open-meteo.com) | Hava Verileri, Tahminler, Hava Kalitesi | ✅ Evet |
+| [Nominatim](https://nominatim.org) | Konum Arama & Jeolokasyon | ✅ Evet |
+| [Nager.at](https://nager.at) | Kamu Tatilleri (40+ ülke) | ✅ Evet |
+| [NASA API'ları](https://api.nasa.gov) | Günün Astronomi Fotoğrafı | ✅ Evet |
+| [Google Gemini](https://ai.google.dev) | Yapay Zeka Hava İçgörüleri | 🆓 Deneme |
 
-### Architecture
-- **Multi-Strategy Caching**: 
-  - Cache First: Static assets
-  - Stale-While-Revalidate: API responses
-  - Network First: HTML pages
-- **Response Caching**: 15-minute TTL on API calls
-- **Error Handling**: Graceful fallbacks, offline modes
+### Mimari
+- **Çok Stratejili Caching**:
+  - Cache First: Statik varlıklar
+  - Stale-While-Revalidate: API yanıtları
+  - Network First: HTML sayfaları
+- **Yanıt Caching**: API çağrılarında 15 dakikalık TTL
+- **Hata Yönetimi**: Zarif fallback'ler, çevrimdışı modlar
 
 ---
 
-## 🎨 Design System
+## 🎨 Tasarım Sistemi
 
-### Typography
+### Tipografi
 ```
-H1: 2rem (32px), weight 700
-H2: 1.5rem (24px), weight 700
-H3: 1.25rem (20px), weight 600
-Body: 1rem (16px), weight 400
-Small: 0.875rem (14px), weight 400
-```
-
-### Color Palette
-```
-Primary:    #00d4aa (Teal) - Success, recommendations
-Secondary:  #fbbf24 (Gold) - Confidence, highlights
-Warning:    #f87171 (Red)  - Alerts, important
-Info:       #3b82f6 (Blue) - Information
-Success:    #4ade80 (Green) - Positive outcomes
+H1: 2rem (32px), ağırlık 700
+H2: 1.5rem (24px), ağırlık 700
+H3: 1.25rem (20px), ağırlık 600
+Body: 1rem (16px), ağırlık 400
+Small: 0.875rem (14px), ağırlık 400
 ```
 
-### Spacing
-- **Base Unit**: 4px
-- **Scale**: xs(4px) → sm(8px) → md(16px) → lg(24px) → xl(32px) → 2xl(48px)
+### Renk Paleti
+```
+Birincil:    #00d4aa (Turkuaz) - Başarı, öneriler
+İkincil:     #fbbf24 (Altın) - Güven, vurgular
+Uyarı:       #f87171 (Kırmızı) - Uyarılar, önemli
+Bilgi:       #3b82f6 (Mavi) - Bilgi
+Başarı:      #4ade80 (Yeşil) - Pozitif sonuçlar
+```
 
-### Animations
-- **Fast**: 150ms, **Base**: 250ms, **Slow**: 350ms
+### Aralık
+- **Temel Birim**: 4px
+- **Ölçek**: xs(4px) → sm(8px) → md(16px) → lg(24px) → xl(32px) → 2xl(48px)
+
+### Animasyonlar
+- **Hızlı**: 150ms, **Standart**: 250ms, **Yavaş**: 350ms
 - **Easing**: cubic-bezier(0.4, 0, 0.2, 1)
-- **Accessibility**: Respects `prefers-reduced-motion`
+- **Erişilebilirlik**: `prefers-reduced-motion` desteği
 
 ---
 
-## ♿ Accessibility
+## ♿ Erişilebilirlik
 
-### WCAG 2.1 AA Compliance ✅
-- **Color Contrast**: 7:1 text, 4.5:1 UI components
-- **Focus States**: Visible outline (2px)
-- **Keyboard Navigation**: Full Tab/Enter/Space/Escape support
-- **Screen Readers**: Semantic HTML, ARIA labels, live regions
-- **Motion Support**: Reduced motion mode, smooth transitions
-- **Touch Targets**: 48x48px minimum buttons
-- **High Contrast**: Support for forced colors mode
+### WCAG 2.1 AA Uyumluluk ✅
+- **Renk Kontrastı**: 7:1 metin, 4.5:1 UI bileşenleri
+- **Odak Durumları**: Görünür outline (2px)
+- **Klavye Navigasyonu**: Tam Tab/Enter/Boşluk/Escape desteği
+- **Ekran Okuyucu**: Semantik HTML, ARIA etiketleri, canlı bölgeler
+- **Hareket Desteği**: Azaltılmış hareket modu, yumuşak geçişler
+- **Dokunma Hedefleri**: Minimum 48x48px düğmeler
+- **Yüksek Kontrast**: Zorunlu renkler modu desteği
 
-### Accessibility Features
-- Skip-to-content link
-- Semantic HTML (`<article>`, `<button>`, `<main>`)
-- ARIA labels and descriptions
-- Live regions for dynamic content
-- Keyboard accessible modals
-- Focus management
-- Alternative text for icons
-
----
-
-## 📱 Responsive Design
-
-### Breakpoints
-| Device | Width | Optimization |
-|--------|-------|--------------|
-| Mobile | <640px | Single column, full-width cards |
-| Tablet | 641-1024px | 2-column grid, enhanced padding |
-| Desktop | 1025px+ | 3-column grid, max-width container |
-
-### Mobile Optimizations
-- 48x48px touch targets
-- Safe-area-inset support (notched devices)
-- Horizontal scroll for filters
-- Optimized font sizes (no zoom needed)
-- Bottom navigation for easy thumb reach
-- Haptic feedback support
+### Erişilebilirlik Özellikleri
+- İçeriğe atla bağlantısı
+- Semantik HTML (`<article>`, `<button>`, `<main>`)
+- ARIA etiketleri ve açıklamalar
+- Dinamik içerik için canlı bölgeler
+- Erişilebilir modallar
+- Odak yönetimi
+- İkonlar için alternatif metin
 
 ---
 
-## 🏗️ Architecture
+## 📱 Responsive Tasarım
 
-### Project Structure
+### Kırılma Noktaları
+| Cihaz | Genişlik | Optimizasyon |
+|--------|---------|--------------|
+| Mobil | <640px | Tek sütun, tam genişlikli kartlar |
+| Tablet | 641-1024px | 2 sütun grid, geliştirilmiş padding |
+| Masaüstü | 1025px+ | 3 sütun grid, max-width konteyner |
+
+### Mobil Optimizasyonları
+- 48x48px dokunma hedefleri
+- Safe-area-inset desteği (çentiği olan cihazlar)
+- Filtreler için yatay kaydırma
+- Optimize edilmiş yazı boyutları (zoom gerekli değil)
+- Alt navigasyon kolay erişim için
+- Haptik geri bildirim desteği
+
+---
+
+## 🏗️ Mimari
+
+### Proje Yapısı
 ```
 havadurumuck/
-├── public/              # Static assets, SW, manifest
+├── public/              # Statik varlıklar, SW, manifest
 │   ├── sw.js           # Service Worker
-│   └── manifest.json   # PWA Manifest
+│   └── manifest.json   # PWA Manifestosu
 ├── src/
-│   ├── components/     # React components
-│   ├── services/       # API services
-│   ├── utils/          # Helper functions
+│   ├── components/     # React bileşenleri
+│   ├── services/       # API servisleri
+│   ├── utils/          # Yardımcı fonksiyonlar
 │   ├── styles/         # CSS (responsive, accessibility)
-│   ├── App.tsx         # Main app component
-│   └── main.tsx        # Entry point
-├── App.tsx             # Root component
-├── vite.config.ts      # Vite configuration
-├── tsconfig.json       # TypeScript config
-└── package.json        # Dependencies
+│   ├── App.tsx         # Ana app bileşeni
+│   └── main.tsx        # Giriş noktası
+├── App.tsx             # Kök bileşeni
+├── vite.config.ts      # Vite konfigürasyonu
+├── tsconfig.json       # TypeScript konfigürasyonu
+└── package.json        # Bağımlılıklar
 ```
 
-### Component Hierarchy
+### Bileşen Hiyerarşisi
 ```
-App (596 lines)
-├── Background (animated background)
-├── Search (location search)
-├── WeatherAlerts (real-time alerts)
-├── HourlyForecast (48-hour breakdown)
-├── DetailsGrid (wind, humidity, pressure, UV)
-├── AirQualityCard (AQI monitoring)
-├── GoldenHourCard (photography times)
-├── ActivityScore (activity recommendations)
-├── ForecastInsight (AI insights)
-├── HolidayCard (upcoming holidays)
-├── SpotifyCard (mood-based playlists)
-├── DailyForecast (16-day forecast)
-├── FavoritesModal (manage locations)
-├── SettingsModal (app settings)
-└── CalendarModal (holiday details)
+App (611 satır)
+├── Background (animasyonlu arka plan)
+├── Search (konum arama)
+├── WeatherAlerts (gerçek zamanlı uyarılar)
+├── HourlyForecast (48 saatlik tahmin)
+├── DetailsGrid (rüzgar, nem, basınç, UV)
+├── AirQualityCard (AQI takibi)
+├── GoldenHourCard (fotoğrafçılık zamanları)
+├── ActivityScore (aktivite önerileri)
+├── ForecastInsight (Yapay zeka içgörüleri)
+├── HolidayCard (yaklaşan tatiller)
+├── SpotifyCard (tema bazlı playlista)
+├── DailyForecast (16 günlük tahmin)
+├── FavoritesModal (konumları yönet)
+├── SettingsModal (uygulama ayarları)
+└── CalendarModal (tatil detayları)
 ```
 
 ---
 
-## 🔒 Security & Privacy
+## 🔒 Güvenlik & Gizlilik
 
-- **No Tracking**: Zero analytics or user tracking
-- **Local Storage Only**: All data stored locally on device
-- **HTTPS Required**: All external API calls over HTTPS
-- **No Login Required**: Full access without authentication
-- **Open Source**: Complete transparency
+- **Takı Yok**: Sıfır analitik veya kullanıcı takiği
+- **Yerel Depolama**: Tüm veriler yerel cihazda saklanır
+- **HTTPS Gerekli**: Tüm harici API çağrıları HTTPS üzerinden
+- **Giriş Yok**: Kimlik doğrulama olmadan tam erişim
+- **Açık Kaynak**: Tam şeffaflık
 
 ---
 
-## 🚀 Performance
+## 🚀 Performans
 
-### Metrics
-| Metric | Target | Status |
+### Metrikler
+| Metrik | Hedef | Durum |
 |--------|--------|--------|
 | First Paint | <1s | ✅ |
 | LCP | <2.5s | ✅ |
@@ -264,169 +264,169 @@ App (596 lines)
 | CSS | <50KB | ✅ 43.96 kB |
 | Lighthouse | >90 | ✅ 94/100 |
 
-### Optimizations
-- Code splitting & lazy loading
-- Image optimization & WebP format
-- CSS minification & purging
-- Service Worker caching strategies
-- API response caching (15 min TTL)
-- Responsive image loading
+### Optimizasyonlar
+- Kod bölündü & lazy loading
+- Resim optimizasyonu & WebP format
+- CSS minifikasyonu & temizliği
+- Service Worker caching stratejileri
+- API yanıt caching (15 dk TTL)
+- Responsive resim yükleme
 - Font subsetting & preloading
 
 ---
 
-## 🌐 PWA Features
+## 🌐 PWA Özellikleri
 
-### Installation
-- **iOS**: Share → Add to Home Screen
-- **Android**: Install App (Chrome prompt)
-- **Desktop**: Chrome → Install App
+### Kurulum
+- **iOS**: Paylaş → Ana Ekrana Ekle
+- **Android**: Yükle Uyarısı (Chrome)
+- **Masaüstü**: Chrome → Uygulamayı Yükle
 
-### Capabilities
-- ✅ Installable on home screen
-- ✅ Offline access with Service Worker
-- ✅ Background synchronization
-- ✅ Push notifications
-- ✅ Works on all modern browsers
-- ✅ Maskable icon support
+### Yetenekler
+- ✅ Ana ekrana kurulabilir
+- ✅ Service Worker ile çevrimdışı erişim
+- ✅ Arka plan senkronizasyonu
+- ✅ Push bildirimleri
+- ✅ Tüm modern tarayıcılarda çalışır
+- ✅ Maskeli ikon desteği
 
 ---
 
-## ⚽ Sports Integration
+## ⚽ Spor Entegrasyonu
 
 ### Futbol Tahmin MVP
-Navigate to football prediction app with one tap from the weather app. Real-time match odds, model predictions, and betting recommendations integrated seamlessly.
+Hava uygulamasından futbol tahmin uygulamasına bir tıkla erişin. Gerçek zamanlı maç oranları, model tahminleri ve bahis önerileri entegre edilmiştir.
 
-**Access**: Bottom navigation "⚽ Futbol" button
-**Technology**: External link with haptic feedback
+**Erişim**: Dip navigasyon "⚽ Futbol" düğmesi
+**Bağlantı**: Ayrı sekmedeki futbol-tahmin-mvp.vercel.app
 
 ---
 
-## 🛠️ Development
+## 🛠️ Geliştirme
 
-### Available Scripts
+### Mevcut Betikler
 ```bash
-npm run dev          # Start dev server (http://localhost:5173)
-npm run build        # Production build
-npm run preview      # Preview build locally
-npm run type-check   # TypeScript validation
-npm run lint         # Code linting
+npm run dev          # Dev sunucusu başlat (http://localhost:5173)
+npm run build        # Üretim build'i
+npm run preview      # Build'i yerel olarak önizle
+npm run type-check   # TypeScript doğrulaması
+npm run lint         # Kod linting
 ```
 
 ### Tech Stack
 - **Framework**: React 19.2
-- **Language**: TypeScript 5.8
-- **Build Tool**: Vite 6.2
-- **Styling**: Tailwind CSS + Custom CSS
-- **Icons**: Lucide React
-- **State Management**: React Hooks
-- **API Communication**: Fetch API
+- **Dil**: TypeScript 5.8
+- **Build Aracı**: Vite 6.2
+- **Stil**: Tailwind CSS + Custom CSS
+- **İkonlar**: Lucide React
+- **Durum Yönetimi**: React Hooks
+- **API İletişimi**: Fetch API
 
-### Code Quality
-- TypeScript strict mode enabled
-- ESLint configured
+### Kod Kalitesi
+- TypeScript strict modu
+- ESLint yapılandırılı
 - Prettier formatting
-- Component documentation
-- Performance monitoring hooks
+- Bileşen dokümantasyonu
+- Performans monitoring hooks
 - Error boundaries
 
 ---
 
-## 📊 Browser Support
+## 📊 Tarayıcı Desteği
 
-| Browser | Desktop | Mobile |
-|---------|---------|--------|
-| Chrome | ✅ Latest | ✅ Latest |
-| Firefox | ✅ Latest | ✅ Latest |
+| Tarayıcı | Masaüstü | Mobil |
+|----------|----------|--------|
+| Chrome | ✅ En son | ✅ En son |
+| Firefox | ✅ En son | ✅ En son |
 | Safari | ✅ 14+ | ✅ 14+ |
-| Edge | ✅ Latest | ✅ Latest |
-| Samsung Internet | - | ✅ Latest |
+| Edge | ✅ En son | ✅ En son |
+| Samsung Internet | - | ✅ En son |
 
 ---
 
-## 🎓 Learning Resources
+## 🎓 Öğrenme Kaynakları
 
-### Documentation
-- [Open-Meteo Docs](https://open-meteo.com/en/docs)
-- [React Documentation](https://react.dev)
-- [Vite Guide](https://vitejs.dev)
-- [TypeScript Handbook](https://www.typescriptlang.org/docs)
-- [PWA Documentation](https://web.dev/progressive-web-apps)
-- [Web Accessibility](https://www.w3.org/WAI/fundamentals)
+### Dokümantasyon
+- [Open-Meteo Belgeleri](https://open-meteo.com/en/docs)
+- [React Dokümantasyonu](https://react.dev)
+- [Vite Rehberi](https://vitejs.dev)
+- [TypeScript El Kitabı](https://www.typescriptlang.org/docs)
+- [PWA Dokümantasyonu](https://web.dev/progressive-web-apps)
+- [Web Erişilebilirliği](https://www.w3.org/WAI/fundamentals)
 
-### Similar Projects
+### Benzer Projeler
 - [weather.gov](https://www.weather.gov)
 - [Weather.com](https://weather.com)
 - [OpenWeatherMap](https://openweathermap.org)
-- [DarkSky (Acquired)](https://darksky.net)
+- [DarkSky (Satın alındı)](https://darksky.net)
 
 ---
 
-## 📄 License
+## 📄 Lisans
 
-This project is open source and available under the [MIT License](LICENSE).
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-### How to Contribute
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+Bu proje açık kaynak olarak sunulmaktadır ve [MIT Lisansı](LICENSE) altında mevcuttur.
 
 ---
 
-## 📞 Support
+## 🤝 Katkıda Bulunma
 
-- **Issues**: [GitHub Issues](https://github.com/kalkanci/havadurumuck/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/kalkanci/havadurumuck/discussions)
-- **Email**: support@havadurumuck.dev
+Katkılar hoş geldindir! Lütfen Pull Request gönderme konusunda çekinmeyin.
 
----
-
-## 🙏 Acknowledgments
-
-- **Open-Meteo**: Free weather data
-- **Nominatim**: Location services
-- **NASA**: Astronomy Picture of the Day
-- **Nager.at**: Public holidays
-- **Google Gemini**: AI insights
-- **React Community**: Awesome framework
-- **Tailwind CSS**: Utility-first styling
+### Nasıl Katkıda Bulunabilirsiniz
+1. Repoyu fork edin
+2. Feature branch'inizi oluşturun (`git checkout -b feature/YeniBözellik`)
+3. Değişikliklerinizi commit edin (`git commit -m 'Yeni özellik ekle'`)
+4. Branch'a push edin (`git push origin feature/YeniBözellik`)
+5. Pull Request açın
 
 ---
 
-## 🗺️ Roadmap
+## 📞 Destek
 
-### v2.0 (Upcoming)
-- [ ] User accounts & cloud sync
-- [ ] Custom alerts & notifications
-- [ ] Historical weather data
-- [ ] Weather trends & analytics
-- [ ] Multi-language support (20+)
-- [ ] Weather widgets
-- [ ] Voice commands
-- [ ] AR weather visualization
+- **Sorunlar**: [GitHub Issues](https://github.com/kalkanci/havadurumuck/issues)
+- **Tartışmalar**: [GitHub Discussions](https://github.com/kalkanci/havadurumuck/discussions)
+- **E-posta**: destek@havadurumuck.dev
 
-### Community Requests
-- More sports integrations
-- Pollen forecasts
-- UV index warnings
-- Lightning strike tracking
-- Mountain weather (avalanche risk)
+---
+
+## 🙏 Teşekkürler
+
+- **Open-Meteo**: Ücretsiz hava verileri
+- **Nominatim**: Konum hizmetleri
+- **NASA**: Astronomi Fotoğrafı
+- **Nager.at**: Kamu tatilleri
+- **Google Gemini**: Yapay zeka içgörüleri
+- **React Topluluğu**: Harika framework
+- **Tailwind CSS**: Utility-first stil
+
+---
+
+## 🗺️ Yol Haritası
+
+### v2.0 (Yakında)
+- [ ] Kullanıcı hesapları & bulut senkronizasyonu
+- [ ] Özel uyarılar & bildirimler
+- [ ] Geçmiş hava durumu verileri
+- [ ] Hava eğilimleri & analitikleri
+- [ ] Çok dilli destek (20+)
+- [ ] Hava widget'ları
+- [ ] Sesli komutlar
+- [ ] AR hava görselleştirmesi
+
+### Topluluk İstekleri
+- Daha fazla spor entegrasyonu
+- Polen tahminleri
+- UV indeks uyarıları
+- Yıldırım çakması takibi
+- Dağ hava durumu (çığ riski)
 
 ---
 
 <div align="center">
 
-### ⭐ If you find this project useful, please consider giving it a star!
+### ⭐ Bu projeyi yararlı bulursanız, lütfen bir yıldız verin!
 
-**Made with ❤️ by [Kalkanci](https://github.com/kalkanci)**
+**❤️ ile yapılmıştır [Kalkanci](https://github.com/kalkanci) tarafından**
 
-Last Updated: 29 January 2026 | Version: 1.0
+Son Güncelleme: 29 Ocak 2026 | Sürüm: 1.0
 

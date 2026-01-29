@@ -136,18 +136,60 @@
   .safe-area-top { padding-top: var(--safe-area-top, 1rem); }
   .safe-area-bottom { padding-bottom: var(--safe-area-bottom, 1rem); }
   
-  /* Glass cards for mobile */
+  /* Glass cards for mobile - Enhanced padding */
   .glass-card {
     border-radius: var(--radius-lg);
-    padding: var(--spacing-lg);
-    margin-bottom: var(--spacing-md);
+    padding: 1.25rem;
+    margin-bottom: 1rem;
     animation: slideInUp var(--transition-base);
+    word-break: break-word;
+    overflow: hidden;
   }
 
   /* Interactive state for cards */
   .glass-card:active {
     background-color: rgba(30, 41, 59, 0.7);
     transform: scale(0.98);
+  }
+
+  /* Improve text wrapping in cards */
+  .glass-card h3, 
+  .glass-card h4 {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+  }
+
+  /* Button sizing for mobile touch */
+  button {
+    min-height: 48px;
+    min-width: 48px;
+    padding: 0.75rem 1rem;
+  }
+
+  /* Grid adjustments for mobile */
+  .grid {
+    gap: 1rem;
+  }
+
+  .grid-cols-2 {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  /* Reduce font size for smaller screens */
+  @media (max-width: 380px) {
+    .glass-card {
+      padding: 1rem;
+    }
+    
+    .text-lg { font-size: 1rem; }
+    .text-xl { font-size: 1.125rem; }
+    
+    button {
+      padding: 0.5rem 0.75rem;
+      font-size: 0.875rem;
+    }
+  }
     transition: all var(--transition-fast);
   }
 

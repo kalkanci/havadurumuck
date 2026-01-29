@@ -55,7 +55,7 @@ const App: React.FC = () => {
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   
   // Navigation State
-  const [activeTab, setActiveTab] = useState<'today' | 'forecast' | 'futbol'>('today');
+  const [activeTab, setActiveTab] = useState<'today' | 'forecast'>('today');
   
   // PWA Install Prompt State
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
@@ -471,14 +471,7 @@ const App: React.FC = () => {
             className="flex-1 flex flex-col animate-fade-in-up pb-10" 
             ref={contentRef}
           >
-            {activeTab === 'futbol' ? (
-              // --- FUTBOL TAHMIN VIEW ---
-              <iframe
-                src="https://futbol-tahmin-mvp.vercel.app"
-                title="Futbol Tahmin MVP"
-                className="w-full h-screen border-0 rounded-lg"
-              />
-            ) : activeTab === 'today' ? (
+            {activeTab === 'today' ? (
               // --- TODAY VIEW ---
               <>
                 <div className="flex flex-col items-center justify-center mb-10 mt-6 text-center relative z-10">
@@ -565,11 +558,11 @@ const App: React.FC = () => {
       </div>
 
       {/* FLOATING NAVIGATION */}
-      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-full max-w-[360px]">
+      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-full max-w-[280px]">
         <div className="relative flex items-center bg-black/40 backdrop-blur-2xl border border-white/10 rounded-full p-1.5 shadow-2xl">
           <div 
-            className={`absolute top-1.5 bottom-1.5 w-[calc(33.33%-6px)] rounded-full bg-blue-500 shadow-lg shadow-blue-500/20 transition-all duration-300 cubic-bezier(0.4, 0, 0.2, 1) ${
-              activeTab === 'today' ? 'left-1.5' : activeTab === 'forecast' ? 'left-[calc(33.33%+3px)]' : activeTab === 'futbol' ? 'left-[calc(66.66%+3px)]' : 'left-1.5'
+            className={`absolute top-1.5 bottom-1.5 w-[calc(50%-6px)] rounded-full bg-blue-500 shadow-lg shadow-blue-500/20 transition-all duration-300 cubic-bezier(0.4, 0, 0.2, 1) ${
+              activeTab === 'today' ? 'left-1.5' : 'left-[calc(50%-3px)]'
             }`}
           />
 
@@ -598,14 +591,11 @@ const App: React.FC = () => {
           <button
             onClick={() => {
               triggerHapticFeedback(settings.hapticsEnabled);
-              setActiveTab('futbol');
+              window.open('https://futbol-tahmin-mvp.vercel.app', '_blank');
             }}
-            title="Futbol Tahmin"
-            aria-label="Futbol Tahmin Sekmesi"
-            aria-current={activeTab === 'futbol' ? 'page' : undefined}
-            className={`relative z-10 flex-1 flex items-center justify-center gap-2 py-3 rounded-full text-sm font-bold transition-colors duration-300 ${
-              activeTab === 'futbol' ? 'text-white' : 'text-white/60 hover:text-white'
-            }`}
+            title="Futbol Tahmin (Yeni Sekme)"
+            aria-label="Futbol Tahmin Sayfasını Aç"
+            className={`relative z-10 flex-1 flex items-center justify-center gap-2 py-3 rounded-full text-sm font-bold transition-colors duration-300 text-white/60 hover:text-white`}
           >
               <span className="text-lg">⚽</span>
               Futbol
