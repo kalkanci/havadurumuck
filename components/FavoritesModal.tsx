@@ -47,6 +47,7 @@ const FavoritesModal: React.FC<FavoritesModalProps> = ({
           </div>
           <button 
             onClick={onClose}
+            aria-label="Kapat"
             className="p-2 bg-white/5 hover:bg-white/10 rounded-full transition-colors text-slate-400"
           >
             <X size={20} />
@@ -100,8 +101,9 @@ const FavoritesModal: React.FC<FavoritesModalProps> = ({
                 key={fav.id} 
                 className={`glass-card p-3 rounded-xl flex justify-between items-center transition-all hover:bg-white/5 border border-white/5 ${fav.id === currentLocation.id ? 'ring-1 ring-blue-500/50' : ''}`}
               >
-                <div 
-                  className="flex-1 cursor-pointer flex items-center gap-3"
+                <button
+                  type="button"
+                  className="flex-1 cursor-pointer flex items-center gap-3 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-lg p-1 -ml-1"
                   onClick={() => { onSelect(fav); onClose(); }}
                 >
                   <div className="p-2 bg-slate-800 rounded-full">
@@ -111,12 +113,13 @@ const FavoritesModal: React.FC<FavoritesModalProps> = ({
                     <h4 className="font-bold text-white text-sm">{fav.name}</h4>
                     <p className="text-[10px] text-slate-400">{fav.admin1 ? `${fav.admin1}, ` : ''}{fav.country}</p>
                   </div>
-                </div>
+                </button>
                 
                 {/* Mevcut konum favoriler listesindeyse silme butonu burada görünmesin, yukarıdan yönetilsin. Sadece diğerleri için göster. */}
                 {fav.id !== currentLocation.id && (
                     <button 
                     onClick={() => onRemove(fav.id)}
+                    aria-label={`${fav.name} favorilerden kaldır`}
                     className="p-2 text-slate-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all"
                     >
                     <Trash2 size={16} />
