@@ -6,10 +6,36 @@ const WEATHER_API_URL = 'https://api.open-meteo.com/v1/forecast';
 const AIR_QUALITY_API_URL = 'https://air-quality-api.open-meteo.com/v1/air-quality';
 const HOLIDAY_API_URL = 'https://date.nager.at/api/v3/PublicHolidays';
 
+/**
+ * Enhanced fetch with retry logic and exponential backoff
+ */
+async function fetchWithRetry(url: string, options: RequestInit = {}, retries = 3, backoff = 500): Promise<Response> {
+  try {
+    const res = await fetch(url, options);
+    // Retry on server errors (5xx) or rate limits (429)
+    if (!res.ok && (res.status >= 500 || res.status === 429)) {
+        if (retries > 0) {
+            console.warn(`Request failed with status ${res.status}. Retrying in ${backoff}ms... (${retries} attempts left)`);
+            await new Promise(r => setTimeout(r, backoff));
+            return fetchWithRetry(url, options, retries - 1, backoff * 2);
+        }
+    }
+    return res;
+  } catch (err) {
+    // Retry on network errors
+    if (retries > 0) {
+        console.warn(`Request failed with network error. Retrying in ${backoff}ms... (${retries} attempts left)`, err);
+        await new Promise(r => setTimeout(r, backoff));
+        return fetchWithRetry(url, options, retries - 1, backoff * 2);
+    }
+    throw err;
+  }
+}
+
 // Sokak/Mahalle detayını bulmak için Nominatim servisi (OpenStreetMap)
 export const getDetailedAddress = async (lat: number, lon: number): Promise<{ city: string, address: string, country: string, countryCode: string }> => {
   try {
-    const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1`, {
+    const res = await fetchWithRetry(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1`, {
       headers: {
         'User-Agent': 'AtmosferAI/1.0'
       }
@@ -78,7 +104,7 @@ export const searchCity = async (query: string): Promise<GeoLocation[]> => {
   try {
     // addressdetails=1: Detaylı adres parçalarını getirir
     // limit=5: En fazla 5 sonuç
-    const res = await fetch(`${SEARCH_API_URL}?q=${encodeURIComponent(query)}&format=json&addressdetails=1&limit=5&accept-language=tr`, {
+    const res = await fetchWithRetry(`${SEARCH_API_URL}?q=${encodeURIComponent(query)}&format=json&addressdetails=1&limit=5&accept-language=tr`, {
         headers: {
             'User-Agent': 'AtmosferAI/1.0'
         }
@@ -145,8 +171,8 @@ export const fetchWeather = async (lat: number, lon: number): Promise<WeatherDat
 
   try {
     const [weatherRes, aqiRes] = await Promise.all([
-      fetch(`${WEATHER_API_URL}?${weatherParams.toString()}`),
-      fetch(`${AIR_QUALITY_API_URL}?${aqiParams.toString()}`)
+      fetchWithRetry(`${WEATHER_API_URL}?${weatherParams.toString()}`),
+      fetchWithRetry(`${AIR_QUALITY_API_URL}?${aqiParams.toString()}`)
     ]);
 
     if (!weatherRes.ok) {
@@ -179,7 +205,7 @@ export const fetchWeather = async (lat: number, lon: number): Promise<WeatherDat
 export const fetchHolidays = async (year: number, countryCode: string): Promise<PublicHoliday[]> => {
     if (!countryCode) return [];
     try {
-        const res = await fetch(`${HOLIDAY_API_URL}/${year}/${countryCode}`);
+        const res = await fetchWithRetry(`${HOLIDAY_API_URL}/${year}/${countryCode}`);
         if (!res.ok) return [];
         const data = await res.json();
         return data || [];

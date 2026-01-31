@@ -190,8 +190,6 @@
       font-size: 0.875rem;
     }
   }
-    transition: all var(--transition-fast);
-  }
 
   /* Text sizing for mobile */
   .heading-mobile { 

@@ -1,4 +1,5 @@
 /* Performance Utilities & Optimizations */
+import React from 'react';
 
 /**
  * Image Lazy Loading & Optimization
