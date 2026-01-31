@@ -46,7 +46,7 @@ const WeatherAlerts: React.FC<WeatherAlertsProps> = ({ alerts }) => {
             return (
                 <div 
                     key={index} 
-                    className={`relative p-4 rounded-2xl border flex items-start gap-4 animate-fade-in-up ${getStyles(alert.level)}`}
+                    className={`relative p-4 rounded-3xl border flex items-start gap-4 animate-fade-in-up ${getStyles(alert.level)}`}
                 >
                     <div className="p-2 bg-white/20 rounded-full shrink-0">
                         {getIcon(alert.type)}

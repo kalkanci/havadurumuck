@@ -390,7 +390,7 @@ const App: React.FC = () => {
           onInstall={handleInstallClick} 
       />
 
-      <div className="relative z-10 flex flex-col min-h-screen p-4 md:max-w-md md:mx-auto transition-transform duration-300">
+      <div className="relative z-10 flex flex-col min-h-screen px-4 pb-24 max-w-md mx-auto w-full transition-transform duration-300">
         
         {/* Pull to Refresh Indicator */}
         {refreshing && (
@@ -431,7 +431,7 @@ const App: React.FC = () => {
             <button 
               onClick={() => setIsFavoritesOpen(true)} 
               aria-label="Favori Konumlar"
-              className={`p-3 glass-card rounded-2xl transition-all active:scale-95 duration-200 ${isFav ? 'bg-red-500/20 border-red-500/30' : 'hover:bg-white/10'}`}
+              className={`p-3 glass-card rounded-3xl transition-all active:scale-95 duration-200 ${isFav ? 'bg-red-500/20 border-red-500/30' : 'hover:bg-white/10'}`}
             >
               <Heart 
                   size={22} 
@@ -441,7 +441,7 @@ const App: React.FC = () => {
             <button 
                onClick={() => setIsSettingsOpen(true)}
                aria-label="Ayarlar"
-               className="p-3 glass-card rounded-2xl transition-all active:scale-95 duration-200 hover:bg-white/10 text-white/70 hover:text-white"
+               className="p-3 glass-card rounded-3xl transition-all active:scale-95 duration-200 hover:bg-white/10 text-white/70 hover:text-white"
             >
                <Settings size={22} />
             </button>
@@ -500,7 +500,7 @@ const App: React.FC = () => {
                      <p className="text-xl font-medium text-blue-100 tracking-wide drop-shadow-lg flex items-center gap-2">
                         {getWeatherLabel(weather.current.weather_code)}
                      </p>
-                     <div className="flex items-center gap-4 text-base font-medium text-white/80 bg-black/10 px-4 py-1.5 rounded-xl backdrop-blur-sm border border-white/5 mt-2">
+                     <div className="flex items-center gap-4 text-base font-medium text-white/80 bg-black/10 px-4 py-1.5 rounded-full backdrop-blur-sm border border-white/5 mt-2">
                          <span className="flex items-center gap-1"><ArrowUp size={14} className="text-red-400" /> {Math.round(weather.daily.temperature_2m_max[0])}°</span>
                          <div className="w-px h-3 bg-white/20"></div>
                          <span className="flex items-center gap-1"><ArrowDown size={14} className="text-blue-400" /> {Math.round(weather.daily.temperature_2m_min[0])}°</span>

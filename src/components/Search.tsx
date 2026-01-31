@@ -59,7 +59,7 @@ const Search: React.FC<SearchProps> = ({ onSelect, onCurrentLocation }) => {
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Konum, sokak, mahalle..."
           aria-label="Şehir veya bölge ara"
-          className="w-full bg-white/10 backdrop-blur-xl text-white pl-10 pr-12 py-3 rounded-2xl border border-white/10 focus:outline-none focus:border-white/30 focus:ring-1 focus:ring-white/20 placeholder-white/50 transition-all shadow-lg"
+          className="w-full bg-white/10 backdrop-blur-xl text-white pl-10 pr-12 py-3 rounded-3xl border border-white/10 focus:outline-none focus:border-white/30 focus:ring-1 focus:ring-white/20 placeholder-white/50 transition-all shadow-lg"
         />
         <div className="absolute left-3 text-zinc-500 dark:text-zinc-400 pointer-events-none">
           {loading ? (
@@ -88,7 +88,7 @@ const Search: React.FC<SearchProps> = ({ onSelect, onCurrentLocation }) => {
       </div>
 
       {isOpen && results.length > 0 && (
-        <ul className="absolute top-full left-0 right-0 mt-2 bg-slate-900/90 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl max-h-60 overflow-y-auto no-scrollbar overflow-hidden z-[60]">
+        <ul className="absolute top-full left-0 right-0 mt-2 bg-slate-900/90 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl max-h-60 overflow-y-auto no-scrollbar overflow-hidden z-[60]">
           {results.map((loc) => (
             <li
               key={loc.id}
