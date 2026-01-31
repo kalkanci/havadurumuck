@@ -69,7 +69,7 @@ const PWAInstallBanner: React.FC<PWAInstallBannerProps> = ({ deferredPrompt, onI
          <div className="fixed inset-0 z-[1000] flex items-end justify-center sm:items-center p-4">
              <div className="absolute inset-0 bg-black/80 backdrop-blur-md transition-opacity" onClick={() => setShowIOSInstructions(false)} />
              
-             <div className="relative w-full max-w-sm bg-slate-900 border border-white/10 rounded-3xl p-6 pb-10 sm:pb-6 shadow-2xl animate-fade-in-up">
+             <div className="relative w-full max-w-sm bg-slate-900 border border-white/10 rounded-2xl p-6 pb-10 sm:pb-6 shadow-2xl animate-fade-in-up">
                  <div className="flex items-center justify-between mb-5">
                      <div className="flex items-center gap-2">
                         <div className="p-2 bg-white/10 rounded-lg">
@@ -108,7 +108,7 @@ const PWAInstallBanner: React.FC<PWAInstallBannerProps> = ({ deferredPrompt, onI
         <div className="fixed inset-0 z-[1000] flex items-center justify-center p-6">
             <div className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" onClick={handleClose} />
             
-            <div className="relative w-full max-w-xs bg-slate-900/95 backdrop-blur-xl border border-white/10 rounded-3xl p-6 shadow-2xl animate-pop-in text-center">
+            <div className="relative w-full max-w-xs bg-slate-900/95 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-2xl animate-pop-in text-center">
                 <div className="mx-auto w-16 h-16 bg-gradient-to-tr from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/30 mb-4">
                     <CloudSun size={32} className="text-white" />
                 </div>

@@ -109,7 +109,7 @@ const DetailsGrid: React.FC<DetailsGridProps> = ({ weather }) => {
                <p className="mt-4 text-teal-400 font-bold text-lg">{getWindDirection(current.wind_direction_10m)} Yönünden</p>
           </div>
 
-          <div className="bg-white/5 rounded-3xl p-5 flex-1 overflow-hidden flex flex-col min-h-0 border border-white/5 shadow-inner">
+          <div className="bg-white/5 rounded-2xl p-5 flex-1 overflow-hidden flex flex-col min-h-0 border border-white/5 shadow-inner">
               <h4 className="text-xs font-bold text-slate-400 uppercase mb-4 flex items-center gap-2 shrink-0 tracking-wider">
                   <Clock size={14} /> Saatlik Tahmin
               </h4>
@@ -150,7 +150,7 @@ const DetailsGrid: React.FC<DetailsGridProps> = ({ weather }) => {
               </p>
           </div>
 
-          <div className="bg-white/5 rounded-3xl p-5 flex-1 overflow-hidden flex flex-col min-h-0 border border-white/5 shadow-inner">
+          <div className="bg-white/5 rounded-2xl p-5 flex-1 overflow-hidden flex flex-col min-h-0 border border-white/5 shadow-inner">
               <h4 className="text-xs font-bold text-slate-400 uppercase mb-4 flex items-center gap-2 shrink-0 tracking-wider">
                   <Droplets size={14} /> Saatlik Nem
               </h4>
@@ -203,7 +203,7 @@ const DetailsGrid: React.FC<DetailsGridProps> = ({ weather }) => {
                 </div>
             </div>
 
-            <div className="flex flex-col items-center bg-white/5 px-8 py-6 rounded-3xl w-full border border-white/5">
+            <div className="flex flex-col items-center bg-white/5 px-8 py-6 rounded-2xl w-full border border-white/5">
                 <div className="p-4 bg-black/40 rounded-full mb-4 shadow-inner ring-1 ring-white/5">
                     {trendIcon}
                 </div>
@@ -273,7 +273,7 @@ const DetailsGrid: React.FC<DetailsGridProps> = ({ weather }) => {
   const renderSunriseContent = () => (
       <div className="flex flex-col h-full">
           {/* Dawn Visual */}
-          <div className="relative w-full aspect-[2/1] rounded-[1.5rem] overflow-hidden bg-gradient-to-t from-orange-300 via-indigo-600 to-slate-900 mb-6 shrink-0 shadow-2xl border border-white/10">
+          <div className="relative w-full aspect-[2/1] rounded-2xl overflow-hidden bg-gradient-to-t from-orange-300 via-indigo-600 to-slate-900 mb-6 shrink-0 shadow-2xl border border-white/10">
                <div className="absolute inset-0 flex items-end justify-center pb-2">
                    <div className="w-32 h-32 bg-orange-400 rounded-full blur-[50px] opacity-60 animate-pulse"></div>
                </div>
@@ -293,7 +293,7 @@ const DetailsGrid: React.FC<DetailsGridProps> = ({ weather }) => {
                     <p className="text-sm text-slate-400 mt-2 font-medium">Yeni bir gün.</p>
                </div>
 
-               <div className="bg-gradient-to-r from-orange-500/10 to-yellow-500/10 p-5 rounded-3xl border border-orange-500/20 flex items-center justify-between">
+               <div className="bg-gradient-to-r from-orange-500/10 to-yellow-500/10 p-5 rounded-2xl border border-orange-500/20 flex items-center justify-between">
                    <div className="flex items-center gap-4">
                        <div className="p-3 rounded-full bg-orange-500/20">
                             <Sunrise size={24} className="text-orange-400" />
@@ -313,7 +313,7 @@ const DetailsGrid: React.FC<DetailsGridProps> = ({ weather }) => {
   const renderSunsetContent = () => (
       <div className="flex flex-col h-full">
           {/* Dusk Visual */}
-          <div className="relative w-full aspect-[2/1] rounded-[1.5rem] overflow-hidden bg-gradient-to-b from-indigo-950 via-purple-900 to-orange-600 mb-6 shrink-0 shadow-2xl border border-white/10">
+          <div className="relative w-full aspect-[2/1] rounded-2xl overflow-hidden bg-gradient-to-b from-indigo-950 via-purple-900 to-orange-600 mb-6 shrink-0 shadow-2xl border border-white/10">
                <div className="absolute inset-0 flex items-end justify-center">
                    <div className="w-full h-1/2 bg-gradient-to-t from-black/50 to-transparent absolute bottom-0"></div>
                </div>
@@ -332,7 +332,7 @@ const DetailsGrid: React.FC<DetailsGridProps> = ({ weather }) => {
                     <p className="text-sm text-slate-400 mt-2 font-medium">Akşam oluyor.</p>
                </div>
 
-               <div className="bg-gradient-to-r from-indigo-500/10 to-purple-500/10 p-5 rounded-3xl border border-indigo-500/20 flex items-center justify-between">
+               <div className="bg-gradient-to-r from-indigo-500/10 to-purple-500/10 p-5 rounded-2xl border border-indigo-500/20 flex items-center justify-between">
                    <div className="flex items-center gap-4">
                        <div className="p-3 rounded-full bg-indigo-500/20">
                            <Sunset size={24} className="text-indigo-400" />
@@ -357,7 +357,7 @@ const DetailsGrid: React.FC<DetailsGridProps> = ({ weather }) => {
                   {value}<span className="text-4xl text-slate-400 font-light ml-2">{unit}</span>
               </div>
           </div>
-          <div className="bg-white/5 p-6 rounded-3xl border border-white/5 max-w-[90%]">
+          <div className="bg-white/5 p-6 rounded-2xl border border-white/5 max-w-[90%]">
               <p className="text-2xl font-bold text-blue-300 mb-2">{desc}</p>
               <p className="text-sm text-slate-400 leading-relaxed">{sub}</p>
           </div>
@@ -454,29 +454,29 @@ const DetailsGrid: React.FC<DetailsGridProps> = ({ weather }) => {
 
   return (
     <>
-        <div className="grid grid-cols-2 gap-3 mb-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6">
         {items.map((item, idx) => {
             return (
             <button 
                 key={idx} 
                 onClick={() => handleOpenWithDelay(item.id as DetailType)}
-                className="glass-card p-4 rounded-3xl flex flex-col justify-between aspect-[4/3] group relative overflow-hidden text-left transition-all duration-300 transform active:scale-[0.95] active:bg-white/10 active:border-white/20 hover:bg-white/5 border border-transparent"
+                className="glass-card p-4 rounded-2xl flex flex-col justify-center items-center text-center aspect-square group relative overflow-hidden transition-all duration-300 transform active:scale-[0.95] active:bg-white/10 active:border-white/20 hover:bg-white/5 border border-transparent"
             >
                 {/* Visual feedback layer */}
                 <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
 
-                <div className="flex justify-between items-start relative z-10">
-                    <div className="bg-white/5 p-2 rounded-full shadow-inner ring-1 ring-white/5 backdrop-blur-sm">
+                <div className="mb-3 relative z-10">
+                    <div className="bg-white/5 p-3 rounded-full shadow-inner ring-1 ring-white/5 backdrop-blur-sm inline-flex">
                     {item.icon}
                     </div>
                 </div>
-                <div className="relative z-10">
-                    <span className="text-slate-400 text-[10px] font-bold uppercase tracking-widest">{item.label}</span>
-                    <div className="flex items-baseline gap-1 mt-1">
+                <div className="relative z-10 flex flex-col items-center">
+                    <span className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-1">{item.label}</span>
+                    <div className="flex items-baseline justify-center gap-1">
                         <span className="text-2xl font-bold text-white tracking-tight drop-shadow-sm">{item.value}</span>
                         <span className="text-sm font-normal text-slate-400">{item.unit}</span>
                     </div>
-                    {item.subtext && item.subtext}
+                    {item.subtext && <div className="mt-1">{item.subtext}</div>}
                 </div>
             </button>
             )
@@ -494,7 +494,7 @@ const DetailsGrid: React.FC<DetailsGridProps> = ({ weather }) => {
                 <div 
                     className={`
                         relative w-full max-w-sm bg-slate-900 border border-white/10
-                        rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col h-[75vh]
+                        rounded-2xl shadow-2xl overflow-hidden flex flex-col h-[75vh]
                         transform transition-all duration-300 cubic-bezier(0.32, 0.72, 0, 1)
                         ${isClosing ? 'animate-pop-out' : 'animate-pop-in'}
                     `}

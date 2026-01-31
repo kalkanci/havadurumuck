@@ -116,7 +116,7 @@ const AirQualityCard: React.FC<AirQualityCardProps> = ({ data }) => {
         <div className="fixed inset-0 z-[500] flex items-center justify-center p-6">
             <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-md transition-opacity duration-300" onClick={handleClose} />
             
-            <div className={`relative w-full max-w-sm bg-slate-900 border border-white/10 rounded-[2rem] p-6 shadow-2xl overflow-hidden flex flex-col max-h-[85vh] overflow-y-auto no-scrollbar ${isClosing ? 'animate-pop-out' : 'animate-pop-in'}`}>
+            <div className={`relative w-full max-w-sm bg-slate-900 border border-white/10 rounded-2xl p-6 shadow-2xl overflow-hidden flex flex-col max-h-[85vh] overflow-y-auto no-scrollbar ${isClosing ? 'animate-pop-out' : 'animate-pop-in'}`}>
                 {/* Background Glow */}
                 <div className={`absolute top-0 left-0 w-full h-48 bg-gradient-to-b ${bgGradient} opacity-30 pointer-events-none`} />
 
@@ -137,7 +137,7 @@ const AirQualityCard: React.FC<AirQualityCardProps> = ({ data }) => {
                 </div>
 
                 <div className="space-y-5 relative z-10">
-                    <div className="bg-white/5 p-5 rounded-3xl border border-white/10 relative overflow-hidden">
+                    <div className="bg-white/5 p-5 rounded-2xl border border-white/10 relative overflow-hidden">
                         <div className="flex items-start gap-4">
                             <div className={`p-2 rounded-xl ${iconBg} shrink-0`}>
                                 <Info size={20} className={colorClass} />
@@ -201,7 +201,7 @@ const AirQualityCard: React.FC<AirQualityCardProps> = ({ data }) => {
     <>
     <button 
       onClick={handleOpenWithDelay}
-      className="w-full glass-card rounded-[2rem] p-6 mb-6 relative overflow-hidden group text-left transition-all duration-300 transform active:scale-[0.97] active:brightness-90 active:border-white/10 hover:shadow-2xl"
+      className="w-full glass-card rounded-2xl p-6 mb-6 relative overflow-hidden group text-left transition-all duration-300 transform active:scale-[0.97] active:brightness-90 active:border-white/10 hover:shadow-2xl"
     >
       {/* Dynamic Background Gradient */}
       <div className={`absolute inset-0 bg-gradient-to-br ${bgGradient} opacity-60 group-hover:opacity-80 transition-opacity duration-500`} />

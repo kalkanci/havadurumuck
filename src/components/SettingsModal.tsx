@@ -47,7 +47,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, settings
         onClick={handleClose}
       />
       
-      <div className={`relative w-full max-w-sm bg-slate-950/95 backdrop-blur-xl border border-white/10 rounded-3xl p-6 shadow-2xl overflow-hidden ${isClosing ? 'animate-pop-out' : 'animate-pop-in'}`}>
+      <div className={`relative w-full max-w-sm bg-slate-950/95 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-2xl overflow-hidden ${isClosing ? 'animate-pop-out' : 'animate-pop-in'}`}>
         
         <div className="flex items-center justify-between mb-6">
            <div className="flex items-center gap-3">

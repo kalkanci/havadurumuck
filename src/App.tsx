@@ -390,7 +390,7 @@ const App: React.FC = () => {
           onInstall={handleInstallClick} 
       />
 
-      <div className="relative z-10 flex flex-col min-h-screen px-4 pb-24 max-w-md mx-auto w-full transition-transform duration-300">
+      <div className="relative z-10 flex flex-col min-h-screen px-4 pb-24 w-full max-w-7xl mx-auto transition-transform duration-300 md:px-8">
         
         {/* Pull to Refresh Indicator */}
         {refreshing && (
@@ -423,7 +423,7 @@ const App: React.FC = () => {
           style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}
         >
           {/* Expanded Search Bar */}
-          <div className="flex-1">
+          <div className="flex-1 max-w-2xl">
             <Search onSelect={setLocation} onCurrentLocation={handleCurrentLocation} />
           </div>
 
@@ -431,7 +431,7 @@ const App: React.FC = () => {
             <button 
               onClick={() => setIsFavoritesOpen(true)} 
               aria-label="Favori Konumlar"
-              className={`p-3 glass-card rounded-3xl transition-all active:scale-95 duration-200 ${isFav ? 'bg-red-500/20 border-red-500/30' : 'hover:bg-white/10'}`}
+              className={`p-3 glass-card rounded-2xl transition-all active:scale-95 duration-200 ${isFav ? 'bg-red-500/20 border-red-500/30' : 'hover:bg-white/10'}`}
             >
               <Heart 
                   size={22} 
@@ -441,7 +441,7 @@ const App: React.FC = () => {
             <button 
                onClick={() => setIsSettingsOpen(true)}
                aria-label="Ayarlar"
-               className="p-3 glass-card rounded-3xl transition-all active:scale-95 duration-200 hover:bg-white/10 text-white/70 hover:text-white"
+               className="p-3 glass-card rounded-2xl transition-all active:scale-95 duration-200 hover:bg-white/10 text-white/70 hover:text-white"
             >
                <Settings size={22} />
             </button>
@@ -468,13 +468,13 @@ const App: React.FC = () => {
         ) : weather && location && (
           <main 
             key={`${weather.generationtime_ms}-${activeTab}`} 
-            className="flex-1 flex flex-col animate-fade-in-up pb-10" 
+            className="flex-1 flex flex-col lg:flex-row lg:items-start lg:gap-12 animate-fade-in-up pb-10"
             ref={contentRef}
           >
             {activeTab === 'today' ? (
               // --- TODAY VIEW ---
               <>
-                <div className="flex flex-col items-center justify-center mb-10 mt-6 text-center relative z-10">
+                <div className="flex flex-col items-center justify-center mb-10 mt-6 text-center relative z-10 lg:w-1/3 lg:sticky lg:top-24">
                   
                   {/* Date Pill (Top - Clickable) */}
                   <button 
@@ -524,20 +524,20 @@ const App: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="flex-1 flex flex-col gap-5">
+                <div className="flex-1 flex flex-col gap-5 lg:w-2/3">
                   <WeatherAlerts alerts={alerts} />
                   <HolidayCard holidays={upcomingHolidays} />
                   <AdviceCard weather={weather} cityName={location.name} />
                   <ForecastInsight weather={weather} />
                   <HourlyForecast weather={weather} />
                   
-                  <div className="grid grid-cols-1 gap-5">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <SpotifyCard weather={weather} />
                     <GoldenHourCard weather={weather} />
                     <ActivityScore weather={weather} />
+                    <AirQualityCard data={weather.air_quality} />
                   </div>
                   
-                  <AirQualityCard data={weather.air_quality} />
                   <DetailsGrid weather={weather} />
                   
                   <div className="text-center pt-4 opacity-50">

@@ -35,7 +35,7 @@ const FavoritesModal: React.FC<FavoritesModalProps> = ({
       />
 
       {/* Modal Card */}
-      <div className="relative w-full max-w-sm bg-slate-950/90 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl overflow-hidden animate-fade-in-up">
+      <div className="relative w-full max-w-sm bg-slate-950/90 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden animate-fade-in-up">
         
         {/* Header */}
         <div className="p-5 border-b border-white/5 flex items-center justify-between bg-white/5">

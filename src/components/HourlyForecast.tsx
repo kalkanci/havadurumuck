@@ -84,7 +84,7 @@ const HourlyForecast: React.FC<HourlyForecastProps> = ({ weather }) => {
         <div className="fixed inset-0 z-[500] flex items-center justify-center p-6">
             <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-md transition-opacity duration-300" onClick={handleClose} />
             
-            <div className={`relative w-full max-w-sm bg-slate-900/90 border border-white/10 rounded-[2.5rem] p-8 shadow-2xl flex flex-col items-center overflow-hidden backdrop-blur-xl ${isClosing ? 'animate-pop-out' : 'animate-pop-in'}`}>
+            <div className={`relative w-full max-w-sm bg-slate-900/90 border border-white/10 rounded-2xl p-8 shadow-2xl flex flex-col items-center overflow-hidden backdrop-blur-xl ${isClosing ? 'animate-pop-out' : 'animate-pop-in'}`}>
                  <button onClick={handleClose} className="absolute top-5 right-5 p-2.5 bg-white/5 rounded-full text-slate-400 hover:text-white transition-all active:scale-90 z-20 border border-white/5">
                      <X size={20} />
                  </button>
@@ -101,26 +101,26 @@ const HourlyForecast: React.FC<HourlyForecastProps> = ({ weather }) => {
                     <p className="text-blue-400 font-bold text-lg mb-8">{getWeatherLabel(code)}</p>
 
                     <div className="grid grid-cols-2 gap-3 w-full">
-                        <div className="bg-white/5 p-4 rounded-3xl flex flex-col items-center justify-center border border-white/5 shadow-inner">
+                        <div className="bg-white/5 p-4 rounded-2xl flex flex-col items-center justify-center border border-white/5 shadow-inner">
                             <div className="flex items-center gap-2 mb-1 text-slate-400">
                                 <Thermometer size={16} /> <span className="text-[10px] font-bold uppercase tracking-wider">Hissedilen</span>
                             </div>
                             <span className="text-xl font-bold text-white">{Math.round(feelsLike)}{tempUnit}</span>
                         </div>
-                        <div className="bg-white/5 p-4 rounded-3xl flex flex-col items-center justify-center border border-white/5 shadow-inner">
+                        <div className="bg-white/5 p-4 rounded-2xl flex flex-col items-center justify-center border border-white/5 shadow-inner">
                             <div className="flex items-center gap-2 mb-1 text-blue-400">
                                 <Droplets size={16} /> <span className="text-[10px] font-bold uppercase tracking-wider">Nem</span>
                             </div>
                             <span className="text-xl font-bold text-white">%{humidity}</span>
                         </div>
-                        <div className="bg-white/5 p-4 rounded-3xl flex flex-col items-center justify-center border border-white/5 shadow-inner">
+                        <div className="bg-white/5 p-4 rounded-2xl flex flex-col items-center justify-center border border-white/5 shadow-inner">
                             <div className="flex items-center gap-2 mb-1 text-teal-400">
                                 <Wind size={16} /> <span className="text-[10px] font-bold uppercase tracking-wider">Rüzgar</span>
                             </div>
                             <span className="text-xl font-bold text-white">{Math.round(windSpeed)} <span className="text-xs font-normal opacity-70">{speedUnit}</span></span>
                             <Navigation size={10} className="text-slate-500 mt-1" style={{ transform: `rotate(${windDir}deg)` }} />
                         </div>
-                        <div className="bg-white/5 p-4 rounded-3xl flex flex-col items-center justify-center border border-white/5 shadow-inner">
+                        <div className="bg-white/5 p-4 rounded-2xl flex flex-col items-center justify-center border border-white/5 shadow-inner">
                             <div className="flex items-center gap-2 mb-1 text-orange-400">
                                 <Sun size={16} /> <span className="text-[10px] font-bold uppercase tracking-wider">UV</span>
                             </div>
@@ -166,7 +166,7 @@ const HourlyForecast: React.FC<HourlyForecastProps> = ({ weather }) => {
                 onClick={() => handleOpenWithDelay(dataIndex)}
                 className={`
                   relative flex flex-col items-center justify-between 
-                  w-[4.5rem] h-32 p-2 rounded-3xl transition-all duration-300 ease-out
+                  w-[4.5rem] h-32 p-2 rounded-2xl transition-all duration-300 ease-out
                   overflow-hidden group snap-center
                   active:scale-[0.9] active:brightness-90
                   ${isNow 
@@ -181,7 +181,7 @@ const HourlyForecast: React.FC<HourlyForecastProps> = ({ weather }) => {
 
                 {/* Rain Bar Visual */}
                 {rainProb > 0 && (
-                    <div className="absolute bottom-0 left-0 right-0 h-full w-full rounded-3xl overflow-hidden pointer-events-none z-0">
+                    <div className="absolute bottom-0 left-0 right-0 h-full w-full rounded-2xl overflow-hidden pointer-events-none z-0">
                         <div 
                             className="absolute bottom-0 w-full bg-blue-500/20 transition-all duration-500" 
                             style={{ height: `${rainProb}%` }}

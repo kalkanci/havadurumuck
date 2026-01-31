@@ -49,7 +49,7 @@ const CosmicCard: React.FC<CosmicCardProps> = ({ data }) => {
       <div className="fixed inset-0 z-[500] flex items-center justify-center p-6">
          <div className="absolute inset-0 bg-black/80 backdrop-blur-md transition-opacity" onClick={handleClose} />
          
-         <div className={`relative w-full max-w-lg bg-slate-950 border border-white/10 rounded-[2rem] overflow-hidden shadow-2xl flex flex-col max-h-[85vh] ${isClosing ? 'animate-pop-out' : 'animate-pop-in'}`}>
+         <div className={`relative w-full max-w-lg bg-slate-950 border border-white/10 rounded-2xl overflow-hidden shadow-2xl flex flex-col max-h-[85vh] ${isClosing ? 'animate-pop-out' : 'animate-pop-in'}`}>
              
              {/* Close Button */}
              <button onClick={handleClose} className="absolute top-4 right-4 p-2 bg-black/40 backdrop-blur-md rounded-full text-white hover:bg-white/20 z-50 border border-white/10 transition-colors">
@@ -108,7 +108,7 @@ const CosmicCard: React.FC<CosmicCardProps> = ({ data }) => {
     <>
       <button 
         onClick={handleOpenWithDelay}
-        className="w-full glass-card rounded-[1.5rem] p-0 mb-6 relative overflow-hidden group text-left aspect-[21/9] flex items-end shadow-lg transition-all duration-300 transform active:scale-[0.97] active:brightness-90 active:shadow-inner"
+        className="w-full glass-card rounded-2xl p-0 mb-6 relative overflow-hidden group text-left aspect-[21/9] flex items-end shadow-lg transition-all duration-300 transform active:scale-[0.97] active:brightness-90 active:shadow-inner"
       >
         {/* Background Image with Parallax-like feel on hover */}
         {data.media_type === 'image' ? (

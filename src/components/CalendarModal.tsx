@@ -44,7 +44,7 @@ const CalendarModal: React.FC<CalendarModalProps> = ({ isOpen, onClose, weather 
         onClick={handleClose}
       />
       
-      <div className={`relative w-full max-w-sm bg-slate-950/90 backdrop-blur-xl border border-white/10 rounded-3xl p-6 shadow-2xl overflow-hidden flex flex-col max-h-[80vh] ${isClosing ? 'animate-pop-out' : 'animate-pop-in'}`}>
+      <div className={`relative w-full max-w-sm bg-slate-950/90 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-2xl overflow-hidden flex flex-col max-h-[80vh] ${isClosing ? 'animate-pop-out' : 'animate-pop-in'}`}>
         
         {/* Header */}
         <div className="flex items-center justify-between mb-6 shrink-0">

@@ -92,7 +92,7 @@ const SpotifyCard: React.FC<SpotifyCardProps> = ({ weather }) => {
         href={rec.link}
         target="_blank"
         rel="noopener noreferrer"
-        className={`w-full relative overflow-hidden rounded-[2rem] p-6 mb-6 flex flex-col justify-between group transition-all duration-300 active:scale-[0.98] hover:shadow-2xl border border-white/10 bg-gradient-to-br ${rec.bgGradient}`}
+        className={`w-full relative overflow-hidden rounded-2xl p-6 mb-6 flex flex-col justify-between group transition-all duration-300 active:scale-[0.98] hover:shadow-2xl border border-white/10 bg-gradient-to-br ${rec.bgGradient}`}
     >
         {/* Subtle Texture Overlay */}
         <div className="absolute inset-0 opacity-20 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] mix-blend-overlay pointer-events-none"></div>

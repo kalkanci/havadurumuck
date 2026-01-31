@@ -133,7 +133,7 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ weather }) => {
                 onClick={closeDayDetail}
             />
             
-            <div className={`relative w-full max-w-sm bg-slate-950/90 backdrop-blur-md border border-white/10 rounded-3xl p-6 shadow-2xl overflow-hidden flex flex-col ${isDetailClosing ? 'animate-pop-out' : 'animate-pop-in'}`}>
+            <div className={`relative w-full max-w-sm bg-slate-950/90 backdrop-blur-md border border-white/10 rounded-2xl p-6 shadow-2xl overflow-hidden flex flex-col ${isDetailClosing ? 'animate-pop-out' : 'animate-pop-in'}`}>
                  {/* Top Glow */}
                  <div className="absolute top-0 left-0 w-full h-32 bg-blue-500/10 blur-[50px] pointer-events-none"></div>
 
@@ -159,7 +159,7 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ weather }) => {
                  {/* Main Stats Grid */}
                  <div className="grid grid-cols-2 gap-3 mb-6 relative z-10">
                      {/* Temp Card */}
-                     <div className="col-span-2 bg-gradient-to-br from-blue-500/20 to-indigo-600/10 p-5 rounded-3xl border border-blue-500/20 flex items-center justify-between">
+                     <div className="col-span-2 bg-gradient-to-br from-blue-500/20 to-indigo-600/10 p-5 rounded-2xl border border-blue-500/20 flex items-center justify-between">
                          <div className="flex flex-col">
                              <div className="flex items-center gap-2 text-blue-200 mb-1">
                                  <Thermometer size={16} /> <span className="text-xs font-bold uppercase tracking-wide">Sıcaklık</span>
@@ -176,14 +176,14 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ weather }) => {
                      </div>
 
                      {/* Wind */}
-                     <div className="bg-white/5 p-4 rounded-3xl border border-white/5 flex flex-col items-center justify-center text-center backdrop-blur-sm">
+                     <div className="bg-white/5 p-4 rounded-2xl border border-white/5 flex flex-col items-center justify-center text-center backdrop-blur-sm">
                          <Wind size={24} className="text-teal-400 mb-2" />
                          <span className="text-xl font-bold text-white">{wind} <span className="text-xs font-normal text-slate-400">{speedUnit}</span></span>
                          <span className="text-[10px] text-slate-400 uppercase font-bold mt-1 tracking-wider">{getWindDirection(windDir)}</span>
                      </div>
 
                      {/* Rain/UV */}
-                     <div className="bg-white/5 p-4 rounded-3xl border border-white/5 flex flex-col items-center justify-center text-center backdrop-blur-sm">
+                     <div className="bg-white/5 p-4 rounded-2xl border border-white/5 flex flex-col items-center justify-center text-center backdrop-blur-sm">
                          {rain > 0 ? (
                              <>
                                 <Droplets size={24} className="text-blue-400 mb-2" />
@@ -201,7 +201,7 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ weather }) => {
                  </div>
 
                  {/* Sun Times */}
-                 <div className="bg-white/5 rounded-3xl p-5 flex items-center justify-between border border-white/5 backdrop-blur-sm relative z-10">
+                 <div className="bg-white/5 rounded-2xl p-5 flex items-center justify-between border border-white/5 backdrop-blur-sm relative z-10">
                      <div className="flex items-center gap-3">
                          <div className="p-2.5 bg-yellow-500/20 rounded-full text-yellow-400"><Sunrise size={20} /></div>
                          <div>
@@ -242,7 +242,7 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ weather }) => {
             </div>
 
             {/* Visual Insight Board */}
-            <div className={`w-full rounded-3xl p-6 bg-gradient-to-br ${trendColor} border border-white/10 shadow-2xl relative overflow-hidden mb-8`}>
+            <div className={`w-full rounded-2xl p-6 bg-gradient-to-br ${trendColor} border border-white/10 shadow-2xl relative overflow-hidden mb-8`}>
                 {/* Abstract Noise Texture */}
                 <div className="absolute inset-0 opacity-20 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] mix-blend-overlay"></div>
                 
@@ -301,7 +301,7 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ weather }) => {
                     <button 
                         key={dateStr}
                         onClick={() => openDayDetailWithDelay(index)}
-                        className={`w-full group flex items-center justify-between p-4 rounded-3xl border backdrop-blur-md transition-all duration-300 active:scale-[0.98] bg-gradient-to-r hover:brightness-110 shadow-lg ${getCardBackground(code)}`}
+                        className={`w-full group flex items-center justify-between p-4 rounded-2xl border backdrop-blur-md transition-all duration-300 active:scale-[0.98] bg-gradient-to-r hover:brightness-110 shadow-lg ${getCardBackground(code)}`}
                     >
                         {/* 1. Date */}
                         <div className="flex flex-col w-16 flex-shrink-0 text-left">

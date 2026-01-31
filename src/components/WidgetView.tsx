@@ -29,7 +29,7 @@ const WidgetView: React.FC<WidgetViewProps> = ({ weather, locationName, loading,
   return (
     <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-6 text-white text-center">
        {/* Widget Container */}
-       <div className="w-full max-w-xs glass-card p-6 rounded-[2rem] shadow-2xl flex flex-col items-center border border-white/10 relative overflow-hidden bg-slate-900/50">
+       <div className="w-full max-w-xs glass-card p-6 rounded-2xl shadow-2xl flex flex-col items-center border border-white/10 relative overflow-hidden bg-slate-900/50">
            
            {/* Background decorative glow */}
            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/20 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none"></div>

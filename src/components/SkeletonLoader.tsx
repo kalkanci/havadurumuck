@@ -7,7 +7,7 @@ const SkeletonLoader: React.FC = () => {
       <div className="flex flex-col items-center mb-12">
         <div className="h-10 w-48 bg-slate-700/50 rounded-lg mb-4"></div>
         <div className="h-4 w-32 bg-slate-700/30 rounded-lg mb-8"></div>
-        <div className="h-32 w-40 bg-slate-700/20 rounded-3xl mb-4"></div>
+        <div className="h-32 w-40 bg-slate-700/20 rounded-2xl mb-4"></div>
         <div className="h-6 w-24 bg-slate-700/30 rounded-lg"></div>
       </div>
 
