@@ -145,7 +145,7 @@ const HourlyForecast: React.FC<HourlyForecastProps> = ({ weather }) => {
       </div>
       
       {/* Scrollable Container */}
-      <div className="overflow-x-auto no-scrollbar py-4 -my-4 px-1">
+      <div className="overflow-x-auto no-scrollbar py-4 -my-4 px-1 snap-x snap-mandatory scroll-pl-4">
         <div className="flex space-x-3 min-w-max pb-2">
           {forecastIndices.map((dataIndex, displayIndex) => {
             if (dataIndex >= weather.hourly.time.length) return null;
@@ -166,8 +166,8 @@ const HourlyForecast: React.FC<HourlyForecastProps> = ({ weather }) => {
                 onClick={() => handleOpenWithDelay(dataIndex)}
                 className={`
                   relative flex flex-col items-center justify-between 
-                  w-[4.5rem] h-32 p-2 rounded-[1.25rem] transition-all duration-300 ease-out
-                  overflow-hidden group
+                  w-[4.5rem] h-32 p-2 rounded-3xl transition-all duration-300 ease-out
+                  overflow-hidden group snap-center
                   active:scale-[0.9] active:brightness-90
                   ${isNow 
                     ? 'bg-blue-600/20 ring-1 ring-blue-500/50 shadow-xl shadow-blue-500/10 scale-105 z-10 backdrop-blur-md'
@@ -181,7 +181,7 @@ const HourlyForecast: React.FC<HourlyForecastProps> = ({ weather }) => {
 
                 {/* Rain Bar Visual */}
                 {rainProb > 0 && (
-                    <div className="absolute bottom-0 left-0 right-0 h-full w-full rounded-[1.25rem] overflow-hidden pointer-events-none z-0">
+                    <div className="absolute bottom-0 left-0 right-0 h-full w-full rounded-3xl overflow-hidden pointer-events-none z-0">
                         <div 
                             className="absolute bottom-0 w-full bg-blue-500/20 transition-all duration-500" 
                             style={{ height: `${rainProb}%` }}

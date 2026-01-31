@@ -59,7 +59,7 @@ const AdviceCard: React.FC<AdviceCardProps> = ({ weather, cityName }) => {
                 onClick={handleClose} 
             />
             
-            <div className={`relative w-full h-full md:h-auto md:max-h-[85vh] md:max-w-lg md:rounded-[3rem] overflow-hidden bg-slate-950 flex flex-col shadow-2xl ${isClosing ? 'animate-pop-out' : 'animate-pop-in'}`}>
+            <div className={`relative w-full h-full md:h-auto md:max-h-[85vh] md:max-w-lg md:rounded-3xl overflow-hidden bg-slate-950 flex flex-col shadow-2xl ${isClosing ? 'animate-pop-out' : 'animate-pop-in'}`}>
                 
                 {/* Full Screen Cinematic Gradient Background */}
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-950 via-slate-900 to-black z-0"></div>
@@ -146,7 +146,7 @@ const AdviceCard: React.FC<AdviceCardProps> = ({ weather, cityName }) => {
     <>
     <button 
       onClick={handleOpenWithDelay}
-      className="w-full glass-card rounded-[2rem] p-6 my-5 flex flex-col relative group overflow-hidden border border-white/5 transition-all duration-300 transform active:scale-[0.97] active:brightness-90 hover:shadow-2xl hover:shadow-blue-500/10"
+      className="w-full glass-card rounded-3xl p-6 my-5 flex flex-col relative group overflow-hidden border border-white/5 transition-all duration-300 transform active:scale-[0.97] active:brightness-90 hover:shadow-2xl hover:shadow-blue-500/10"
     >
       {/* Background Gradient/Glow */}
       <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-cyan-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />

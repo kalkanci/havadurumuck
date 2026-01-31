@@ -460,7 +460,7 @@ const DetailsGrid: React.FC<DetailsGridProps> = ({ weather }) => {
             <button 
                 key={idx} 
                 onClick={() => handleOpenWithDelay(item.id as DetailType)}
-                className="glass-card p-4 rounded-[1.5rem] flex flex-col justify-between aspect-[4/3] group relative overflow-hidden text-left transition-all duration-300 transform active:scale-[0.95] active:bg-white/10 active:border-white/20 hover:bg-white/5 border border-transparent"
+                className="glass-card p-4 rounded-3xl flex flex-col justify-between aspect-[4/3] group relative overflow-hidden text-left transition-all duration-300 transform active:scale-[0.95] active:bg-white/10 active:border-white/20 hover:bg-white/5 border border-transparent"
             >
                 {/* Visual feedback layer */}
                 <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />

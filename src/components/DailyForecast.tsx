@@ -133,7 +133,7 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ weather }) => {
                 onClick={closeDayDetail}
             />
             
-            <div className={`relative w-full max-w-sm bg-slate-950/90 backdrop-blur-md border border-white/10 rounded-[2rem] p-6 shadow-2xl overflow-hidden flex flex-col ${isDetailClosing ? 'animate-pop-out' : 'animate-pop-in'}`}>
+            <div className={`relative w-full max-w-sm bg-slate-950/90 backdrop-blur-md border border-white/10 rounded-3xl p-6 shadow-2xl overflow-hidden flex flex-col ${isDetailClosing ? 'animate-pop-out' : 'animate-pop-in'}`}>
                  {/* Top Glow */}
                  <div className="absolute top-0 left-0 w-full h-32 bg-blue-500/10 blur-[50px] pointer-events-none"></div>
 
@@ -242,7 +242,7 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ weather }) => {
             </div>
 
             {/* Visual Insight Board */}
-            <div className={`w-full rounded-[2rem] p-6 bg-gradient-to-br ${trendColor} border border-white/10 shadow-2xl relative overflow-hidden mb-8`}>
+            <div className={`w-full rounded-3xl p-6 bg-gradient-to-br ${trendColor} border border-white/10 shadow-2xl relative overflow-hidden mb-8`}>
                 {/* Abstract Noise Texture */}
                 <div className="absolute inset-0 opacity-20 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] mix-blend-overlay"></div>
                 
@@ -301,7 +301,7 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ weather }) => {
                     <button 
                         key={dateStr}
                         onClick={() => openDayDetailWithDelay(index)}
-                        className={`w-full group flex items-center justify-between p-4 rounded-2xl border backdrop-blur-md transition-all duration-300 active:scale-[0.98] bg-gradient-to-r hover:brightness-110 shadow-lg ${getCardBackground(code)}`}
+                        className={`w-full group flex items-center justify-between p-4 rounded-3xl border backdrop-blur-md transition-all duration-300 active:scale-[0.98] bg-gradient-to-r hover:brightness-110 shadow-lg ${getCardBackground(code)}`}
                     >
                         {/* 1. Date */}
                         <div className="flex flex-col w-16 flex-shrink-0 text-left">
