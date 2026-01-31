@@ -14,7 +14,13 @@ const Search: React.FC<SearchProps> = ({ onSelect, onCurrentLocation }) => {
   const [results, setResults] = useState<GeoLocation[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(-1);
   const wrapperRef = useRef<HTMLDivElement>(null);
+
+  // Reset navigation when results change
+  useEffect(() => {
+    setActiveIndex(-1);
+  }, [results]);
 
   useEffect(() => {
     const delayDebounce = setTimeout(async () => {
@@ -32,6 +38,23 @@ const Search: React.FC<SearchProps> = ({ onSelect, onCurrentLocation }) => {
 
     return () => clearTimeout(delayDebounce);
   }, [query]);
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (!isOpen || results.length === 0) return;
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setActiveIndex(prev => (prev < results.length - 1 ? prev + 1 : prev));
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setActiveIndex(prev => (prev > 0 ? prev - 1 : -1));
+    } else if (e.key === 'Enter' && activeIndex > -1) {
+      e.preventDefault();
+      handleSelect(results[activeIndex]);
+    } else if (e.key === 'Escape') {
+      setIsOpen(false);
+    }
+  };
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -57,8 +80,14 @@ const Search: React.FC<SearchProps> = ({ onSelect, onCurrentLocation }) => {
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
+          onKeyDown={handleKeyDown}
           placeholder="Konum, sokak, mahalle..."
           aria-label="Şehir veya bölge ara"
+          role="combobox"
+          aria-autocomplete="list"
+          aria-expanded={isOpen && results.length > 0}
+          aria-controls="search-results-list"
+          aria-activedescendant={activeIndex > -1 ? `result-${results[activeIndex].id}` : undefined}
           className="w-full bg-white/10 backdrop-blur-xl text-white pl-10 pr-12 py-3 rounded-2xl border border-white/10 focus:outline-none focus:border-white/30 focus:ring-1 focus:ring-white/20 placeholder-white/50 transition-all shadow-lg"
         />
         <div className="absolute left-3 text-zinc-500 dark:text-zinc-400 pointer-events-none">
@@ -88,12 +117,21 @@ const Search: React.FC<SearchProps> = ({ onSelect, onCurrentLocation }) => {
       </div>
 
       {isOpen && results.length > 0 && (
-        <ul className="absolute top-full left-0 right-0 mt-2 bg-slate-900/90 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl max-h-60 overflow-y-auto no-scrollbar overflow-hidden z-[60]">
-          {results.map((loc) => (
+        <ul
+          id="search-results-list"
+          role="listbox"
+          className="absolute top-full left-0 right-0 mt-2 bg-slate-900/90 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl max-h-60 overflow-y-auto no-scrollbar overflow-hidden z-[60]"
+        >
+          {results.map((loc, index) => (
             <li
               key={loc.id}
+              id={`result-${loc.id}`}
+              role="option"
+              aria-selected={index === activeIndex}
               onClick={() => handleSelect(loc)}
-              className="px-4 py-3 hover:bg-white/10 cursor-pointer flex flex-col border-b border-white/5 last:border-none transition-colors"
+              className={`px-4 py-3 cursor-pointer flex flex-col border-b border-white/5 last:border-none transition-colors ${
+                index === activeIndex ? 'bg-white/10' : 'hover:bg-white/10'
+              }`}
             >
               <span className="font-medium text-white">{loc.name}</span>
               <span className="text-xs text-white/50">
