@@ -90,6 +90,13 @@ const AirQualityCard: React.FC<AirQualityCardProps> = ({ data }) => {
     return 'bg-slate-400';
   };
 
+  const getPollenStatus = (val: number) => {
+      if (val < 10) return { text: 'Düşük', color: 'text-emerald-400', bar: 'bg-emerald-400' };
+      if (val < 50) return { text: 'Orta', color: 'text-yellow-400', bar: 'bg-yellow-400' };
+      if (val < 200) return { text: 'Yüksek', color: 'text-orange-400', bar: 'bg-orange-400' };
+      return { text: 'Çok Yüksek', color: 'text-red-400', bar: 'bg-red-400' };
+  };
+
   const percentage = Math.min((aqi / 100) * 100, 100);
 
   const handleOpenWithDelay = () => {
@@ -183,6 +190,32 @@ const AirQualityCard: React.FC<AirQualityCardProps> = ({ data }) => {
                                 <span className="text-lg font-bold text-white block leading-none">{data.pm10.toFixed(1)}</span>
                                 <span className="text-[9px] text-slate-500">µg/m³</span>
                             </div>
+                        </div>
+                    </div>
+
+                    <div className="space-y-3">
+                        <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-2 mb-1">Polen Durumu</h4>
+                        <div className="grid grid-cols-2 gap-3">
+                            {[
+                                { label: 'Ağaç (Kızılağaç)', val: data.alder_pollen },
+                                { label: 'Huş Ağacı', val: data.birch_pollen },
+                                { label: 'Çimen', val: data.grass_pollen },
+                                { label: 'Pelin Otu', val: data.mugwort_pollen },
+                                { label: 'Zeytin', val: data.olive_pollen },
+                                { label: 'Kanarya Otu', val: data.ragweed_pollen },
+                            ].map((item, idx) => {
+                                if (item.val === undefined) return null;
+                                const status = getPollenStatus(item.val);
+                                return (
+                                    <div key={idx} className="bg-slate-800/50 p-3 rounded-2xl border border-white/5 flex flex-col justify-between">
+                                        <span className="text-[10px] text-slate-400 font-bold mb-1">{item.label}</span>
+                                        <div className="flex items-center justify-between">
+                                            <span className={`text-xs font-bold ${status.color}`}>{status.text}</span>
+                                            <div className={`w-2 h-2 rounded-full ${status.bar}`}></div>
+                                        </div>
+                                    </div>
+                                );
+                            })}
                         </div>
                     </div>
 
