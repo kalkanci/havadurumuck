@@ -1,36 +1,11 @@
 
 import { WeatherData, GeoLocation, AirQuality, PublicHoliday } from '../types';
+import { fetchWithRetry } from '../utils/api';
 
 const SEARCH_API_URL = 'https://nominatim.openstreetmap.org/search';
 const WEATHER_API_URL = 'https://api.open-meteo.com/v1/forecast';
 const AIR_QUALITY_API_URL = 'https://air-quality-api.open-meteo.com/v1/air-quality';
 const HOLIDAY_API_URL = 'https://date.nager.at/api/v3/PublicHolidays';
-
-/**
- * Enhanced fetch with retry logic and exponential backoff
- */
-async function fetchWithRetry(url: string, options: RequestInit = {}, retries = 3, backoff = 500): Promise<Response> {
-  try {
-    const res = await fetch(url, options);
-    // Retry on server errors (5xx) or rate limits (429)
-    if (!res.ok && (res.status >= 500 || res.status === 429)) {
-        if (retries > 0) {
-            console.warn(`Request failed with status ${res.status}. Retrying in ${backoff}ms... (${retries} attempts left)`);
-            await new Promise(r => setTimeout(r, backoff));
-            return fetchWithRetry(url, options, retries - 1, backoff * 2);
-        }
-    }
-    return res;
-  } catch (err) {
-    // Retry on network errors
-    if (retries > 0) {
-        console.warn(`Request failed with network error. Retrying in ${backoff}ms... (${retries} attempts left)`, err);
-        await new Promise(r => setTimeout(r, backoff));
-        return fetchWithRetry(url, options, retries - 1, backoff * 2);
-    }
-    throw err;
-  }
-}
 
 // Sokak/Mahalle detayını bulmak için Nominatim servisi (OpenStreetMap)
 export const getDetailedAddress = async (lat: number, lon: number): Promise<{ city: string, address: string, country: string, countryCode: string }> => {
@@ -165,7 +140,7 @@ export const fetchWeather = async (lat: number, lon: number): Promise<WeatherDat
   const aqiParams = new URLSearchParams({
     latitude: lat.toString(),
     longitude: lon.toString(),
-    current: 'european_aqi,pm10,pm2_5,dust',
+    current: 'european_aqi,pm10,pm2_5,dust,alder_pollen,birch_pollen,grass_pollen,mugwort_pollen,olive_pollen,ragweed_pollen',
     timezone: 'auto'
   });
 

@@ -64,6 +64,12 @@ export interface AirQuality {
   pm10: number;
   pm2_5: number;
   dust: number;
+  alder_pollen?: number;
+  birch_pollen?: number;
+  grass_pollen?: number;
+  mugwort_pollen?: number;
+  olive_pollen?: number;
+  ragweed_pollen?: number;
 }
 
 export interface WeatherData {
