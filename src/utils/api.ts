@@ -1,6 +1,11 @@
 /**
  * Enhanced fetch with retry logic and exponential backoff
  */
+import { AppError, ErrorCode } from './errors';
+
+/**
+ * Enhanced fetch with retry logic and exponential backoff
+ */
 export async function fetchWithRetry(url: string, options: RequestInit = {}, retries = 3, backoff = 500): Promise<Response> {
   try {
     const res = await fetch(url, options);
@@ -20,6 +25,6 @@ export async function fetchWithRetry(url: string, options: RequestInit = {}, ret
         await new Promise(r => setTimeout(r, backoff));
         return fetchWithRetry(url, options, retries - 1, backoff * 2);
     }
-    throw err;
+    throw new AppError('Bağlantı hatası', ErrorCode.NETWORK_ERROR, err);
   }
 }
