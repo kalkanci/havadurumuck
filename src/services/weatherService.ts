@@ -1,6 +1,7 @@
 
 import { WeatherData, GeoLocation, AirQuality, PublicHoliday } from '../types';
 import { fetchWithRetry } from '../utils/api';
+import { AppError, ErrorCode } from '../utils/errors';
 
 const SEARCH_API_URL = 'https://nominatim.openstreetmap.org/search';
 const WEATHER_API_URL = 'https://api.open-meteo.com/v1/forecast';
@@ -153,7 +154,7 @@ export const fetchWeather = async (lat: number, lon: number): Promise<WeatherDat
     if (!weatherRes.ok) {
         const errorText = await weatherRes.text();
         console.error("Open-Meteo API Error:", errorText);
-        throw new Error(`Weather fetch failed: ${weatherRes.status}`);
+        throw new AppError(`Hava durumu servisi yanıt vermiyor (${weatherRes.status})`, ErrorCode.API_ERROR);
     }
     
     const weatherData = await weatherRes.json();
@@ -172,8 +173,11 @@ export const fetchWeather = async (lat: number, lon: number): Promise<WeatherDat
     };
 
   } catch (error) {
+    if (error instanceof AppError) {
+        throw error;
+    }
     console.error("API Error:", error);
-    throw error;
+    throw new AppError('Hava durumu verisi alınamadı.', ErrorCode.API_ERROR, error);
   }
 };
 
