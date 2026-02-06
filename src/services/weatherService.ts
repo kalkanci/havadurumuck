@@ -1,6 +1,7 @@
 
 import { WeatherData, GeoLocation, AirQuality, PublicHoliday } from '../types';
 import { fetchWithRetry } from '../utils/api';
+import { AppError, ErrorCode } from '../utils/errors';
 
 const SEARCH_API_URL = 'https://nominatim.openstreetmap.org/search';
 const WEATHER_API_URL = 'https://api.open-meteo.com/v1/forecast';
@@ -15,6 +16,11 @@ export const getDetailedAddress = async (lat: number, lon: number): Promise<{ ci
         'User-Agent': 'AtmosferAI/1.0'
       }
     });
+
+    if (!res.ok) {
+      throw new AppError(ErrorCode.GEOCODING_ERROR, `Reverse geocoding failed: ${res.status}`);
+    }
+
     const data = await res.json();
     const addr = data.address || {};
     
@@ -69,6 +75,7 @@ export const getDetailedAddress = async (lat: number, lon: number): Promise<{ ci
     return { city: mainName, address: subText, country: country, countryCode };
   } catch (error) {
     console.warn("Reverse geocoding failed", error);
+    // Return fallback for UI continuity
     return { city: 'Konum Bulunamadı', address: '', country: '', countryCode: '' };
   }
 };
@@ -84,6 +91,11 @@ export const searchCity = async (query: string): Promise<GeoLocation[]> => {
             'User-Agent': 'AtmosferAI/1.0'
         }
     });
+
+    if (!res.ok) {
+        throw new AppError(ErrorCode.GEOCODING_ERROR, `Search failed: ${res.status}`);
+    }
+
     const data = await res.json();
     
     if (!data || data.length === 0) return [];
@@ -151,9 +163,12 @@ export const fetchWeather = async (lat: number, lon: number): Promise<WeatherDat
     ]);
 
     if (!weatherRes.ok) {
+        if (weatherRes.status === 400) {
+             throw new AppError(ErrorCode.INVALID_DATA, 'Invalid coordinates for weather data');
+        }
         const errorText = await weatherRes.text();
         console.error("Open-Meteo API Error:", errorText);
-        throw new Error(`Weather fetch failed: ${weatherRes.status}`);
+        throw new AppError(ErrorCode.API_ERROR, `Weather fetch failed: ${weatherRes.status}`);
     }
     
     const weatherData = await weatherRes.json();
@@ -172,8 +187,11 @@ export const fetchWeather = async (lat: number, lon: number): Promise<WeatherDat
     };
 
   } catch (error) {
+    if (error instanceof AppError) {
+      throw error;
+    }
     console.error("API Error:", error);
-    throw error;
+    throw new AppError(ErrorCode.UNKNOWN_ERROR, 'Failed to fetch weather data', error);
   }
 };
 
@@ -181,7 +199,10 @@ export const fetchHolidays = async (year: number, countryCode: string): Promise<
     if (!countryCode) return [];
     try {
         const res = await fetchWithRetry(`${HOLIDAY_API_URL}/${year}/${countryCode}`);
-        if (!res.ok) return [];
+        if (!res.ok) {
+            // Holiday API failing is not critical, just return empty
+            return [];
+        }
         const data = await res.json();
         return data || [];
     } catch (error) {
