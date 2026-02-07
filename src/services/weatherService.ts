@@ -1,6 +1,7 @@
 
 import { WeatherData, GeoLocation, AirQuality, PublicHoliday } from '../types';
 import { fetchWithRetry } from '../utils/api';
+import { apiCache } from '../utils/performance';
 
 const SEARCH_API_URL = 'https://nominatim.openstreetmap.org/search';
 const WEATHER_API_URL = 'https://api.open-meteo.com/v1/forecast';
@@ -119,6 +120,11 @@ export const searchCity = async (query: string): Promise<GeoLocation[]> => {
 };
 
 export const fetchWeather = async (lat: number, lon: number): Promise<WeatherData> => {
+  const cacheKey = `weather_${lat.toFixed(4)}_${lon.toFixed(4)}`;
+
+  if (apiCache.has(cacheKey)) {
+      return apiCache.get(cacheKey);
+  }
   
   // 1. Hava Durumu Verisi
   const weatherParams = new URLSearchParams({
@@ -166,10 +172,13 @@ export const fetchWeather = async (lat: number, lon: number): Promise<WeatherDat
       }
     }
 
-    return {
+    const result = {
       ...weatherData,
       air_quality: aqiData
     };
+
+    apiCache.set(cacheKey, result);
+    return result;
 
   } catch (error) {
     console.error("API Error:", error);
