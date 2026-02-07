@@ -1,10 +1,11 @@
 
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import { Heart, Navigation, MapPin, ArrowUp, ArrowDown, RefreshCw, Calendar, CloudSun, Loader2, Settings } from 'lucide-react';
+import { Heart, Navigation, MapPin, ArrowUp, ArrowDown, RefreshCw, Calendar, CloudSun, Loader2, Settings, WifiOff } from 'lucide-react';
 import { GeoLocation, WeatherData, WeatherAlert, PublicHoliday, AppSettings, AstronomyData } from './types';
-import { fetchWeather, getDetailedAddress, fetchHolidays } from './services/weatherService';
+import { fetchHolidays } from './services/weatherService';
 import { fetchAstronomyPicture } from './services/astronomyService';
-import { calculateDistance, checkWeatherAlerts, triggerHapticFeedback } from './utils/helpers';
+import { calculateDistance, triggerHapticFeedback } from './utils/helpers';
+import { useWeatherApp } from './hooks/useWeatherApp';
 import Background from './components/Background';
 import Search from './components/Search';
 import HourlyForecast from './components/HourlyForecast';
@@ -28,14 +29,22 @@ const SettingsModal = React.lazy(() => import('./components/SettingsModal'));
 const CalendarModal = React.lazy(() => import('./components/CalendarModal'));
 
 const App: React.FC = () => {
-  // Start with NO location to show splash screen
-  const [location, setLocation] = useState<GeoLocation | null>(null);
-  
-  const [weather, setWeather] = useState<WeatherData | null>(null);
-  const [loading, setLoading] = useState(false);
+  // Use Custom Hook for Core Logic
+  const {
+      weather,
+      location,
+      loading,
+      error,
+      alerts,
+      gpsError,
+      isOffline,
+      loadWeather,
+      handleCurrentLocation,
+      setLocation
+  } = useWeatherApp();
+
   const [initialBoot, setInitialBoot] = useState(true); // Control Splash Screen
   const [refreshing, setRefreshing] = useState(false);
-  const [alerts, setAlerts] = useState<WeatherAlert[]>([]);
   const [upcomingHolidays, setUpcomingHolidays] = useState<PublicHoliday[]>([]);
   const [cosmicData, setCosmicData] = useState<AstronomyData | null>(null);
   
@@ -59,9 +68,6 @@ const App: React.FC = () => {
   
   // PWA Install Prompt State
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
-  
-  const [error, setError] = useState<string | null>(null);
-  const [gpsError, setGpsError] = useState<boolean>(false);
 
   // Widget Mode Detection
   const isWidgetMode = new URLSearchParams(window.location.search).get('mode') === 'widget';
@@ -85,9 +91,29 @@ const App: React.FC = () => {
     window.scrollTo({ top: 0, behavior: 'instant' });
   }, [activeTab]);
 
+  const haptic = useCallback((pattern?: number | number[]) => {
+      if (settings.hapticsEnabled) {
+          triggerHapticFeedback(pattern);
+      }
+  }, [settings.hapticsEnabled]);
+
+  // Handle Splash Screen Transition
+  useEffect(() => {
+      if (weather || error) {
+          const timer = setTimeout(() => {
+              setInitialBoot(false);
+          }, 800);
+          return () => clearTimeout(timer);
+      }
+      // Fallback timeout in case loading takes too long or fails silently?
+      // But we rely on hook to set weather or error.
+  }, [weather, error]);
+
   useEffect(() => {
     // Start the app flow
-    handleCurrentLocation();
+    if (!location) {
+       handleCurrentLocation();
+    }
     
     // Load non-location dependent data once
     loadAstronomy();
@@ -102,21 +128,22 @@ const App: React.FC = () => {
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     };
-  }, []);
+  }, []); // Run once on mount
 
-  // Trigger weather load when location is set
+  // Trigger side-effects when location changes (Holidays)
   useEffect(() => {
     if (location) {
-        loadWeather();
         loadHolidays();
+        haptic(20); // Feedback for location change
     }
   }, [location]);
 
-  const haptic = useCallback((pattern?: number | number[]) => {
-      if (settings.hapticsEnabled) {
-          triggerHapticFeedback(pattern);
+  // Trigger haptics on critical alerts
+  useEffect(() => {
+      if (alerts.some(a => a.level === 'critical')) {
+          haptic([50, 100, 50]);
       }
-  }, [settings.hapticsEnabled]);
+  }, [alerts, haptic]);
 
   const loadAstronomy = useCallback(async () => {
       const data = await fetchAstronomyPicture();
@@ -143,98 +170,6 @@ const App: React.FC = () => {
 
       setUpcomingHolidays(relevant);
   }, [location]);
-
-  const loadWeather = useCallback(async (isRefresh = false) => {
-    if (!location) return;
-    
-    if (!isRefresh && !initialBoot) setLoading(true);
-    setError(null);
-    
-    try {
-      const data = await fetchWeather(location.latitude, location.longitude);
-      setWeather(data);
-      
-      const generatedAlerts = checkWeatherAlerts(data);
-      setAlerts(generatedAlerts);
-      
-      if (generatedAlerts.some(a => a.level === 'critical')) {
-          haptic([50, 100, 50]);
-      } else if (isRefresh) {
-          haptic(20);
-      }
-
-      if (location.country !== 'GPS') setGpsError(false); 
-    } catch (err) {
-      setError('Hava durumu verisi alınamadı. İnternet bağlantınızı kontrol edin.');
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-      
-      // Artificial delay for splash screen smoothness if it's the first boot
-      if (initialBoot) {
-          setTimeout(() => {
-              setInitialBoot(false);
-          }, 800);
-      }
-    }
-  }, [location, initialBoot, haptic]);
-
-  const handleCurrentLocation = useCallback(() => {
-    // If manually triggered later, show loading
-    if (!initialBoot) setLoading(true);
-    
-    setGpsError(false);
-    haptic(10);
-
-    if (!navigator.geolocation) {
-      handleLocationError('Cihazınız konum özelliğini desteklemiyor.');
-      return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const { latitude, longitude } = position.coords;
-        const details = await getDetailedAddress(latitude, longitude);
-        
-        const loc: GeoLocation = {
-          id: Date.now(),
-          name: details.city, 
-          latitude,
-          longitude,
-          country: details.country || 'Konum',
-          countryCode: details.countryCode,
-          subtext: details.address,
-          admin1: details.country
-        };
-        setLocation(loc); // This triggers useEffect -> loadWeather
-        haptic(20);
-      },
-      (err) => {
-        console.warn("GPS Error:", err);
-        handleLocationError('Konum alınamadı.');
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 0
-      }
-    );
-  }, [initialBoot, haptic]);
-
-  const handleLocationError = useCallback((msg: string) => {
-      // Fallback to Istanbul if GPS fails on boot
-      if (initialBoot) {
-          const defaultLoc = {
-            id: 745044, name: 'İstanbul', latitude: 41.0138, longitude: 28.9497, country: 'Türkiye', countryCode: 'TR'
-          };
-          setLocation(defaultLoc);
-          setGpsError(true);
-      } else {
-          setError(msg);
-          setLoading(false);
-          setGpsError(true);
-      }
-  }, [initialBoot]);
 
   const addFavorite = useCallback((loc: GeoLocation) => {
      if (!favorites.some(f => f.id === loc.id)) {
@@ -284,6 +219,7 @@ const App: React.FC = () => {
       loadWeather(true);
       loadHolidays();
       loadAstronomy();
+      setTimeout(() => setRefreshing(false), 1000); // UI visual delay
     }
     startY.current = 0;
     pullDistance.current = 0;
@@ -401,8 +337,24 @@ const App: React.FC = () => {
            </div>
         )}
 
+        {/* Offline Banner */}
+        {isOffline && (
+          <div className="mt-20 mb-4 p-3 bg-orange-500/20 backdrop-blur-md rounded-xl flex items-center justify-between shadow-lg animate-bounce-short text-white border border-orange-500/30">
+            <div className="flex items-center gap-2">
+              <WifiOff size={18} />
+              <span className="text-sm font-medium">Çevrimdışı Mod - Önbellek Gösteriliyor</span>
+            </div>
+            <button
+              onClick={() => loadWeather(true)}
+              className="px-3 py-1 bg-white text-orange-600 text-xs font-bold rounded-lg"
+            >
+              Yenile
+            </button>
+          </div>
+        )}
+
         {/* GPS Error Banner */}
-        {gpsError && !loading && (
+        {gpsError && !loading && !isOffline && (
           <div className="mt-20 mb-4 p-3 bg-red-500/20 backdrop-blur-md rounded-xl flex items-center justify-between shadow-lg animate-bounce-short text-white border border-red-500/30">
             <div className="flex items-center gap-2">
               <Navigation size={18} />
@@ -449,9 +401,9 @@ const App: React.FC = () => {
         </header>
 
         {/* Main Content Area */}
-        {loading ? (
+        {loading && !weather ? (
           <SkeletonLoader />
-        ) : error ? (
+        ) : error && !weather ? (
           <div className="flex-1 flex flex-col items-center justify-center text-center">
             <div className="p-4 bg-red-500/20 rounded-full mb-4">
               <Navigation size={32} className="text-red-400" />
