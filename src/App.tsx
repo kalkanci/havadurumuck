@@ -5,7 +5,9 @@ import { GeoLocation, WeatherData, WeatherAlert, PublicHoliday, AppSettings, Ast
 import { fetchWeather, getDetailedAddress, fetchHolidays } from './services/weatherService';
 import { fetchAstronomyPicture } from './services/astronomyService';
 import { calculateDistance, checkWeatherAlerts, triggerHapticFeedback } from './utils/helpers';
+import { usePWA } from './hooks/usePWA';
 import Background from './components/Background';
+import ErrorState from './components/ErrorState';
 import Search from './components/Search';
 import HourlyForecast from './components/HourlyForecast';
 import DetailsGrid from './components/DetailsGrid';
@@ -57,8 +59,8 @@ const App: React.FC = () => {
   // Navigation State
   const [activeTab, setActiveTab] = useState<'today' | 'forecast'>('today');
   
-  // PWA Install Prompt State
-  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  // PWA Logic
+  const { deferredPrompt, installPrompt } = usePWA();
   
   const [error, setError] = useState<string | null>(null);
   const [gpsError, setGpsError] = useState<boolean>(false);
@@ -91,17 +93,6 @@ const App: React.FC = () => {
     
     // Load non-location dependent data once
     loadAstronomy();
-
-    const handleBeforeInstallPrompt = (e: any) => {
-      e.preventDefault();
-      setDeferredPrompt(e);
-    };
-
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-
-    return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    };
   }, []);
 
   // Trigger weather load when location is set
@@ -248,19 +239,6 @@ const App: React.FC = () => {
      haptic(30);
   }, [favorites, haptic]);
 
-  const handleInstallClick = useCallback(() => {
-    if (deferredPrompt) {
-      haptic(20);
-      deferredPrompt.prompt();
-      deferredPrompt.userChoice.then((choiceResult: any) => {
-        if (choiceResult.outcome === 'accepted') {
-          console.log('User accepted the install prompt');
-        }
-        setDeferredPrompt(null);
-      });
-    }
-  }, [deferredPrompt, haptic]);
-
   // Pull to Refresh Logic
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
     if (window.scrollY === 0) {
@@ -387,7 +365,7 @@ const App: React.FC = () => {
       {/* Auto PWA Prompt Modal */}
       <PWAInstallBanner 
           deferredPrompt={deferredPrompt} 
-          onInstall={handleInstallClick} 
+          onInstall={installPrompt}
       />
 
       <div className="relative z-10 flex flex-col min-h-screen px-4 pb-24 max-w-md mx-auto w-full transition-transform duration-300">
@@ -452,19 +430,12 @@ const App: React.FC = () => {
         {loading ? (
           <SkeletonLoader />
         ) : error ? (
-          <div className="flex-1 flex flex-col items-center justify-center text-center">
-            <div className="p-4 bg-red-500/20 rounded-full mb-4">
-              <Navigation size={32} className="text-red-400" />
-            </div>
-            <p className="text-red-400 text-lg mb-2 font-bold">Bağlantı Sorunu</p>
-            <p className="text-zinc-300 max-w-xs mx-auto mb-6">{error}</p>
-            <button 
-              onClick={() => loadWeather()} 
-              className="px-6 py-2 bg-blue-600 hover:bg-blue-500 rounded-xl font-medium transition-colors text-white"
-            >
-              Tekrar Dene
-            </button>
-          </div>
+          <ErrorState
+            message={error}
+            title="Bağlantı Sorunu"
+            onRetry={() => loadWeather()}
+            icon="wifi"
+          />
         ) : weather && location && (
           <main 
             key={`${weather.generationtime_ms}-${activeTab}`} 
