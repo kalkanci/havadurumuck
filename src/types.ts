@@ -91,6 +91,7 @@ export interface UserSettings {
 
 export interface AppSettings {
   hapticsEnabled: boolean;
+  temperatureUnit: 'celsius' | 'fahrenheit';
 }
 
 export interface AdviceResponse {
