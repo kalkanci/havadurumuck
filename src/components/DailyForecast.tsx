@@ -10,12 +10,14 @@ import {
     ThermometerSun, ThermometerSnowflake, CalendarDays
 } from 'lucide-react';
 import { getWindDirection, formatTime, triggerHapticFeedback } from '../utils/helpers';
+import { TemperatureUnit, convertTemperature, getUnitLabel } from '../utils/units';
 
 interface DailyForecastProps {
   weather: WeatherData;
+  unit: TemperatureUnit;
 }
 
-const DailyForecast: React.FC<DailyForecastProps> = ({ weather }) => {
+const DailyForecast: React.FC<DailyForecastProps> = ({ weather, unit }) => {
   // Slicing data to exactly 15 days
   const limit = 15;
   
@@ -34,16 +36,20 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ weather }) => {
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
   const [isDetailClosing, setIsDetailClosing] = useState(false);
 
-  const tempUnit = '°';
+  const tempUnit = getUnitLabel(unit);
   const speedUnit = 'km/s';
 
   // Statistics for the summary header
-  const globalMin = Math.min(...temperature_2m_min);
-  const globalMax = Math.max(...temperature_2m_max);
+  // Note: We convert these for display, but index finding uses raw arrays
+  const rawGlobalMin = Math.min(...temperature_2m_min);
+  const rawGlobalMax = Math.max(...temperature_2m_max);
+
+  const globalMin = convertTemperature(rawGlobalMin, unit);
+  const globalMax = convertTemperature(rawGlobalMax, unit);
   const tempRange = globalMax - globalMin;
   
-  const hottestDayIndex = temperature_2m_max.indexOf(globalMax);
-  const coldestDayIndex = temperature_2m_min.indexOf(globalMin);
+  const hottestDayIndex = temperature_2m_max.indexOf(rawGlobalMax);
+  const coldestDayIndex = temperature_2m_min.indexOf(rawGlobalMin);
   const rainyDaysCount = precipitation_probability_max.filter(p => p > 50).length;
 
   // Trend Analysis
@@ -116,9 +122,9 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ weather }) => {
       const index = selectedDay;
       const date = new Date(time[index]);
       const code = weather_code[index];
-      const maxT = Math.round(temperature_2m_max[index]);
-      const minT = Math.round(temperature_2m_min[index]);
-      const feels = Math.round(apparent_temperature_max ? apparent_temperature_max[index] : maxT);
+      const maxT = convertTemperature(temperature_2m_max[index], unit);
+      const minT = convertTemperature(temperature_2m_min[index], unit);
+      const feels = convertTemperature(apparent_temperature_max ? apparent_temperature_max[index] : temperature_2m_max[index], unit);
       const rain = precipitation_probability_max ? precipitation_probability_max[index] : 0;
       const wind = Math.round(wind_speed_10m_max ? wind_speed_10m_max[index] : 0);
       const windDir = wind_direction_10m_dominant ? wind_direction_10m_dominant[index] : 0;
@@ -288,8 +294,8 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ weather }) => {
                 const dateNum = date.getDate();
                 const month = date.toLocaleDateString('tr-TR', { month: 'short' });
                 
-                const min = Math.round(temperature_2m_min[index]);
-                const max = Math.round(temperature_2m_max[index]);
+                const min = convertTemperature(temperature_2m_min[index], unit);
+                const max = convertTemperature(temperature_2m_max[index], unit);
                 const rainProb = precipitation_probability_max ? precipitation_probability_max[index] : 0;
                 const code = weather_code[index];
                 
