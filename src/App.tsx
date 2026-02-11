@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { Heart, Navigation, MapPin, ArrowUp, ArrowDown, RefreshCw, Calendar, CloudSun, Loader2, Settings } from 'lucide-react';
 import { GeoLocation, WeatherData, WeatherAlert, PublicHoliday, AppSettings, AstronomyData } from './types';
+import { usePWA } from './hooks/usePWA';
 import { fetchWeather, getDetailedAddress, fetchHolidays } from './services/weatherService';
 import { fetchAstronomyPicture } from './services/astronomyService';
 import { calculateDistance, checkWeatherAlerts, triggerHapticFeedback } from './utils/helpers';
@@ -57,8 +58,8 @@ const App: React.FC = () => {
   // Navigation State
   const [activeTab, setActiveTab] = useState<'today' | 'forecast'>('today');
   
-  // PWA Install Prompt State
-  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  // PWA Hook
+  const { deferredPrompt, install } = usePWA();
   
   const [error, setError] = useState<string | null>(null);
   const [gpsError, setGpsError] = useState<boolean>(false);
@@ -91,17 +92,6 @@ const App: React.FC = () => {
     
     // Load non-location dependent data once
     loadAstronomy();
-
-    const handleBeforeInstallPrompt = (e: any) => {
-      e.preventDefault();
-      setDeferredPrompt(e);
-    };
-
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-
-    return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    };
   }, []);
 
   // Trigger weather load when location is set
@@ -251,15 +241,9 @@ const App: React.FC = () => {
   const handleInstallClick = useCallback(() => {
     if (deferredPrompt) {
       haptic(20);
-      deferredPrompt.prompt();
-      deferredPrompt.userChoice.then((choiceResult: any) => {
-        if (choiceResult.outcome === 'accepted') {
-          console.log('User accepted the install prompt');
-        }
-        setDeferredPrompt(null);
-      });
+      install();
     }
-  }, [deferredPrompt, haptic]);
+  }, [deferredPrompt, haptic, install]);
 
   // Pull to Refresh Logic
   const handleTouchStart = useCallback((e: React.TouchEvent) => {

@@ -20,9 +20,6 @@
     <link rel="apple-touch-icon" href="/icon-192.png" />
     <link rel="apple-touch-icon" href="/icon-512.png" sizes="512x512" />
     
-    <!-- PWA Manifest (Critical for Installability) -->
-    <link rel="manifest" href="/manifest.json" />
-
     <!-- Theme & Status Bar -->
     <meta name="theme-color" content="#020617" media="(prefers-color-scheme: dark)" />
     <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
@@ -395,19 +392,6 @@
     <script type="module" src="/src/index.tsx"></script>
     
     <script>
-      // Service Worker Registration with improved error handling
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js')
-            .then(reg => {
-              console.log('✓ SW registered');
-              // Check for updates periodically
-              setInterval(() => reg.update(), 60000);
-            })
-            .catch(err => console.warn('✗ SW registration failed:', err));
-        });
-      }
-
       // Prevent zooming on double tap
       let lastTouchEnd = 0;
       document.addEventListener('touchend', (event) => {
