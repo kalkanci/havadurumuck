@@ -4,8 +4,10 @@ import { Heart, Navigation, MapPin, ArrowUp, ArrowDown, RefreshCw, Calendar, Clo
 import { GeoLocation, WeatherData, WeatherAlert, PublicHoliday, AppSettings, AstronomyData } from './types';
 import { fetchWeather, getDetailedAddress, fetchHolidays } from './services/weatherService';
 import { fetchAstronomyPicture } from './services/astronomyService';
+import { AppError, ErrorCode } from './utils/errors';
 import { calculateDistance, checkWeatherAlerts, triggerHapticFeedback } from './utils/helpers';
 import Background from './components/Background';
+import Toast, { ToastType } from './components/ui/Toast';
 import Search from './components/Search';
 import HourlyForecast from './components/HourlyForecast';
 import DetailsGrid from './components/DetailsGrid';
@@ -62,6 +64,7 @@ const App: React.FC = () => {
   
   const [error, setError] = useState<string | null>(null);
   const [gpsError, setGpsError] = useState<boolean>(false);
+  const [toast, setToast] = useState<{ message: string, type: ToastType } | null>(null);
 
   // Widget Mode Detection
   const isWidgetMode = new URLSearchParams(window.location.search).get('mode') === 'widget';
@@ -144,6 +147,10 @@ const App: React.FC = () => {
       setUpcomingHolidays(relevant);
   }, [location]);
 
+  const showToast = (message: string, type: ToastType = 'info') => {
+    setToast({ message, type });
+  };
+
   const loadWeather = useCallback(async (isRefresh = false) => {
     if (!location) return;
     
@@ -161,11 +168,28 @@ const App: React.FC = () => {
           haptic([50, 100, 50]);
       } else if (isRefresh) {
           haptic(20);
+          showToast('Veriler güncellendi', 'success');
       }
 
       if (location.country !== 'GPS') setGpsError(false); 
     } catch (err) {
-      setError('Hava durumu verisi alınamadı. İnternet bağlantınızı kontrol edin.');
+      let message = 'Hava durumu verisi alınamadı.';
+
+      if (err instanceof AppError) {
+          if (err.code === ErrorCode.NETWORK_ERROR) {
+              message = 'İnternet bağlantınızı kontrol edin.';
+          } else if (err.code === ErrorCode.API_ERROR) {
+              message = 'Sunucuya ulaşılamıyor, daha sonra tekrar deneyin.';
+          }
+      }
+
+      // If we are refreshing, show Toast instead of blocking error.
+      // For initial boot or location change, show error screen.
+      if (isRefresh) {
+          showToast(message, 'error');
+      } else {
+          setError(message);
+      }
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -313,14 +337,23 @@ const App: React.FC = () => {
   // RENDER WIDGET MODE
   if (isWidgetMode) {
     return (
-      <React.Suspense fallback={<div className="flex items-center justify-center h-screen bg-black"><Loader2 className="animate-spin text-white" /></div>}>
-        <WidgetView 
-            weather={weather} 
-            locationName={location?.name || ''} 
-            loading={loading}
-            onRefresh={() => loadWeather(true)}
-        />
-      </React.Suspense>
+      <>
+        {toast && (
+          <Toast
+            message={toast.message}
+            type={toast.type}
+            onClose={() => setToast(null)}
+          />
+        )}
+        <React.Suspense fallback={<div className="flex items-center justify-center h-screen bg-black"><Loader2 className="animate-spin text-white" /></div>}>
+          <WidgetView
+              weather={weather}
+              locationName={location?.name || ''}
+              loading={loading}
+              onRefresh={() => loadWeather(true)}
+          />
+        </React.Suspense>
+      </>
     );
   }
 
@@ -389,6 +422,15 @@ const App: React.FC = () => {
           deferredPrompt={deferredPrompt} 
           onInstall={handleInstallClick} 
       />
+
+      {/* Global Toast */}
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
 
       <div className="relative z-10 flex flex-col min-h-screen px-4 pb-24 max-w-md mx-auto w-full transition-transform duration-300">
         
