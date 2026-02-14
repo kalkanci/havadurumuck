@@ -1,6 +1,6 @@
-
 import { WeatherData, GeoLocation, AirQuality, PublicHoliday } from '../types';
 import { fetchWithRetry } from '../utils/api';
+import { AppError, ErrorCode } from '../utils/errors';
 
 const SEARCH_API_URL = 'https://nominatim.openstreetmap.org/search';
 const WEATHER_API_URL = 'https://api.open-meteo.com/v1/forecast';
@@ -15,6 +15,11 @@ export const getDetailedAddress = async (lat: number, lon: number): Promise<{ ci
         'User-Agent': 'AtmosferAI/1.0'
       }
     });
+
+    if (!res.ok) {
+        throw new AppError(`Geocoding API failed: ${res.status}`, ErrorCode.API_ERROR);
+    }
+
     const data = await res.json();
     const addr = data.address || {};
     
@@ -69,7 +74,10 @@ export const getDetailedAddress = async (lat: number, lon: number): Promise<{ ci
     return { city: mainName, address: subText, country: country, countryCode };
   } catch (error) {
     console.warn("Reverse geocoding failed", error);
-    return { city: 'Konum Bulunamadı', address: '', country: '', countryCode: '' };
+    if (error instanceof AppError) throw error;
+    // If it's a network error (no response), fetchWithRetry might throw.
+    // We'll wrap it.
+    throw new AppError('Adres bilgisi alınamadı.', ErrorCode.NETWORK_ERROR, error);
   }
 };
 
@@ -77,13 +85,16 @@ export const getDetailedAddress = async (lat: number, lon: number): Promise<{ ci
 export const searchCity = async (query: string): Promise<GeoLocation[]> => {
   if (query.length < 2) return [];
   try {
-    // addressdetails=1: Detaylı adres parçalarını getirir
-    // limit=5: En fazla 5 sonuç
     const res = await fetchWithRetry(`${SEARCH_API_URL}?q=${encodeURIComponent(query)}&format=json&addressdetails=1&limit=5&accept-language=tr`, {
         headers: {
             'User-Agent': 'AtmosferAI/1.0'
         }
     });
+
+    if (!res.ok) {
+         throw new AppError(`Search API failed: ${res.status}`, ErrorCode.API_ERROR);
+    }
+
     const data = await res.json();
     
     if (!data || data.length === 0) return [];
@@ -114,7 +125,8 @@ export const searchCity = async (query: string): Promise<GeoLocation[]> => {
 
   } catch (error) {
     console.error("Geocoding error:", error);
-    return [];
+    if (error instanceof AppError) throw error;
+    throw new AppError('Konum araması başarısız oldu.', ErrorCode.NETWORK_ERROR, error);
   }
 };
 
@@ -153,7 +165,7 @@ export const fetchWeather = async (lat: number, lon: number): Promise<WeatherDat
     if (!weatherRes.ok) {
         const errorText = await weatherRes.text();
         console.error("Open-Meteo API Error:", errorText);
-        throw new Error(`Weather fetch failed: ${weatherRes.status}`);
+        throw new AppError(`Weather fetch failed: ${weatherRes.status}`, ErrorCode.API_ERROR);
     }
     
     const weatherData = await weatherRes.json();
@@ -173,7 +185,8 @@ export const fetchWeather = async (lat: number, lon: number): Promise<WeatherDat
 
   } catch (error) {
     console.error("API Error:", error);
-    throw error;
+    if (error instanceof AppError) throw error;
+    throw new AppError('Hava durumu verisi alınamadı.', ErrorCode.NETWORK_ERROR, error);
   }
 };
 
