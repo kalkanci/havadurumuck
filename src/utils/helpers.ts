@@ -248,3 +248,11 @@ export const checkWeatherAlerts = (weather: WeatherData): WeatherAlert[] => {
 
     return alerts;
 };
+
+// Sıcaklık Dönüştürücü
+export const convertTemp = (celsius: number, unit: 'celsius' | 'fahrenheit'): number => {
+  if (unit === 'fahrenheit') {
+    return (celsius * 9/5) + 32;
+  }
+  return celsius;
+};
