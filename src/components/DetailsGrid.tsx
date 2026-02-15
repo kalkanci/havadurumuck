@@ -3,21 +3,25 @@ import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { WeatherData } from '../types';
 import { Droplets, Wind, Sun, Gauge, Thermometer, Navigation, X, Clock, Sunrise, Sunset, ArrowUpRight, ArrowDownRight, Minus, HelpCircle } from 'lucide-react';
-import { formatTime, getWindDirection, triggerHapticFeedback } from '../utils/helpers';
+import { formatTime, getWindDirection, triggerHapticFeedback, convertTemp } from '../utils/helpers';
 
 interface DetailsGridProps {
   weather: WeatherData;
+  unit: 'celsius' | 'fahrenheit';
 }
 
 type DetailType = 'feels_like' | 'wind' | 'humidity' | 'dew_point' | 'uv' | 'pressure' | 'sunrise' | 'sunset' | null;
 
-const DetailsGrid: React.FC<DetailsGridProps> = ({ weather }) => {
+const DetailsGrid: React.FC<DetailsGridProps> = ({ weather, unit }) => {
   const { current, daily, hourly } = weather;
   const [selectedDetail, setSelectedDetail] = useState<DetailType>(null);
   const [isClosing, setIsClosing] = useState(false);
 
-  const tempUnit = '°';
+  const tempUnit = unit === 'celsius' ? '°' : '°F';
   const speedUnit = 'km/s';
+
+  const dpDisplay = Math.round(convertTemp(current.dew_point_2m, unit));
+  const feelsDisplay = Math.round(convertTemp(current.apparent_temperature, unit));
 
   useEffect(() => {
     if (selectedDetail !== null) {
@@ -140,13 +144,13 @@ const DetailsGrid: React.FC<DetailsGridProps> = ({ weather }) => {
               <div className="w-[1px] h-12 bg-white/10"></div>
               <div className="text-center">
                   <p className="text-[10px] text-slate-400 uppercase font-bold mb-2">Çiy Noktası</p>
-                  <p className="text-4xl font-black text-cyan-400 drop-shadow-lg">{Math.round(current.dew_point_2m)}{tempUnit}</p>
+                  <p className="text-4xl font-black text-cyan-400 drop-shadow-lg">{dpDisplay}{tempUnit}</p>
               </div>
           </div>
           
           <div className="bg-blue-500/10 p-5 rounded-2xl border border-blue-500/20 text-center shrink-0">
               <p className="text-blue-200 text-sm font-medium leading-relaxed">
-                  Çiy noktası <span className="text-white font-bold">{Math.round(current.dew_point_2m)}{tempUnit}</span> seviyesinde. Hissedilen hava şuan <span className="font-bold text-white underline decoration-blue-400/50">{getDewPointDesc(current.dew_point_2m)}</span>.
+                  Çiy noktası <span className="text-white font-bold">{dpDisplay}{tempUnit}</span> seviyesinde. Hissedilen hava şuan <span className="font-bold text-white underline decoration-blue-400/50">{getDewPointDesc(current.dew_point_2m)}</span>.
               </p>
           </div>
 
@@ -369,15 +373,15 @@ const DetailsGrid: React.FC<DetailsGridProps> = ({ weather }) => {
     {
       id: 'feels_like',
       label: 'Hissedilen',
-      value: Math.round(current.apparent_temperature),
+      value: feelsDisplay,
       unit: tempUnit,
       icon: <Thermometer size={24} className="text-red-400" />,
       subtext: null,
       render: () => renderBasicContent(
-          Math.round(current.apparent_temperature), 
+          feelsDisplay,
           tempUnit, 
           current.apparent_temperature > current.temperature_2m ? 'Olduğundan daha sıcak' : 'Olduğundan daha soğuk',
-          `Rüzgar ve nem faktörleri hesaba katıldığında sıcaklık ${Math.round(current.apparent_temperature)}${tempUnit} olarak hissediliyor.`
+          `Rüzgar ve nem faktörleri hesaba katıldığında sıcaklık ${feelsDisplay}${tempUnit} olarak hissediliyor.`
       )
     },
     {
@@ -406,7 +410,7 @@ const DetailsGrid: React.FC<DetailsGridProps> = ({ weather }) => {
     {
       id: 'dew_point',
       label: 'Çiy Noktası',
-      value: Math.round(current.dew_point_2m),
+      value: dpDisplay,
       unit: tempUnit,
       icon: <Droplets size={24} className="text-cyan-300" />,
       subtext: <span className="text-[10px] text-slate-400 mt-1 block">{getDewPointDesc(current.dew_point_2m)}</span>,
