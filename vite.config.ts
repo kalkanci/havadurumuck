@@ -43,6 +43,11 @@ export default defineConfig(({ mode }) => {
       optimizeDeps: {
         include: ['react', 'react-dom', 'lucide-react'],
         exclude: ['node_modules/.vite'],
-      }
+      },
+      test: {
+        globals: true,
+        environment: 'jsdom',
+        setupFiles: './vitest.setup.ts',
+      },
     };
 });

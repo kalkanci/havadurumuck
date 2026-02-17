@@ -1,6 +1,6 @@
-
 import { WeatherData, GeoLocation, AirQuality, PublicHoliday } from '../types';
 import { fetchWithRetry } from '../utils/api';
+import { AppError, ErrorCode } from '../utils/errors';
 
 const SEARCH_API_URL = 'https://nominatim.openstreetmap.org/search';
 const WEATHER_API_URL = 'https://api.open-meteo.com/v1/forecast';
@@ -69,6 +69,7 @@ export const getDetailedAddress = async (lat: number, lon: number): Promise<{ ci
     return { city: mainName, address: subText, country: country, countryCode };
   } catch (error) {
     console.warn("Reverse geocoding failed", error);
+    // Don't throw for geocoding, just return fallback
     return { city: 'Konum Bulunamadı', address: '', country: '', countryCode: '' };
   }
 };
@@ -77,13 +78,16 @@ export const getDetailedAddress = async (lat: number, lon: number): Promise<{ ci
 export const searchCity = async (query: string): Promise<GeoLocation[]> => {
   if (query.length < 2) return [];
   try {
-    // addressdetails=1: Detaylı adres parçalarını getirir
-    // limit=5: En fazla 5 sonuç
     const res = await fetchWithRetry(`${SEARCH_API_URL}?q=${encodeURIComponent(query)}&format=json&addressdetails=1&limit=5&accept-language=tr`, {
         headers: {
             'User-Agent': 'AtmosferAI/1.0'
         }
     });
+
+    if (!res.ok) {
+        throw new AppError(ErrorCode.NETWORK, 'Search API response not ok');
+    }
+
     const data = await res.json();
     
     if (!data || data.length === 0) return [];
@@ -91,52 +95,47 @@ export const searchCity = async (query: string): Promise<GeoLocation[]> => {
     return data.map((item: any) => {
         const addr = item.address || {};
         
-        // Görünen ana isim (Sokak, Mahalle veya Şehir)
         const name = addr.road || addr.neighbourhood || addr.suburb || addr.town || addr.city || addr.county || item.name;
         
-        // Alt metin (İlçe, İl, Ülke)
         const parts = [];
         if (addr.town && addr.town !== name) parts.push(addr.town);
         if (addr.city && addr.city !== name) parts.push(addr.city);
         if (addr.country) parts.push(addr.country);
 
         return {
-            id: parseInt(item.place_id), // Nominatim place_id
+            id: parseInt(item.place_id),
             name: name,
             latitude: parseFloat(item.lat),
             longitude: parseFloat(item.lon),
             country: addr.country || '',
             countryCode: addr.country_code ? addr.country_code.toUpperCase() : '',
-            admin1: addr.state || addr.province || addr.city, // İl bilgisi
+            admin1: addr.state || addr.province || addr.city,
             subtext: parts.join(', ')
         };
     });
 
   } catch (error) {
     console.error("Geocoding error:", error);
-    return [];
+    if (error instanceof AppError) throw error;
+    throw new AppError(ErrorCode.NETWORK, 'Konum araması başarısız oldu.', 'Konum arama servisine ulaşılamıyor.');
   }
 };
 
 export const fetchWeather = async (lat: number, lon: number): Promise<WeatherData> => {
   
-  // 1. Hava Durumu Verisi
   const weatherParams = new URLSearchParams({
     latitude: lat.toString(),
     longitude: lon.toString(),
     current: 'temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,cloud_cover,pressure_msl,surface_pressure,wind_speed_10m,wind_direction_10m,dew_point_2m',
-    // Detailed hourly data for popups:
     hourly: 'temperature_2m,weather_code,is_day,wind_speed_10m,wind_direction_10m,precipitation_probability,uv_index,relative_humidity_2m,apparent_temperature,surface_pressure,pressure_msl',
     daily: 'weather_code,temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,sunrise,sunset,uv_index_max,precipitation_probability_max,precipitation_sum,precipitation_hours,wind_speed_10m_max,wind_gusts_10m_max,wind_direction_10m_dominant',
     timezone: 'auto',
     forecast_days: '16',
-    // Force Metric Units
     temperature_unit: 'celsius',
     wind_speed_unit: 'kmh',
     precipitation_unit: 'mm',
   });
 
-  // 2. Hava Kalitesi Verisi (Ayrı endpoint)
   const aqiParams = new URLSearchParams({
     latitude: lat.toString(),
     longitude: lon.toString(),
@@ -153,7 +152,7 @@ export const fetchWeather = async (lat: number, lon: number): Promise<WeatherDat
     if (!weatherRes.ok) {
         const errorText = await weatherRes.text();
         console.error("Open-Meteo API Error:", errorText);
-        throw new Error(`Weather fetch failed: ${weatherRes.status}`);
+        throw new AppError(ErrorCode.API, `Weather API Error: ${weatherRes.status}`, 'Hava durumu servisine erişilemiyor.');
     }
     
     const weatherData = await weatherRes.json();
@@ -173,7 +172,8 @@ export const fetchWeather = async (lat: number, lon: number): Promise<WeatherDat
 
   } catch (error) {
     console.error("API Error:", error);
-    throw error;
+    if (error instanceof AppError) throw error;
+    throw new AppError(ErrorCode.UNKNOWN, 'Unexpected weather error', 'Hava durumu verisi alınırken bir hata oluştu.');
   }
 };
 
