@@ -1,6 +1,11 @@
 
 import { CurrentWeather, AdviceResponse, WeatherData, WeatherAlert, DailyForecast, AirQuality } from '../types';
 
+export const convertTemperature = (value: number, unit: 'celsius' | 'fahrenheit'): number => {
+  if (unit === 'celsius') return value;
+  return (value * 9 / 5) + 32;
+};
+
 // Haversine formula for distance
 export const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
   const R = 6371; // km
@@ -15,7 +20,7 @@ export const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2
 };
 
 // Akıllı Tavsiye Motoru (Gelişmiş Mantık)
-export const generateSmartAdvice = (weather: WeatherData): AdviceResponse => {
+export const generateSmartAdvice = (weather: WeatherData, unit: 'celsius' | 'fahrenheit' = 'celsius'): AdviceResponse => {
   const { current, daily, air_quality } = weather;
   const temp = current.temperature_2m;
   const code = current.weather_code;
@@ -105,14 +110,14 @@ export const generateSmartAdvice = (weather: WeatherData): AdviceResponse => {
 };
 
 // Fallback is simply calling the smart advice now
-export const generateFallbackAdvice = (current: CurrentWeather): AdviceResponse => {
+export const generateFallbackAdvice = (current: CurrentWeather, unit: 'celsius' | 'fahrenheit' = 'celsius'): AdviceResponse => {
     // Mock weather data structure for simple fallback
     return generateSmartAdvice({
         current,
         daily: { uv_index_max: [0], precipitation_probability_max: [0] } as any,
         hourly: {} as any,
         latitude: 0, longitude: 0, generationtime_ms: 0, utc_offset_seconds: 0, elevation: 0, current_units: {}
-    });
+    }, unit);
 };
 
 // 24 Saatlik Format (HH:mm)
@@ -165,10 +170,11 @@ export const triggerHapticFeedback = (pattern: number | number[] = 10) => {
 };
 
 // --- HAVA DURUMU UYARILARI ANALİZİ ---
-export const checkWeatherAlerts = (weather: WeatherData): WeatherAlert[] => {
+export const checkWeatherAlerts = (weather: WeatherData, unit: 'celsius' | 'fahrenheit' = 'celsius'): WeatherAlert[] => {
     const alerts: WeatherAlert[] = [];
     const current = weather.current;
     const daily = weather.daily;
+    const tempUnit = unit === 'celsius' ? '°C' : '°F';
 
     // 1. Fırtına / Şiddetli Yağmur (Code 95-99, 65, 82)
     const severeCodes = [95, 96, 99, 65, 82];
@@ -183,11 +189,12 @@ export const checkWeatherAlerts = (weather: WeatherData): WeatherAlert[] => {
 
     // 2. Aşırı Sıcaklık (> 35°C)
     if (current.temperature_2m > 35) {
+        const displayTemp = Math.round(convertTemperature(current.temperature_2m, unit));
         alerts.push({
             type: 'heat',
             level: 'warning',
             title: 'Aşırı Sıcak',
-            message: `Sıcaklık ${Math.round(current.temperature_2m)}°C'ye ulaştı. Bol su tüketin ve güneşten korunun.`
+            message: `Sıcaklık ${displayTemp}${tempUnit}'ye ulaştı. Bol su tüketin ve güneşten korunun.`
         });
     }
 

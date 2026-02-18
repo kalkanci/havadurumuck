@@ -1,10 +1,11 @@
 
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { Heart, Navigation, MapPin, ArrowUp, ArrowDown, RefreshCw, Calendar, CloudSun, Loader2, Settings } from 'lucide-react';
+import { usePullToRefresh } from './hooks/usePullToRefresh';
 import { GeoLocation, WeatherData, WeatherAlert, PublicHoliday, AppSettings, AstronomyData } from './types';
 import { fetchWeather, getDetailedAddress, fetchHolidays } from './services/weatherService';
 import { fetchAstronomyPicture } from './services/astronomyService';
-import { calculateDistance, checkWeatherAlerts, triggerHapticFeedback } from './utils/helpers';
+import { calculateDistance, checkWeatherAlerts, triggerHapticFeedback, convertTemperature } from './utils/helpers';
 import Background from './components/Background';
 import Search from './components/Search';
 import HourlyForecast from './components/HourlyForecast';
@@ -34,7 +35,7 @@ const App: React.FC = () => {
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [loading, setLoading] = useState(false);
   const [initialBoot, setInitialBoot] = useState(true); // Control Splash Screen
-  const [refreshing, setRefreshing] = useState(false);
+  // refreshing state is now handled by usePullToRefresh
   const [alerts, setAlerts] = useState<WeatherAlert[]>([]);
   const [upcomingHolidays, setUpcomingHolidays] = useState<PublicHoliday[]>([]);
   const [cosmicData, setCosmicData] = useState<AstronomyData | null>(null);
@@ -42,7 +43,7 @@ const App: React.FC = () => {
   // Settings State
   const [settings, setSettings] = useState<AppSettings>(() => {
       const saved = localStorage.getItem('atmosfer_settings');
-      return saved ? JSON.parse(saved) : { hapticsEnabled: true };
+      return saved ? { temperatureUnit: 'celsius', ...JSON.parse(saved) } : { hapticsEnabled: true, temperatureUnit: 'celsius' };
   });
 
   const [favorites, setFavorites] = useState<GeoLocation[]>(() => {
@@ -66,10 +67,6 @@ const App: React.FC = () => {
   // Widget Mode Detection
   const isWidgetMode = new URLSearchParams(window.location.search).get('mode') === 'widget';
 
-  // Pull to refresh refs
-  const startY = useRef(0);
-  const pullDistance = useRef(0);
-  const PULL_THRESHOLD = 120;
   const contentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -111,6 +108,13 @@ const App: React.FC = () => {
         loadHolidays();
     }
   }, [location]);
+
+  // Update alerts when unit changes
+  useEffect(() => {
+    if (weather) {
+      setAlerts(checkWeatherAlerts(weather, settings.temperatureUnit));
+    }
+  }, [settings.temperatureUnit, weather]);
 
   const haptic = useCallback((pattern?: number | number[]) => {
       if (settings.hapticsEnabled) {
@@ -154,7 +158,7 @@ const App: React.FC = () => {
       const data = await fetchWeather(location.latitude, location.longitude);
       setWeather(data);
       
-      const generatedAlerts = checkWeatherAlerts(data);
+      const generatedAlerts = checkWeatherAlerts(data, settings.temperatureUnit);
       setAlerts(generatedAlerts);
       
       if (generatedAlerts.some(a => a.level === 'critical')) {
@@ -168,7 +172,6 @@ const App: React.FC = () => {
       setError('Hava durumu verisi alınamadı. İnternet bağlantınızı kontrol edin.');
     } finally {
       setLoading(false);
-      setRefreshing(false);
       
       // Artificial delay for splash screen smoothness if it's the first boot
       if (initialBoot) {
@@ -261,33 +264,19 @@ const App: React.FC = () => {
     }
   }, [deferredPrompt, haptic]);
 
-  // Pull to Refresh Logic
-  const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    if (window.scrollY === 0) {
-      startY.current = e.touches[0].clientY;
-    }
-  }, []);
+  const handleRefresh = useCallback(async () => {
+      await Promise.all([
+          loadWeather(true),
+          loadHolidays(),
+          loadAstronomy()
+      ]);
+  }, [loadWeather, loadHolidays, loadAstronomy]);
 
-  const handleTouchMove = useCallback((e: React.TouchEvent) => {
-    if (startY.current === 0) return;
-    const currentY = e.touches[0].clientY;
-    const diff = currentY - startY.current;
-    
-    if (diff > 0 && window.scrollY === 0) {
-      pullDistance.current = diff;
-    }
-  }, []);
-  const handleTouchEnd = useCallback(() => {
-    if (pullDistance.current > PULL_THRESHOLD && window.scrollY === 0) {
-      setRefreshing(true);
-      haptic(50);
-      loadWeather(true);
-      loadHolidays();
-      loadAstronomy();
-    }
-    startY.current = 0;
-    pullDistance.current = 0;
-  }, [haptic, loadWeather, loadHolidays, loadAstronomy]);
+  const { refreshing, handlers } = usePullToRefresh({
+      onRefresh: handleRefresh,
+      haptic,
+      threshold: 120
+  });
 
   // --- SPLASH SCREEN RENDER ---
   if (initialBoot) {
@@ -337,9 +326,9 @@ const App: React.FC = () => {
   return (
     <div 
       className="relative min-h-screen overflow-x-hidden selection:bg-blue-500/30 pb-24 text-white transition-colors duration-500"
-      onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
-      onTouchEnd={handleTouchEnd}
+      onTouchStart={handlers.onTouchStart}
+      onTouchMove={handlers.onTouchMove}
+      onTouchEnd={handlers.onTouchEnd}
     >
       <Background 
         city={location?.name || ''} 
@@ -491,7 +480,7 @@ const App: React.FC = () => {
                      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 bg-blue-500/20 rounded-full blur-[80px] pointer-events-none"></div>
                      
                      <h1 className="text-[9rem] leading-[0.85] font-thin tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white via-white to-white/70 drop-shadow-2xl select-none">
-                        {Math.round(weather.current.temperature_2m)}<span className="text-[5rem] font-light text-zinc-300 align-top absolute top-2 ml-1">°</span>
+                        {Math.round(convertTemperature(weather.current.temperature_2m, settings.temperatureUnit))}<span className="text-[5rem] font-light text-zinc-300 align-top absolute top-2 ml-1">°</span>
                      </h1>
                   </div>
 
@@ -501,9 +490,9 @@ const App: React.FC = () => {
                         {getWeatherLabel(weather.current.weather_code)}
                      </p>
                      <div className="flex items-center gap-4 text-base font-medium text-white/80 bg-black/10 px-4 py-1.5 rounded-full backdrop-blur-sm border border-white/5 mt-2">
-                         <span className="flex items-center gap-1"><ArrowUp size={14} className="text-red-400" /> {Math.round(weather.daily.temperature_2m_max[0])}°</span>
+                         <span className="flex items-center gap-1"><ArrowUp size={14} className="text-red-400" /> {Math.round(convertTemperature(weather.daily.temperature_2m_max[0], settings.temperatureUnit))}°</span>
                          <div className="w-px h-3 bg-white/20"></div>
-                         <span className="flex items-center gap-1"><ArrowDown size={14} className="text-blue-400" /> {Math.round(weather.daily.temperature_2m_min[0])}°</span>
+                         <span className="flex items-center gap-1"><ArrowDown size={14} className="text-blue-400" /> {Math.round(convertTemperature(weather.daily.temperature_2m_min[0], settings.temperatureUnit))}°</span>
                      </div>
                   </div>
 
@@ -527,9 +516,9 @@ const App: React.FC = () => {
                 <div className="flex-1 flex flex-col gap-5">
                   <WeatherAlerts alerts={alerts} />
                   <HolidayCard holidays={upcomingHolidays} />
-                  <AdviceCard weather={weather} cityName={location.name} />
+                  <AdviceCard weather={weather} cityName={location.name} unit={settings.temperatureUnit} />
                   <ForecastInsight weather={weather} />
-                  <HourlyForecast weather={weather} />
+                  <HourlyForecast weather={weather} unit={settings.temperatureUnit} />
                   
                   <div className="grid grid-cols-1 gap-5">
                     <SpotifyCard weather={weather} />
@@ -538,7 +527,7 @@ const App: React.FC = () => {
                   </div>
                   
                   <AirQualityCard data={weather.air_quality} />
-                  <DetailsGrid weather={weather} />
+                  <DetailsGrid weather={weather} unit={settings.temperatureUnit} />
                   
                   <div className="text-center pt-4 opacity-50">
                     <p className="text-[10px] uppercase tracking-widest text-zinc-400">
@@ -550,7 +539,7 @@ const App: React.FC = () => {
             ) : (
               // --- 16 DAYS FORECAST VIEW ---
               <React.Suspense fallback={<SkeletonLoader />}>
-                <DailyForecast weather={weather} />
+                <DailyForecast weather={weather} unit={settings.temperatureUnit} />
               </React.Suspense>
             )}
           </main>

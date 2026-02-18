@@ -3,11 +3,12 @@ import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { WeatherData } from '../types';
 import { getWeatherIcon, getWeatherLabel } from '../constants';
-import { formatTime, triggerHapticFeedback } from '../utils/helpers';
+import { formatTime, triggerHapticFeedback, convertTemperature } from '../utils/helpers';
 import { Droplets, Navigation, X, Wind, Thermometer, Sun, Gauge } from 'lucide-react';
 
 interface HourlyForecastProps {
   weather: WeatherData;
+  unit: 'celsius' | 'fahrenheit';
 }
 
 // Sıcaklığa göre arka plan rengi
@@ -19,11 +20,11 @@ const getTempColor = (temp: number, isDay: number) => {
     return "text-rose-300";
 };
 
-const HourlyForecast: React.FC<HourlyForecastProps> = ({ weather }) => {
+const HourlyForecast: React.FC<HourlyForecastProps> = ({ weather, unit }) => {
   const [selectedHour, setSelectedHour] = useState<number | null>(null);
   const [isClosing, setIsClosing] = useState(false);
 
-  const tempUnit = '°';
+  const tempUnit = unit === 'celsius' ? '°' : '°F';
   const speedUnit = 'km/s';
 
   useEffect(() => {
@@ -70,11 +71,11 @@ const HourlyForecast: React.FC<HourlyForecastProps> = ({ weather }) => {
     if (index >= weather.hourly.time.length) return null;
 
     const time = weather.hourly.time[index];
-    const temp = weather.hourly.temperature_2m[index];
+    const temp = convertTemperature(weather.hourly.temperature_2m[index], unit);
     const code = weather.hourly.weather_code[index];
     const isDay = weather.hourly.is_day[index];
     const humidity = weather.hourly.relative_humidity_2m?.[index] ?? 0;
-    const feelsLike = weather.hourly.apparent_temperature?.[index] ?? temp;
+    const feelsLike = convertTemperature(weather.hourly.apparent_temperature?.[index] ?? temp, unit);
     const uv = weather.hourly.uv_index?.[index] ?? 0;
     const pressure = weather.hourly.surface_pressure?.[index] ?? 0;
     const windSpeed = weather.hourly.wind_speed_10m?.[index] ?? 0;
@@ -151,14 +152,15 @@ const HourlyForecast: React.FC<HourlyForecastProps> = ({ weather }) => {
             if (dataIndex >= weather.hourly.time.length) return null;
 
             const time = weather.hourly.time[dataIndex];
-            const temp = weather.hourly.temperature_2m[dataIndex];
+            const rawTemp = weather.hourly.temperature_2m[dataIndex];
+            const temp = convertTemperature(rawTemp, unit);
             const code = weather.hourly.weather_code[dataIndex];
             const isDay = weather.hourly.is_day[dataIndex];
             const formattedTime = formatTime(time);
             const isNow = displayIndex === 0;
             const rainProb = weather.hourly.precipitation_probability?.[dataIndex] ?? 0;
             const windDir = weather.hourly.wind_direction_10m?.[dataIndex] ?? 0;
-            const tempColor = getTempColor(temp, isDay);
+            const tempColor = getTempColor(rawTemp, isDay);
 
             return (
               <button 
