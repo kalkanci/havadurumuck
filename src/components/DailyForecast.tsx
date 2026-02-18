@@ -9,13 +9,14 @@ import {
     TrendingUp, TrendingDown, Minus, ArrowUp, ArrowDown, 
     ThermometerSun, ThermometerSnowflake, CalendarDays
 } from 'lucide-react';
-import { getWindDirection, formatTime, triggerHapticFeedback } from '../utils/helpers';
+import { getWindDirection, formatTime, triggerHapticFeedback, convertTemperature } from '../utils/helpers';
 
 interface DailyForecastProps {
   weather: WeatherData;
+  unit: 'celsius' | 'fahrenheit';
 }
 
-const DailyForecast: React.FC<DailyForecastProps> = ({ weather }) => {
+const DailyForecast: React.FC<DailyForecastProps> = ({ weather, unit }) => {
   // Slicing data to exactly 15 days
   const limit = 15;
   
@@ -34,7 +35,7 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ weather }) => {
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
   const [isDetailClosing, setIsDetailClosing] = useState(false);
 
-  const tempUnit = '°';
+  const tempUnit = unit === 'celsius' ? '°' : '°F';
   const speedUnit = 'km/s';
 
   // Statistics for the summary header
@@ -42,6 +43,9 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ weather }) => {
   const globalMax = Math.max(...temperature_2m_max);
   const tempRange = globalMax - globalMin;
   
+  const displayGlobalMin = Math.round(convertTemperature(globalMin, unit));
+  const displayGlobalMax = Math.round(convertTemperature(globalMax, unit));
+
   const hottestDayIndex = temperature_2m_max.indexOf(globalMax);
   const coldestDayIndex = temperature_2m_min.indexOf(globalMin);
   const rainyDaysCount = precipitation_probability_max.filter(p => p > 50).length;
@@ -116,9 +120,9 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ weather }) => {
       const index = selectedDay;
       const date = new Date(time[index]);
       const code = weather_code[index];
-      const maxT = Math.round(temperature_2m_max[index]);
-      const minT = Math.round(temperature_2m_min[index]);
-      const feels = Math.round(apparent_temperature_max ? apparent_temperature_max[index] : maxT);
+      const maxT = Math.round(convertTemperature(temperature_2m_max[index], unit));
+      const minT = Math.round(convertTemperature(temperature_2m_min[index], unit));
+      const feels = Math.round(convertTemperature(apparent_temperature_max ? apparent_temperature_max[index] : maxT, unit));
       const rain = precipitation_probability_max ? precipitation_probability_max[index] : 0;
       const wind = Math.round(wind_speed_10m_max ? wind_speed_10m_max[index] : 0);
       const windDir = wind_direction_10m_dominant ? wind_direction_10m_dominant[index] : 0;
@@ -259,14 +263,14 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ weather }) => {
                     <div className="bg-black/20 rounded-2xl p-3 backdrop-blur-sm border border-white/5 flex flex-col items-center justify-center text-center">
                         <ThermometerSun size={18} className="text-orange-300 mb-1" />
                         <span className="text-[10px] font-bold text-slate-400 uppercase">En Yüksek</span>
-                        <span className="text-xl font-black text-white">{globalMax}{tempUnit}</span>
+                        <span className="text-xl font-black text-white">{displayGlobalMax}{tempUnit}</span>
                         <span className="text-[9px] text-slate-500">{new Date(time[hottestDayIndex]).getDate()} {new Date(time[hottestDayIndex]).toLocaleDateString('tr-TR', { month: 'short' })}</span>
                     </div>
 
                     <div className="bg-black/20 rounded-2xl p-3 backdrop-blur-sm border border-white/5 flex flex-col items-center justify-center text-center">
                         <ThermometerSnowflake size={18} className="text-blue-300 mb-1" />
                         <span className="text-[10px] font-bold text-slate-400 uppercase">En Düşük</span>
-                        <span className="text-xl font-black text-white">{globalMin}{tempUnit}</span>
+                        <span className="text-xl font-black text-white">{displayGlobalMin}{tempUnit}</span>
                          <span className="text-[9px] text-slate-500">{new Date(time[coldestDayIndex]).getDate()} {new Date(time[coldestDayIndex]).toLocaleDateString('tr-TR', { month: 'short' })}</span>
                     </div>
 
@@ -288,14 +292,16 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ weather }) => {
                 const dateNum = date.getDate();
                 const month = date.toLocaleDateString('tr-TR', { month: 'short' });
                 
-                const min = Math.round(temperature_2m_min[index]);
-                const max = Math.round(temperature_2m_max[index]);
+                const minRaw = temperature_2m_min[index];
+                const maxRaw = temperature_2m_max[index];
+                const min = Math.round(convertTemperature(minRaw, unit));
+                const max = Math.round(convertTemperature(maxRaw, unit));
                 const rainProb = precipitation_probability_max ? precipitation_probability_max[index] : 0;
                 const code = weather_code[index];
                 
-                // Calculate visualization bars
-                const leftPos = ((min - globalMin) / tempRange) * 100;
-                const width = ((max - min) / tempRange) * 100;
+                // Calculate visualization bars (use raw values)
+                const leftPos = ((minRaw - globalMin) / tempRange) * 100;
+                const width = ((maxRaw - minRaw) / tempRange) * 100;
                 
                 return (
                     <button 

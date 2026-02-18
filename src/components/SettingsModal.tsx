@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Settings, Vibrate } from 'lucide-react';
+import { X, Settings, Vibrate, Thermometer } from 'lucide-react';
 import { AppSettings } from '../types';
 
 interface SettingsModalProps {
@@ -40,6 +40,11 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, settings
     onUpdate({ ...settings, hapticsEnabled: !settings.hapticsEnabled });
   };
 
+  const toggleUnit = () => {
+    const newUnit = settings.temperatureUnit === 'fahrenheit' ? 'celsius' : 'fahrenheit';
+    onUpdate({ ...settings, temperatureUnit: newUnit });
+  };
+
   return createPortal(
     <div className="fixed inset-0 z-[600] flex items-center justify-center p-6">
       <div 
@@ -62,6 +67,27 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, settings
         </div>
 
         <div className="space-y-4">
+            {/* Temperature Unit */}
+            <button
+                onClick={toggleUnit}
+                className="w-full bg-slate-900/50 p-4 rounded-2xl border border-white/5 flex items-center justify-between group active:scale-[0.98] transition-all"
+            >
+                <div className="flex items-center gap-3">
+                    <div className={`p-2 rounded-lg transition-colors ${settings.temperatureUnit === 'fahrenheit' ? 'bg-orange-500/20 text-orange-400' : 'bg-blue-500/20 text-blue-400'}`}>
+                        <Thermometer size={18} />
+                    </div>
+                    <div className="text-left">
+                        <span className="block text-slate-200 font-bold text-sm">Birim</span>
+                        <span className="text-xs text-slate-500">{settings.temperatureUnit === 'fahrenheit' ? 'Fahrenheit (°F)' : 'Celsius (°C)'}</span>
+                    </div>
+                </div>
+
+                <div className="flex items-center gap-1 bg-slate-800/80 p-1 rounded-lg border border-white/5">
+                     <span className={`text-xs font-bold px-3 py-1.5 rounded-md transition-all ${settings.temperatureUnit === 'celsius' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'}`}>°C</span>
+                     <span className={`text-xs font-bold px-3 py-1.5 rounded-md transition-all ${settings.temperatureUnit === 'fahrenheit' ? 'bg-orange-600 text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'}`}>°F</span>
+                </div>
+            </button>
+
             {/* Haptics */}
             <button 
                 onClick={toggleHaptics}

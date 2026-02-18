@@ -8,17 +8,18 @@ import { generateSmartAdvice, triggerHapticFeedback } from '../utils/helpers';
 interface AdviceCardProps {
   weather: WeatherData;
   cityName: string;
+  unit: 'celsius' | 'fahrenheit';
 }
 
-const AdviceCard: React.FC<AdviceCardProps> = ({ weather, cityName }) => {
+const AdviceCard: React.FC<AdviceCardProps> = ({ weather, cityName, unit }) => {
   const [data, setData] = useState<AdviceResponse | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
 
   useEffect(() => {
-    const advice = generateSmartAdvice(weather);
+    const advice = generateSmartAdvice(weather, unit);
     setData(advice);
-  }, [weather, cityName]);
+  }, [weather, cityName, unit]);
 
   useEffect(() => {
     if (isOpen) {
