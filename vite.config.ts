@@ -1,6 +1,7 @@
 import path from 'path';
 import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
+import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig(({ mode }) => {
     const env = loadEnv(mode, '.', '');
@@ -13,7 +14,80 @@ export default defineConfig(({ mode }) => {
           'Cache-Control': 'no-cache',
         }
       },
-      plugins: [react()],
+      plugins: [
+        react(),
+        VitePWA({
+          registerType: 'autoUpdate',
+          includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
+          manifest: {
+            name: "Atmosfer AI - Hava Durumu",
+            short_name: "Atmosfer",
+            description: "Sinematik, mobil öncelikli ve akıllı tavsiyeler sunan gerçek zamanlı hava durumu deneyimi.",
+            start_url: "/",
+            scope: "/",
+            display: "standalone",
+            orientation: "portrait-primary",
+            background_color: "#020617",
+            theme_color: "#020617",
+            prefer_related_applications: false,
+            icons: [
+              {
+                src: "/icon-192.png",
+                sizes: "192x192",
+                type: "image/png",
+                purpose: "any"
+              },
+              {
+                src: "/icon-512.png",
+                sizes: "512x512",
+                type: "image/png",
+                purpose: "any maskable"
+              }
+            ],
+            screenshots: [
+              {
+                src: "/icon-512.png",
+                sizes: "512x512",
+                type: "image/png",
+                form_factor: "wide"
+              },
+              {
+                src: "/icon-192.png",
+                sizes: "192x192",
+                type: "image/png",
+                form_factor: "narrow"
+              }
+            ],
+            categories: ["weather", "productivity"],
+            shortcuts: [
+              {
+                name: "Anlık Hava Durumu",
+                short_name: "Hava",
+                description: "Mevcut konumunuzun hava durumunu gösterin",
+                url: "/?tab=today",
+                icons: [{ src: "/icon-192.png", sizes: "192x192", type: "image/png" }]
+              },
+              {
+                name: "7 Günlük Tahmin",
+                short_name: "Tahmin",
+                description: "Haftalık hava durumu tahmini",
+                url: "/?tab=forecast",
+                icons: [{ src: "/icon-192.png", sizes: "192x192", type: "image/png" }]
+              }
+            ],
+            share_target: {
+              action: "/share",
+              method: "POST",
+              enctype: "application/x-www-form-urlencoded",
+              params: {
+                title: "title",
+                text: "text",
+                url: "url"
+              }
+            }
+          }
+        })
+      ],
       define: {
         'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
         'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY)
