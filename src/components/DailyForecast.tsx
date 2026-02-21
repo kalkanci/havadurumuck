@@ -9,21 +9,25 @@ import {
     TrendingUp, TrendingDown, Minus, ArrowUp, ArrowDown, 
     ThermometerSun, ThermometerSnowflake, CalendarDays
 } from 'lucide-react';
-import { getWindDirection, formatTime, triggerHapticFeedback } from '../utils/helpers';
+import { getWindDirection, formatTime, triggerHapticFeedback, convertTemperature } from '../utils/helpers';
 
 interface DailyForecastProps {
   weather: WeatherData;
+  unit: 'celsius' | 'fahrenheit';
 }
 
-const DailyForecast: React.FC<DailyForecastProps> = ({ weather }) => {
+const DailyForecast: React.FC<DailyForecastProps> = ({ weather, unit }) => {
   // Slicing data to exactly 15 days
   const limit = 15;
   
   const time = weather.daily.time.slice(0, limit);
   const weather_code = weather.daily.weather_code.slice(0, limit);
-  const temperature_2m_max = weather.daily.temperature_2m_max.slice(0, limit);
-  const temperature_2m_min = weather.daily.temperature_2m_min.slice(0, limit);
-  const apparent_temperature_max = weather.daily.apparent_temperature_max.slice(0, limit);
+
+  // Convert Data
+  const temperature_2m_max = weather.daily.temperature_2m_max.slice(0, limit).map(t => convertTemperature(t, unit));
+  const temperature_2m_min = weather.daily.temperature_2m_min.slice(0, limit).map(t => convertTemperature(t, unit));
+  const apparent_temperature_max = weather.daily.apparent_temperature_max.slice(0, limit).map(t => convertTemperature(t, unit));
+
   const precipitation_probability_max = weather.daily.precipitation_probability_max.slice(0, limit);
   const wind_speed_10m_max = weather.daily.wind_speed_10m_max.slice(0, limit);
   const wind_direction_10m_dominant = weather.daily.wind_direction_10m_dominant.slice(0, limit);
@@ -34,7 +38,7 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ weather }) => {
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
   const [isDetailClosing, setIsDetailClosing] = useState(false);
 
-  const tempUnit = '°';
+  const tempUnit = unit === 'celsius' ? '°' : '°F';
   const speedUnit = 'km/s';
 
   // Statistics for the summary header
