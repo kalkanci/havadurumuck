@@ -1,6 +1,12 @@
 
 import { CurrentWeather, AdviceResponse, WeatherData, WeatherAlert, DailyForecast, AirQuality } from '../types';
 
+// Sıcaklık Dönüştürücü (C -> F)
+export const convertTemperature = (temp: number, unit: 'celsius' | 'fahrenheit'): number => {
+    if (unit === 'celsius') return temp;
+    return (temp * 9 / 5) + 32;
+};
+
 // Haversine formula for distance
 export const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
   const R = 6371; // km

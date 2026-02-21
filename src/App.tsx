@@ -1,25 +1,14 @@
-
-import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import { Heart, Navigation, MapPin, ArrowUp, ArrowDown, RefreshCw, Calendar, CloudSun, Loader2, Settings } from 'lucide-react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { Heart, Navigation, RefreshCw, Calendar, CloudSun, Loader2, Settings } from 'lucide-react';
 import { GeoLocation, WeatherData, WeatherAlert, PublicHoliday, AppSettings, AstronomyData } from './types';
 import { fetchWeather, getDetailedAddress, fetchHolidays } from './services/weatherService';
 import { fetchAstronomyPicture } from './services/astronomyService';
 import { calculateDistance, checkWeatherAlerts, triggerHapticFeedback } from './utils/helpers';
 import Background from './components/Background';
 import Search from './components/Search';
-import HourlyForecast from './components/HourlyForecast';
-import DetailsGrid from './components/DetailsGrid';
-import AirQualityCard from './components/AirQualityCard';
 import SkeletonLoader from './components/SkeletonLoader';
-import GoldenHourCard from './components/GoldenHourCard';
-import ActivityScore from './components/ActivityScore';
-import WeatherAlerts from './components/WeatherAlerts';
-import ForecastInsight from './components/ForecastInsight';
 import PWAInstallBanner from './components/PWAInstallBanner';
-import AdviceCard from './components/AdviceCard';
-import HolidayCard from './components/HolidayCard';
-import SpotifyCard from './components/SpotifyCard';
-import { getWeatherLabel } from './constants';
+import TodayView from './components/TodayView';
 
 const DailyForecast = React.lazy(() => import('./components/DailyForecast'));
 const FavoritesModal = React.lazy(() => import('./components/FavoritesModal'));
@@ -42,7 +31,11 @@ const App: React.FC = () => {
   // Settings State
   const [settings, setSettings] = useState<AppSettings>(() => {
       const saved = localStorage.getItem('atmosfer_settings');
-      return saved ? JSON.parse(saved) : { hapticsEnabled: true };
+      if (saved) {
+          const parsed = JSON.parse(saved);
+          return { ...parsed, temperatureUnit: parsed.temperatureUnit || 'celsius' };
+      }
+      return { hapticsEnabled: true, temperatureUnit: 'celsius' };
   });
 
   const [favorites, setFavorites] = useState<GeoLocation[]>(() => {
@@ -330,10 +323,6 @@ const App: React.FC = () => {
     ? calculateDistance(location.latitude, location.longitude, weather.latitude, weather.longitude)
     : 0;
 
-  const todayStr = new Date().toLocaleDateString('tr-TR', { 
-    weekday: 'long', day: 'numeric', month: 'long'
-  });
-
   return (
     <div 
       className="relative min-h-screen overflow-x-hidden selection:bg-blue-500/30 pb-24 text-white transition-colors duration-500"
@@ -472,85 +461,20 @@ const App: React.FC = () => {
             ref={contentRef}
           >
             {activeTab === 'today' ? (
-              // --- TODAY VIEW ---
-              <>
-                <div className="flex flex-col items-center justify-center mb-10 mt-6 text-center relative z-10">
-                  
-                  {/* Date Pill (Top - Clickable) */}
-                  <button 
-                    onClick={() => setIsCalendarOpen(true)}
-                    className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 hover:bg-white/10 backdrop-blur-md border border-white/10 shadow-lg mb-6 active:scale-95 transition-transform"
-                  >
-                    <Calendar size={12} className="text-blue-400" />
-                    <span className="text-xs font-bold text-white tracking-wide uppercase">{todayStr}</span>
-                  </button>
-
-                  {/* Massive Temperature (The Hero) */}
-                  <div className="relative">
-                     {/* Glow effect behind */}
-                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 bg-blue-500/20 rounded-full blur-[80px] pointer-events-none"></div>
-                     
-                     <h1 className="text-[9rem] leading-[0.85] font-thin tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white via-white to-white/70 drop-shadow-2xl select-none">
-                        {Math.round(weather.current.temperature_2m)}<span className="text-[5rem] font-light text-zinc-300 align-top absolute top-2 ml-1">°</span>
-                     </h1>
-                  </div>
-
-                  {/* Condition & High/Low */}
-                  <div className="mt-4 flex flex-col items-center gap-1">
-                     <p className="text-xl font-medium text-blue-100 tracking-wide drop-shadow-lg flex items-center gap-2">
-                        {getWeatherLabel(weather.current.weather_code)}
-                     </p>
-                     <div className="flex items-center gap-4 text-base font-medium text-white/80 bg-black/10 px-4 py-1.5 rounded-full backdrop-blur-sm border border-white/5 mt-2">
-                         <span className="flex items-center gap-1"><ArrowUp size={14} className="text-red-400" /> {Math.round(weather.daily.temperature_2m_max[0])}°</span>
-                         <div className="w-px h-3 bg-white/20"></div>
-                         <span className="flex items-center gap-1"><ArrowDown size={14} className="text-blue-400" /> {Math.round(weather.daily.temperature_2m_min[0])}°</span>
-                     </div>
-                  </div>
-
-                  {/* Location Pill (New Design) */}
-                  <div className="mt-6 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
-                      <button 
-                         onClick={() => setIsFavoritesOpen(true)}
-                         className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/10 hover:bg-white/15 active:scale-95 transition-all backdrop-blur-md border border-white/10 shadow-xl group"
-                      >
-                         <MapPin size={16} className="text-red-400 group-hover:animate-bounce" />
-                         <span className="text-base font-medium text-white tracking-wide shadow-sm">
-                             {location.name}
-                             {location.admin1 && location.name !== location.admin1 && (
-                                 <span className="opacity-80 font-normal">, {location.admin1}</span>
-                             )}
-                         </span>
-                      </button>
-                  </div>
-                </div>
-
-                <div className="flex-1 flex flex-col gap-5">
-                  <WeatherAlerts alerts={alerts} />
-                  <HolidayCard holidays={upcomingHolidays} />
-                  <AdviceCard weather={weather} cityName={location.name} />
-                  <ForecastInsight weather={weather} />
-                  <HourlyForecast weather={weather} />
-                  
-                  <div className="grid grid-cols-1 gap-5">
-                    <SpotifyCard weather={weather} />
-                    <GoldenHourCard weather={weather} />
-                    <ActivityScore weather={weather} />
-                  </div>
-                  
-                  <AirQualityCard data={weather.air_quality} />
-                  <DetailsGrid weather={weather} />
-                  
-                  <div className="text-center pt-4 opacity-50">
-                    <p className="text-[10px] uppercase tracking-widest text-zinc-400">
-                      En Yakın İstasyon: {distanceToStation} km
-                    </p>
-                  </div>
-                </div>
-              </>
+              <TodayView
+                weather={weather}
+                location={location}
+                alerts={alerts}
+                upcomingHolidays={upcomingHolidays}
+                distanceToStation={distanceToStation}
+                onOpenCalendar={() => setIsCalendarOpen(true)}
+                onOpenFavorites={() => setIsFavoritesOpen(true)}
+                unit={settings.temperatureUnit}
+              />
             ) : (
               // --- 16 DAYS FORECAST VIEW ---
               <React.Suspense fallback={<SkeletonLoader />}>
-                <DailyForecast weather={weather} />
+                <DailyForecast weather={weather} unit={settings.temperatureUnit} />
               </React.Suspense>
             )}
           </main>
