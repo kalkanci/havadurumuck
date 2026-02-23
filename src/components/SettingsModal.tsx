@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Settings, Vibrate, Thermometer } from 'lucide-react';
+import { X, Settings, Vibrate, Thermometer, Download } from 'lucide-react';
 import { AppSettings } from '../types';
 
 interface SettingsModalProps {
@@ -9,9 +9,10 @@ interface SettingsModalProps {
   onClose: () => void;
   settings: AppSettings;
   onUpdate: (newSettings: AppSettings) => void;
+  onInstall?: () => void;
 }
 
-const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, settings, onUpdate }) => {
+const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, settings, onUpdate, onInstall }) => {
   const [isClosing, setIsClosing] = useState(false);
 
   // Lock body scroll
@@ -66,6 +67,24 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, settings
         </div>
 
         <div className="space-y-4">
+            {/* Install PWA Button - Only visible if available */}
+            {onInstall && (
+                <button
+                    onClick={onInstall}
+                    className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 p-4 rounded-2xl border border-white/10 flex items-center justify-between group active:scale-[0.98] transition-all shadow-lg shadow-blue-500/20"
+                >
+                    <div className="flex items-center gap-3">
+                        <div className="p-2 rounded-lg bg-white/20 text-white">
+                            <Download size={18} />
+                        </div>
+                        <div className="text-left">
+                            <span className="block text-white font-bold text-sm">Uygulamayı Yükle</span>
+                            <span className="text-xs text-blue-100">Ana ekrana ekle</span>
+                        </div>
+                    </div>
+                </button>
+            )}
+
             {/* Haptics */}
             <button 
                 onClick={toggleHaptics}
@@ -110,7 +129,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, settings
         <div className="mt-6 text-center">
             <p className="text-[10px] text-slate-600">
                 Veri Sağlayıcı: <a href="https://open-meteo.com/" target="_blank" className="text-blue-400 hover:underline">Open-Meteo</a>
-                <br />Atmosfer AI v1.4
+                <br />Atmosfer AI v1.5
             </p>
         </div>
 
