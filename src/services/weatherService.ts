@@ -1,6 +1,6 @@
-
 import { WeatherData, GeoLocation, AirQuality, PublicHoliday } from '../types';
 import { fetchWithRetry } from '../utils/api';
+import { AppError } from '../utils/AppError';
 
 const SEARCH_API_URL = 'https://nominatim.openstreetmap.org/search';
 const WEATHER_API_URL = 'https://api.open-meteo.com/v1/forecast';
@@ -15,6 +15,11 @@ export const getDetailedAddress = async (lat: number, lon: number): Promise<{ ci
         'User-Agent': 'AtmosferAI/1.0'
       }
     });
+
+    if (!res.ok) {
+        throw new AppError(`Geocoding API error: ${res.status}`, 'API');
+    }
+
     const data = await res.json();
     const addr = data.address || {};
     
@@ -69,6 +74,7 @@ export const getDetailedAddress = async (lat: number, lon: number): Promise<{ ci
     return { city: mainName, address: subText, country: country, countryCode };
   } catch (error) {
     console.warn("Reverse geocoding failed", error);
+    // Non-critical, return fallback
     return { city: 'Konum Bulunamadı', address: '', country: '', countryCode: '' };
   }
 };
@@ -84,6 +90,11 @@ export const searchCity = async (query: string): Promise<GeoLocation[]> => {
             'User-Agent': 'AtmosferAI/1.0'
         }
     });
+
+    if (!res.ok) {
+        throw new AppError(`Search API error: ${res.status}`, 'API');
+    }
+
     const data = await res.json();
     
     if (!data || data.length === 0) return [];
@@ -113,8 +124,9 @@ export const searchCity = async (query: string): Promise<GeoLocation[]> => {
     });
 
   } catch (error) {
+    if (error instanceof AppError) throw error;
     console.error("Geocoding error:", error);
-    return [];
+    throw new AppError("Arama servisine ulaşılamadı", 'NETWORK', error);
   }
 };
 
@@ -153,16 +165,20 @@ export const fetchWeather = async (lat: number, lon: number): Promise<WeatherDat
     if (!weatherRes.ok) {
         const errorText = await weatherRes.text();
         console.error("Open-Meteo API Error:", errorText);
-        throw new Error(`Weather fetch failed: ${weatherRes.status}`);
+        throw new AppError(`Weather fetch failed: ${weatherRes.status}`, 'API');
     }
     
     const weatherData = await weatherRes.json();
     let aqiData: AirQuality | undefined;
 
     if (aqiRes.ok) {
-      const aqiJson = await aqiRes.json();
-      if (aqiJson.current) {
-        aqiData = aqiJson.current;
+      try {
+          const aqiJson = await aqiRes.json();
+          if (aqiJson.current) {
+            aqiData = aqiJson.current;
+          }
+      } catch (e) {
+          console.warn("AQI parse error", e);
       }
     }
 
@@ -172,8 +188,10 @@ export const fetchWeather = async (lat: number, lon: number): Promise<WeatherDat
     };
 
   } catch (error) {
+    if (error instanceof AppError) throw error;
     console.error("API Error:", error);
-    throw error;
+    // Differentiate between network and logic errors if possible, otherwise default to NETWORK
+    throw new AppError("Hava durumu verisi alınamadı", 'NETWORK', error);
   }
 };
 
