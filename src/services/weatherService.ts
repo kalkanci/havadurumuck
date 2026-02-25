@@ -1,6 +1,6 @@
-
 import { WeatherData, GeoLocation, AirQuality, PublicHoliday } from '../types';
 import { fetchWithRetry } from '../utils/api';
+import { AppError, ErrorCode } from '../utils/AppError';
 
 const SEARCH_API_URL = 'https://nominatim.openstreetmap.org/search';
 const WEATHER_API_URL = 'https://api.open-meteo.com/v1/forecast';
@@ -15,6 +15,11 @@ export const getDetailedAddress = async (lat: number, lon: number): Promise<{ ci
         'User-Agent': 'AtmosferAI/1.0'
       }
     });
+
+    if (!res.ok) {
+        throw new AppError(`Geocoding failed: ${res.status}`, ErrorCode.API);
+    }
+
     const data = await res.json();
     const addr = data.address || {};
     
@@ -69,6 +74,8 @@ export const getDetailedAddress = async (lat: number, lon: number): Promise<{ ci
     return { city: mainName, address: subText, country: country, countryCode };
   } catch (error) {
     console.warn("Reverse geocoding failed", error);
+    // Return default to avoid breaking the app flow for a non-critical feature (address name)
+    // But logs are now better.
     return { city: 'Konum Bulunamadı', address: '', country: '', countryCode: '' };
   }
 };
@@ -84,6 +91,11 @@ export const searchCity = async (query: string): Promise<GeoLocation[]> => {
             'User-Agent': 'AtmosferAI/1.0'
         }
     });
+
+    if (!res.ok) {
+         throw new AppError(`Search failed: ${res.status}`, ErrorCode.API);
+    }
+
     const data = await res.json();
     
     if (!data || data.length === 0) return [];
@@ -153,7 +165,7 @@ export const fetchWeather = async (lat: number, lon: number): Promise<WeatherDat
     if (!weatherRes.ok) {
         const errorText = await weatherRes.text();
         console.error("Open-Meteo API Error:", errorText);
-        throw new Error(`Weather fetch failed: ${weatherRes.status}`);
+        throw new AppError(`Weather fetch failed: ${weatherRes.status}`, ErrorCode.API);
     }
     
     const weatherData = await weatherRes.json();
@@ -173,7 +185,11 @@ export const fetchWeather = async (lat: number, lon: number): Promise<WeatherDat
 
   } catch (error) {
     console.error("API Error:", error);
-    throw error;
+    if (error instanceof AppError) {
+        throw error;
+    }
+    // Generic Network or Parsing error
+    throw new AppError('Hava durumu verisi indirilemedi. Bağlantınızı kontrol edin.', ErrorCode.NETWORK);
   }
 };
 
