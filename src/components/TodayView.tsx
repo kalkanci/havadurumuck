@@ -1,5 +1,5 @@
 import React from 'react';
-import { MapPin, ArrowUp, ArrowDown, Calendar } from 'lucide-react';
+import { MapPin, ArrowUp, ArrowDown, Calendar, Share2 } from 'lucide-react';
 import { WeatherData, WeatherAlert, PublicHoliday, GeoLocation } from '../types';
 import WeatherAlerts from './WeatherAlerts';
 import HolidayCard from './HolidayCard';
@@ -23,6 +23,7 @@ interface TodayViewProps {
   onOpenCalendar: () => void;
   onOpenFavorites: () => void;
   unit: 'celsius' | 'fahrenheit';
+  onShowToast: (msg: string, type?: 'success' | 'error' | 'info') => void;
 }
 
 const TodayView: React.FC<TodayViewProps> = ({
@@ -33,7 +34,8 @@ const TodayView: React.FC<TodayViewProps> = ({
   distanceToStation,
   onOpenCalendar,
   onOpenFavorites,
-  unit
+  unit,
+  onShowToast
 }) => {
   const todayStr = new Date().toLocaleDateString('tr-TR', {
     weekday: 'long', day: 'numeric', month: 'long'
@@ -43,18 +45,58 @@ const TodayView: React.FC<TodayViewProps> = ({
   const maxTemp = Math.round(convertTemperature(weather.daily.temperature_2m_max[0], unit));
   const minTemp = Math.round(convertTemperature(weather.daily.temperature_2m_min[0], unit));
 
+  const handleShare = async () => {
+    const shareText = `${location.name} için hava durumu: ${currentTemp}°C, ${getWeatherLabel(weather.current.weather_code)}. Detaylar: Havadurumuck!`;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'Hava Durumu',
+          text: shareText,
+          url: window.location.href,
+        });
+        onShowToast('Hava durumu paylaşıldı!', 'success');
+        if (navigator.vibrate) navigator.vibrate(20);
+      } catch (error) {
+        if ((error as Error).name !== 'AbortError') {
+          onShowToast('Paylaşım yapılamadı.', 'error');
+        }
+      }
+    } else {
+      try {
+        await navigator.clipboard.writeText(shareText);
+        onShowToast('Bağlantı kopyalandı!', 'success');
+        if (navigator.vibrate) navigator.vibrate(20);
+      } catch (error) {
+        onShowToast('Kopyalama başarısız oldu.', 'error');
+      }
+    }
+  };
+
   return (
     <>
       <div className="flex flex-col items-center justify-center mb-10 mt-6 text-center relative z-10">
 
-        {/* Date Pill (Top - Clickable) */}
-        <button
-          onClick={onOpenCalendar}
-          className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 hover:bg-white/10 backdrop-blur-md border border-white/10 shadow-lg mb-6 active:scale-95 transition-transform"
-        >
-          <Calendar size={12} className="text-blue-400" />
-          <span className="text-xs font-bold text-white tracking-wide uppercase">{todayStr}</span>
-        </button>
+        {/* Top Controls: Date Pill and Share Button */}
+        <div className="flex items-center justify-between w-full mb-6">
+          <div className="w-10"></div> {/* Spacer to center the date pill */}
+
+          <button
+            onClick={onOpenCalendar}
+            className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 hover:bg-white/10 backdrop-blur-md border border-white/10 shadow-lg active:scale-95 transition-transform"
+          >
+            <Calendar size={12} className="text-blue-400" />
+            <span className="text-xs font-bold text-white tracking-wide uppercase">{todayStr}</span>
+          </button>
+
+          <button
+            onClick={handleShare}
+            aria-label="Paylaş"
+            className="w-10 h-10 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 backdrop-blur-md border border-white/10 shadow-lg active:scale-95 transition-transform text-white"
+          >
+            <Share2 size={16} />
+          </button>
+        </div>
 
         {/* Massive Temperature (The Hero) */}
         <div className="relative">

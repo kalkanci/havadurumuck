@@ -9,6 +9,7 @@ import Search from './components/Search';
 import SkeletonLoader from './components/SkeletonLoader';
 import PWAInstallBanner from './components/PWAInstallBanner';
 import TodayView from './components/TodayView';
+import Toast, { ToastType } from './components/ui/Toast';
 
 const DailyForecast = React.lazy(() => import('./components/DailyForecast'));
 const FavoritesModal = React.lazy(() => import('./components/FavoritesModal'));
@@ -50,11 +51,26 @@ const App: React.FC = () => {
   // Navigation State
   const [activeTab, setActiveTab] = useState<'today' | 'forecast'>('today');
   
+  // Toast State
+  const [toastMessage, setToastMessage] = useState('');
+  const [toastType, setToastType] = useState<ToastType>('info');
+  const [isToastVisible, setIsToastVisible] = useState(false);
+
   // PWA Install Prompt State
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   
   const [error, setError] = useState<string | null>(null);
   const [gpsError, setGpsError] = useState<boolean>(false);
+
+  const showToast = useCallback((msg: string, type: ToastType = 'info') => {
+      setToastMessage(msg);
+      setToastType(type);
+      setIsToastVisible(true);
+  }, []);
+
+  const hideToast = useCallback(() => {
+      setIsToastVisible(false);
+  }, []);
 
   // Widget Mode Detection
   const isWidgetMode = new URLSearchParams(window.location.search).get('mode') === 'widget';
@@ -285,8 +301,15 @@ const App: React.FC = () => {
   // --- SPLASH SCREEN RENDER ---
   if (initialBoot) {
       return (
-          <div className="fixed inset-0 z-[999] bg-black flex flex-col items-center justify-center text-white p-6">
-              <div className="relative mb-8">
+          <>
+            <Toast
+                message={toastMessage}
+                type={toastType}
+                isVisible={isToastVisible}
+                onClose={hideToast}
+            />
+            <div className="fixed inset-0 z-[999] bg-black flex flex-col items-center justify-center text-white p-6">
+                <div className="relative mb-8">
                   <div className="w-24 h-24 bg-blue-500/20 rounded-full animate-ping absolute inset-0"></div>
                   <div className="w-24 h-24 bg-zinc-900 rounded-full flex items-center justify-center relative z-10 shadow-2xl border border-white/10">
                        <CloudSun size={48} className="text-blue-500" />
@@ -295,25 +318,34 @@ const App: React.FC = () => {
               
               <h1 className="text-3xl font-bold tracking-tight mb-2">Atmosfer AI</h1>
               
-              <div className="flex items-center gap-2 text-zinc-400 text-sm font-medium animate-pulse">
-                  <Navigation size={16} className="animate-bounce" />
-                  <span>Konum Bekleniyor...</span>
-              </div>
-          </div>
+                <div className="flex items-center gap-2 text-zinc-400 text-sm font-medium animate-pulse">
+                    <Navigation size={16} className="animate-bounce" />
+                    <span>Konum Bekleniyor...</span>
+                </div>
+            </div>
+          </>
       );
   }
 
   // RENDER WIDGET MODE
   if (isWidgetMode) {
     return (
-      <React.Suspense fallback={<div className="flex items-center justify-center h-screen bg-black"><Loader2 className="animate-spin text-white" /></div>}>
-        <WidgetView 
-            weather={weather} 
-            locationName={location?.name || ''} 
-            loading={loading}
-            onRefresh={() => loadWeather(true)}
+      <>
+        <Toast
+            message={toastMessage}
+            type={toastType}
+            isVisible={isToastVisible}
+            onClose={hideToast}
         />
-      </React.Suspense>
+        <React.Suspense fallback={<div className="flex items-center justify-center h-screen bg-black"><Loader2 className="animate-spin text-white" /></div>}>
+          <WidgetView
+              weather={weather}
+              locationName={location?.name || ''}
+              loading={loading}
+              onRefresh={() => loadWeather(true)}
+          />
+        </React.Suspense>
+      </>
     );
   }
 
@@ -324,13 +356,20 @@ const App: React.FC = () => {
     : 0;
 
   return (
-    <div 
-      className="relative min-h-screen overflow-x-hidden selection:bg-blue-500/30 pb-24 text-white transition-colors duration-500"
-      onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
-      onTouchEnd={handleTouchEnd}
-    >
-      <Background 
+    <>
+      <Toast
+          message={toastMessage}
+          type={toastType}
+          isVisible={isToastVisible}
+          onClose={hideToast}
+      />
+      <div
+        className="relative min-h-screen overflow-x-hidden selection:bg-blue-500/30 pb-24 text-white transition-colors duration-500"
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+      >
+        <Background
         city={location?.name || ''} 
         weatherCode={weather?.current.weather_code}
         isDay={weather?.current.is_day}
@@ -470,6 +509,7 @@ const App: React.FC = () => {
                 onOpenCalendar={() => setIsCalendarOpen(true)}
                 onOpenFavorites={() => setIsFavoritesOpen(true)}
                 unit={settings.temperatureUnit}
+                onShowToast={showToast}
               />
             ) : (
               // --- 16 DAYS FORECAST VIEW ---
@@ -501,20 +541,21 @@ const App: React.FC = () => {
               Bugün
           </button>
           
-          <button
-            onClick={() => setActiveTab('forecast')}
-            aria-current={activeTab === 'forecast' ? 'page' : undefined}
-            className={`relative z-10 flex-1 flex items-center justify-center gap-2 py-3 rounded-full text-sm font-bold transition-colors duration-300 ${
-              activeTab === 'forecast' ? 'text-white' : 'text-white/60 hover:text-white'
-            }`}
-          >
-              <Calendar size={18} className={activeTab === 'forecast' ? "fill-white/20" : ""} />
-              Uzun Vade
-          </button>
+            <button
+              onClick={() => setActiveTab('forecast')}
+              aria-current={activeTab === 'forecast' ? 'page' : undefined}
+              className={`relative z-10 flex-1 flex items-center justify-center gap-2 py-3 rounded-full text-sm font-bold transition-colors duration-300 ${
+                activeTab === 'forecast' ? 'text-white' : 'text-white/60 hover:text-white'
+              }`}
+            >
+                <Calendar size={18} className={activeTab === 'forecast' ? "fill-white/20" : ""} />
+                Uzun Vade
+            </button>
+          </div>
         </div>
-      </div>
 
-    </div>
+      </div>
+    </>
   );
 };
 
