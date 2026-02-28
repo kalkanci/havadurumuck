@@ -1,3 +1,5 @@
+import { AppError } from './AppError';
+
 /**
  * Enhanced fetch with retry logic and exponential backoff
  */
@@ -20,6 +22,6 @@ export async function fetchWithRetry(url: string, options: RequestInit = {}, ret
         await new Promise(r => setTimeout(r, backoff));
         return fetchWithRetry(url, options, retries - 1, backoff * 2);
     }
-    throw err;
+    throw new AppError('Network error occurred', 'NETWORK');
   }
 }
