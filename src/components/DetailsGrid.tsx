@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { WeatherData } from '../types';
 import { Droplets, Wind, Sun, Gauge, Thermometer, Navigation, X, Clock, Sunrise, Sunset, ArrowUpRight, ArrowDownRight, Minus, HelpCircle } from 'lucide-react';
@@ -54,31 +54,29 @@ const DetailsGrid: React.FC<DetailsGridProps> = ({ weather, unit }) => {
     return "Bunaltıcı";
   };
 
-  const getNext24Hours = () => {
-      const now = new Date();
-      const currentHourIndex = hourly.time.findIndex(t => {
-          const d = new Date(t);
-          return d.getHours() === now.getHours() && d.getDate() === now.getDate();
-      });
-      
-      const startIndex = currentHourIndex !== -1 ? currentHourIndex : 0;
-      
-      return hourly.time.slice(startIndex, startIndex + 24).map((t, i) => {
-          const idx = startIndex + i;
-          return {
-            time: t,
-            temp: hourly.temperature_2m[idx],
-            windSpeed: hourly.wind_speed_10m[idx],
-            windDir: hourly.wind_direction_10m[idx],
-            humidity: hourly.relative_humidity_2m ? hourly.relative_humidity_2m[idx] : 0,
-            uv: hourly.uv_index ? hourly.uv_index[idx] : 0,
-            pressure: (hourly.pressure_msl && hourly.pressure_msl[idx]) || (hourly.surface_pressure && hourly.surface_pressure[idx]) || 0,
-            feelsLike: hourly.apparent_temperature ? hourly.apparent_temperature[idx] : 0,
-          };
-      });
-  };
+  const hourlyData = useMemo(() => {
+    const now = new Date();
+    const currentHourIndex = hourly.time.findIndex(t => {
+        const d = new Date(t);
+        return d.getHours() === now.getHours() && d.getDate() === now.getDate();
+    });
 
-  const hourlyData = getNext24Hours();
+    const startIndex = currentHourIndex !== -1 ? currentHourIndex : 0;
+
+    return hourly.time.slice(startIndex, startIndex + 24).map((t, i) => {
+        const idx = startIndex + i;
+        return {
+          time: t,
+          temp: hourly.temperature_2m[idx],
+          windSpeed: hourly.wind_speed_10m[idx],
+          windDir: hourly.wind_direction_10m[idx],
+          humidity: hourly.relative_humidity_2m ? hourly.relative_humidity_2m[idx] : 0,
+          uv: hourly.uv_index ? hourly.uv_index[idx] : 0,
+          pressure: (hourly.pressure_msl && hourly.pressure_msl[idx]) || (hourly.surface_pressure && hourly.surface_pressure[idx]) || 0,
+          feelsLike: hourly.apparent_temperature ? hourly.apparent_temperature[idx] : 0,
+        };
+    });
+  }, [hourly.time, hourly.temperature_2m, hourly.wind_speed_10m, hourly.wind_direction_10m, hourly.relative_humidity_2m, hourly.uv_index, hourly.pressure_msl, hourly.surface_pressure, hourly.apparent_temperature]);
 
   // --- Modal Content Renderers ---
 
@@ -465,6 +463,7 @@ const DetailsGrid: React.FC<DetailsGridProps> = ({ weather, unit }) => {
             <button 
                 key={idx} 
                 onClick={() => handleOpenWithDelay(item.id as DetailType)}
+                aria-label={`${item.label} detayı aç`}
                 className="glass-card p-4 rounded-3xl flex flex-col justify-between aspect-[4/3] group relative overflow-hidden text-left transition-all duration-300 transform active:scale-[0.95] active:bg-white/10 active:border-white/20 hover:bg-white/5 border border-transparent"
             >
                 {/* Visual feedback layer */}
