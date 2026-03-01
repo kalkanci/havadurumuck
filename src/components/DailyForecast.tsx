@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { WeatherData } from '../types';
 import { getWeatherIcon, getWeatherLabel } from '../constants';
@@ -17,23 +17,35 @@ interface DailyForecastProps {
 }
 
 const DailyForecast: React.FC<DailyForecastProps> = ({ weather, unit }) => {
-  // Slicing data to exactly 15 days
   const limit = 15;
-  
-  const time = weather.daily.time.slice(0, limit);
-  const weather_code = weather.daily.weather_code.slice(0, limit);
 
-  // Convert Data
-  const temperature_2m_max = weather.daily.temperature_2m_max.slice(0, limit).map(t => convertTemperature(t, unit));
-  const temperature_2m_min = weather.daily.temperature_2m_min.slice(0, limit).map(t => convertTemperature(t, unit));
-  const apparent_temperature_max = weather.daily.apparent_temperature_max.slice(0, limit).map(t => convertTemperature(t, unit));
-
-  const precipitation_probability_max = weather.daily.precipitation_probability_max.slice(0, limit);
-  const wind_speed_10m_max = weather.daily.wind_speed_10m_max.slice(0, limit);
-  const wind_direction_10m_dominant = weather.daily.wind_direction_10m_dominant.slice(0, limit);
-  const sunrise = weather.daily.sunrise.slice(0, limit);
-  const sunset = weather.daily.sunset.slice(0, limit);
-  const uv_index_max = weather.daily.uv_index_max.slice(0, limit);
+  const {
+    time,
+    weather_code,
+    temperature_2m_max,
+    temperature_2m_min,
+    apparent_temperature_max,
+    precipitation_probability_max,
+    wind_speed_10m_max,
+    wind_direction_10m_dominant,
+    sunrise,
+    sunset,
+    uv_index_max,
+  } = useMemo(() => {
+    return {
+      time: weather.daily.time.slice(0, limit),
+      weather_code: weather.daily.weather_code.slice(0, limit),
+      temperature_2m_max: weather.daily.temperature_2m_max.slice(0, limit).map((t) => convertTemperature(t, unit)),
+      temperature_2m_min: weather.daily.temperature_2m_min.slice(0, limit).map((t) => convertTemperature(t, unit)),
+      apparent_temperature_max: weather.daily.apparent_temperature_max.slice(0, limit).map((t) => convertTemperature(t, unit)),
+      precipitation_probability_max: weather.daily.precipitation_probability_max.slice(0, limit),
+      wind_speed_10m_max: weather.daily.wind_speed_10m_max.slice(0, limit),
+      wind_direction_10m_dominant: weather.daily.wind_direction_10m_dominant.slice(0, limit),
+      sunrise: weather.daily.sunrise.slice(0, limit),
+      sunset: weather.daily.sunset.slice(0, limit),
+      uv_index_max: weather.daily.uv_index_max.slice(0, limit),
+    };
+  }, [weather.daily, unit]);
 
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
   const [isDetailClosing, setIsDetailClosing] = useState(false);
@@ -41,33 +53,57 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ weather, unit }) => {
   const tempUnit = unit === 'celsius' ? '°' : '°F';
   const speedUnit = 'km/s';
 
-  // Statistics for the summary header
-  const globalMin = Math.min(...temperature_2m_min);
-  const globalMax = Math.max(...temperature_2m_max);
-  const tempRange = globalMax - globalMin;
-  
-  const hottestDayIndex = temperature_2m_max.indexOf(globalMax);
-  const coldestDayIndex = temperature_2m_min.indexOf(globalMin);
-  const rainyDaysCount = precipitation_probability_max.filter(p => p > 50).length;
+  const stats = useMemo(() => {
+    const globalMin = Math.min(...temperature_2m_min);
+    const globalMax = Math.max(...temperature_2m_max);
+    const tempRange = globalMax - globalMin;
 
-  // Trend Analysis
-  const startAvg = (temperature_2m_max[0] + temperature_2m_min[0]) / 2;
-  const endAvg = (temperature_2m_max[limit-1] + temperature_2m_min[limit-1]) / 2;
-  const trendDiff = endAvg - startAvg;
-  
-  let trendIcon = <Minus size={20} className="text-slate-400" />;
-  let trendText = "Sıcaklıklar dengeli seyredecek.";
-  let trendColor = "from-slate-800 to-slate-900";
+    const hottestDayIndex = temperature_2m_max.indexOf(globalMax);
+    const coldestDayIndex = temperature_2m_min.indexOf(globalMin);
+    const rainyDaysCount = precipitation_probability_max.filter((p) => p > 50).length;
 
-  if (trendDiff > 2) {
+    const startAvg = (temperature_2m_max[0] + temperature_2m_min[0]) / 2;
+    const endAvg = (temperature_2m_max[limit - 1] + temperature_2m_min[limit - 1]) / 2;
+    const trendDiff = endAvg - startAvg;
+
+    let trendIcon = <Minus size={20} className="text-slate-400" />;
+    let trendText = "Sıcaklıklar dengeli seyredecek.";
+    let trendColor = "from-slate-800 to-slate-900";
+
+    if (trendDiff > 2) {
       trendIcon = <TrendingUp size={20} className="text-orange-400" />;
       trendText = "Hava kademeli olarak ısınıyor.";
       trendColor = "from-orange-900/40 to-slate-900";
-  } else if (trendDiff < -2) {
+    } else if (trendDiff < -2) {
       trendIcon = <TrendingDown size={20} className="text-blue-400" />;
       trendText = "Hava kademeli olarak soğuyor.";
       trendColor = "from-blue-900/40 to-slate-900";
-  }
+    }
+
+    return {
+      globalMin,
+      globalMax,
+      tempRange,
+      hottestDayIndex,
+      coldestDayIndex,
+      rainyDaysCount,
+      trendIcon,
+      trendText,
+      trendColor,
+    };
+  }, [temperature_2m_min, temperature_2m_max, precipitation_probability_max]);
+
+  const {
+    globalMin,
+    globalMax,
+    tempRange,
+    hottestDayIndex,
+    coldestDayIndex,
+    rainyDaysCount,
+    trendIcon,
+    trendText,
+    trendColor,
+  } = stats;
 
   // Helper to determine card background based on weather
   const getCardBackground = (code: number) => {
@@ -305,6 +341,7 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ weather, unit }) => {
                     <button 
                         key={dateStr}
                         onClick={() => openDayDetailWithDelay(index)}
+                        aria-label={`${dateNum} ${month} ${dayName} için tahmin detayları`}
                         className={`w-full group flex items-center justify-between p-4 rounded-3xl border backdrop-blur-md transition-all duration-300 active:scale-[0.98] bg-gradient-to-r hover:brightness-110 shadow-lg ${getCardBackground(code)}`}
                     >
                         {/* 1. Date */}
