@@ -1,14 +1,17 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Heart, Navigation, RefreshCw, Calendar, CloudSun, Loader2, Settings } from 'lucide-react';
+import { Heart, Navigation, RefreshCw, Calendar, CloudSun, Loader2, Settings, Share2, WifiOff } from 'lucide-react';
 import { GeoLocation, WeatherData, WeatherAlert, PublicHoliday, AppSettings, AstronomyData } from './types';
 import { fetchWeather, getDetailedAddress, fetchHolidays } from './services/weatherService';
 import { fetchAstronomyPicture } from './services/astronomyService';
-import { calculateDistance, checkWeatherAlerts, triggerHapticFeedback } from './utils/helpers';
+import { calculateDistance } from './utils/helpers';
 import Background from './components/Background';
+import { useWeatherApp } from './hooks/useWeatherApp';
+import { usePullToRefresh } from './hooks/usePullToRefresh';
 import Search from './components/Search';
 import SkeletonLoader from './components/SkeletonLoader';
 import PWAInstallBanner from './components/PWAInstallBanner';
 import TodayView from './components/TodayView';
+import Toast, { ToastType } from './components/ui/Toast';
 
 const DailyForecast = React.lazy(() => import('./components/DailyForecast'));
 const FavoritesModal = React.lazy(() => import('./components/FavoritesModal'));
@@ -17,31 +20,31 @@ const SettingsModal = React.lazy(() => import('./components/SettingsModal'));
 const CalendarModal = React.lazy(() => import('./components/CalendarModal'));
 
 const App: React.FC = () => {
-  // Start with NO location to show splash screen
-  const [location, setLocation] = useState<GeoLocation | null>(null);
   
-  const [weather, setWeather] = useState<WeatherData | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [initialBoot, setInitialBoot] = useState(true); // Control Splash Screen
-  const [refreshing, setRefreshing] = useState(false);
-  const [alerts, setAlerts] = useState<WeatherAlert[]>([]);
-  const [upcomingHolidays, setUpcomingHolidays] = useState<PublicHoliday[]>([]);
-  const [cosmicData, setCosmicData] = useState<AstronomyData | null>(null);
-  
-  // Settings State
-  const [settings, setSettings] = useState<AppSettings>(() => {
-      const saved = localStorage.getItem('atmosfer_settings');
-      if (saved) {
-          const parsed = JSON.parse(saved);
-          return { ...parsed, temperatureUnit: parsed.temperatureUnit || 'celsius' };
-      }
-      return { hapticsEnabled: true, temperatureUnit: 'celsius' };
-  });
-
-  const [favorites, setFavorites] = useState<GeoLocation[]>(() => {
-    const saved = localStorage.getItem('weather_favorites');
-    return saved ? JSON.parse(saved) : [];
-  });
+  const {
+    location,
+    setLocation,
+    weather,
+    loading,
+    initialBoot,
+    refreshing,
+    alerts,
+    upcomingHolidays,
+    cosmicData,
+    settings,
+    setSettings,
+    favorites,
+    addFavorite,
+    removeFavorite,
+    deferredPrompt,
+    error,
+    gpsError,
+    haptic,
+    handleCurrentLocation,
+    loadWeather,
+    refreshAll,
+    handleInstallClick
+  } = useWeatherApp();
   
   const [isFavoritesOpen, setIsFavoritesOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -50,241 +53,81 @@ const App: React.FC = () => {
   // Navigation State
   const [activeTab, setActiveTab] = useState<'today' | 'forecast'>('today');
   
-  // PWA Install Prompt State
-  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
-  
-  const [error, setError] = useState<string | null>(null);
-  const [gpsError, setGpsError] = useState<boolean>(false);
+  // Toast State
+  const [toast, setToast] = useState<{ message: string; type: ToastType; isVisible: boolean }>({
+    message: '',
+    type: 'info',
+    isVisible: false,
+  });
+
+  const showToast = (message: string, type: ToastType) => {
+    setToast({ message, type, isVisible: true });
+  };
+
+  const closeToast = () => {
+    setToast(prev => ({ ...prev, isVisible: false }));
+  };
 
   // Widget Mode Detection
   const isWidgetMode = new URLSearchParams(window.location.search).get('mode') === 'widget';
 
-  // Pull to refresh refs
-  const startY = useRef(0);
-  const pullDistance = useRef(0);
-  const PULL_THRESHOLD = 120;
   const contentRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    localStorage.setItem('weather_favorites', JSON.stringify(favorites));
-  }, [favorites]);
-
-  useEffect(() => {
-    localStorage.setItem('atmosfer_settings', JSON.stringify(settings));
-  }, [settings]);
 
   // Sekme değiştiğinde sayfayı en yukarı kaydır
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });
   }, [activeTab]);
 
-  useEffect(() => {
-    // Start the app flow
-    handleCurrentLocation();
-    
-    // Load non-location dependent data once
-    loadAstronomy();
+  const { handleTouchStart, handleTouchMove, handleTouchEnd } = usePullToRefresh(refreshAll);
 
-    const handleBeforeInstallPrompt = (e: any) => {
-      e.preventDefault();
-      setDeferredPrompt(e);
-    };
+  // Share Feature
+  const handleShare = async () => {
+    if (!weather || !location) return;
 
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    haptic(15);
+    const temp = Math.round(weather.current.temperature_2m);
+    const text = `Şu an ${location.name}'da hava ${temp}°C. Detaylar için Atmosfer AI'a göz at!`;
 
-    return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    };
-  }, []);
-
-  // Trigger weather load when location is set
-  useEffect(() => {
-    if (location) {
-        loadWeather();
-        loadHolidays();
-    }
-  }, [location]);
-
-  const haptic = useCallback((pattern?: number | number[]) => {
-      if (settings.hapticsEnabled) {
-          triggerHapticFeedback(pattern);
-      }
-  }, [settings.hapticsEnabled]);
-
-  const loadAstronomy = useCallback(async () => {
-      const data = await fetchAstronomyPicture();
-      if (data) setCosmicData(data);
-  }, []);
-
-  const loadHolidays = useCallback(async () => {
-      if (!location || !location.countryCode) return;
-      
-      const year = new Date().getFullYear();
-      const holidays = await fetchHolidays(year, location.countryCode);
-      
-      // Filter for holidays happening Today or in the next 7 days
-      const today = new Date();
-      today.setHours(0,0,0,0);
-      
-      const nextWeek = new Date(today);
-      nextWeek.setDate(today.getDate() + 7);
-
-      const relevant = holidays.filter(h => {
-          const hDate = new Date(h.date);
-          return hDate >= today && hDate <= nextWeek;
-      });
-
-      setUpcomingHolidays(relevant);
-  }, [location]);
-
-  const loadWeather = useCallback(async (isRefresh = false) => {
-    if (!location) return;
-    
-    if (!isRefresh && !initialBoot) setLoading(true);
-    setError(null);
-    
-    try {
-      const data = await fetchWeather(location.latitude, location.longitude);
-      setWeather(data);
-      
-      const generatedAlerts = checkWeatherAlerts(data);
-      setAlerts(generatedAlerts);
-      
-      if (generatedAlerts.some(a => a.level === 'critical')) {
-          haptic([50, 100, 50]);
-      } else if (isRefresh) {
-          haptic(20);
-      }
-
-      if (location.country !== 'GPS') setGpsError(false); 
-    } catch (err) {
-      setError('Hava durumu verisi alınamadı. İnternet bağlantınızı kontrol edin.');
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-      
-      // Artificial delay for splash screen smoothness if it's the first boot
-      if (initialBoot) {
-          setTimeout(() => {
-              setInitialBoot(false);
-          }, 800);
-      }
-    }
-  }, [location, initialBoot, haptic]);
-
-  const handleCurrentLocation = useCallback(() => {
-    // If manually triggered later, show loading
-    if (!initialBoot) setLoading(true);
-    
-    setGpsError(false);
-    haptic(10);
-
-    if (!navigator.geolocation) {
-      handleLocationError('Cihazınız konum özelliğini desteklemiyor.');
-      return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const { latitude, longitude } = position.coords;
-        const details = await getDetailedAddress(latitude, longitude);
-        
-        const loc: GeoLocation = {
-          id: Date.now(),
-          name: details.city, 
-          latitude,
-          longitude,
-          country: details.country || 'Konum',
-          countryCode: details.countryCode,
-          subtext: details.address,
-          admin1: details.country
-        };
-        setLocation(loc); // This triggers useEffect -> loadWeather
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'Atmosfer AI - Hava Durumu',
+          text: text,
+          url: window.location.href,
+        });
+        showToast('Başarıyla paylaşıldı', 'success');
         haptic(20);
-      },
-      (err) => {
-        console.warn("GPS Error:", err);
-        handleLocationError('Konum alınamadı.');
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 0
-      }
-    );
-  }, [initialBoot, haptic]);
-
-  const handleLocationError = useCallback((msg: string) => {
-      // Fallback to Istanbul if GPS fails on boot
-      if (initialBoot) {
-          const defaultLoc = {
-            id: 745044, name: 'İstanbul', latitude: 41.0138, longitude: 28.9497, country: 'Türkiye', countryCode: 'TR'
-          };
-          setLocation(defaultLoc);
-          setGpsError(true);
-      } else {
-          setError(msg);
-          setLoading(false);
-          setGpsError(true);
-      }
-  }, [initialBoot]);
-
-  const addFavorite = useCallback((loc: GeoLocation) => {
-     if (!favorites.some(f => f.id === loc.id)) {
-        setFavorites([...favorites, loc]);
-        haptic(30);
-     }
-  }, [favorites, haptic]);
-
-  const removeFavorite = useCallback((id: number) => {
-     setFavorites(favorites.filter(f => f.id !== id));
-     haptic(30);
-  }, [favorites, haptic]);
-
-  const handleInstallClick = useCallback(() => {
-    if (deferredPrompt) {
-      haptic(20);
-      deferredPrompt.prompt();
-      deferredPrompt.userChoice.then((choiceResult: any) => {
-        if (choiceResult.outcome === 'accepted') {
-          console.log('User accepted the install prompt');
+      } catch (err: any) {
+        if (err.name !== 'AbortError') {
+          showToast('Paylaşım başarısız oldu', 'error');
         }
-        setDeferredPrompt(null);
-      });
+      }
+    } else {
+      try {
+        await navigator.clipboard.writeText(`${text} ${window.location.href}`);
+        showToast('Bağlantı kopyalandı', 'success');
+        haptic(20);
+      } catch (err) {
+        showToast('Kopyalama başarısız', 'error');
+      }
     }
-  }, [deferredPrompt, haptic]);
+  };
 
-  // Pull to Refresh Logic
-  const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    if (window.scrollY === 0) {
-      startY.current = e.touches[0].clientY;
-    }
-  }, []);
-
-  const handleTouchMove = useCallback((e: React.TouchEvent) => {
-    if (startY.current === 0) return;
-    const currentY = e.touches[0].clientY;
-    const diff = currentY - startY.current;
-    
-    if (diff > 0 && window.scrollY === 0) {
-      pullDistance.current = diff;
-    }
-  }, []);
-  const handleTouchEnd = useCallback(() => {
-    if (pullDistance.current > PULL_THRESHOLD && window.scrollY === 0) {
-      setRefreshing(true);
-      haptic(50);
-      loadWeather(true);
-      loadHolidays();
-      loadAstronomy();
-    }
-    startY.current = 0;
-    pullDistance.current = 0;
-  }, [haptic, loadWeather, loadHolidays, loadAstronomy]);
+  // Toast Component
+  const toastComponent = (
+    <Toast
+      message={toast.message}
+      type={toast.type}
+      isVisible={toast.isVisible}
+      onClose={closeToast}
+    />
+  );
 
   // --- SPLASH SCREEN RENDER ---
   if (initialBoot) {
       return (
+          <>
+          {toastComponent}
           <div className="fixed inset-0 z-[999] bg-black flex flex-col items-center justify-center text-white p-6">
               <div className="relative mb-8">
                   <div className="w-24 h-24 bg-blue-500/20 rounded-full animate-ping absolute inset-0"></div>
@@ -300,12 +143,15 @@ const App: React.FC = () => {
                   <span>Konum Bekleniyor...</span>
               </div>
           </div>
+          </>
       );
   }
 
   // RENDER WIDGET MODE
   if (isWidgetMode) {
     return (
+      <>
+      {toastComponent}
       <React.Suspense fallback={<div className="flex items-center justify-center h-screen bg-black"><Loader2 className="animate-spin text-white" /></div>}>
         <WidgetView 
             weather={weather} 
@@ -314,6 +160,7 @@ const App: React.FC = () => {
             onRefresh={() => loadWeather(true)}
         />
       </React.Suspense>
+      </>
     );
   }
 
@@ -324,6 +171,8 @@ const App: React.FC = () => {
     : 0;
 
   return (
+    <>
+    {toastComponent}
     <div 
       className="relative min-h-screen overflow-x-hidden selection:bg-blue-500/30 pb-24 text-white transition-colors duration-500"
       onTouchStart={handleTouchStart}
@@ -417,6 +266,13 @@ const App: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-2">
+            <button
+              onClick={handleShare}
+              aria-label="Paylaş"
+              className="p-3 glass-card rounded-3xl transition-all active:scale-95 duration-200 hover:bg-white/10 text-white/70 hover:text-white"
+            >
+              <Share2 size={22} />
+            </button>
             <button 
               onClick={() => setIsFavoritesOpen(true)} 
               aria-label="Favori Konumlar"
@@ -515,6 +371,7 @@ const App: React.FC = () => {
       </div>
 
     </div>
+    </>
   );
 };
 
