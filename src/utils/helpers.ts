@@ -21,7 +21,7 @@ export const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2
 };
 
 // Akıllı Tavsiye Motoru (Gelişmiş Mantık)
-export const generateSmartAdvice = (weather: WeatherData): AdviceResponse => {
+export const generateSmartAdvice = (weather: WeatherData, unit: 'celsius' | 'fahrenheit' = 'celsius'): AdviceResponse => {
   const { current, daily, air_quality } = weather;
   const temp = current.temperature_2m;
   const code = current.weather_code;
@@ -74,7 +74,7 @@ export const generateSmartAdvice = (weather: WeatherData): AdviceResponse => {
   // Aşırı Sıcak (>32°C)
   else if (temp > 32) { 
      mood = "Kavurucu";
-     advice = "Güneş yakıcı seviyede. Dışarıda fazla kalmamaya ve bol sıvı tüketmeye dikkat et.";
+     advice = `Güneş yakıcı seviyede (${Math.round(convertTemperature(temp, unit))}°${unit === 'celsius' ? 'C' : 'F'}). Dışarıda fazla kalmamaya ve bol sıvı tüketmeye dikkat et.`;
      activities = ["Yüzme Havuzu", "Kliması Olan Mekanlar", "Soğuk Kahve Molası", "Siesta"];
   } 
   // Soğuk (<5°C)
@@ -111,14 +111,14 @@ export const generateSmartAdvice = (weather: WeatherData): AdviceResponse => {
 };
 
 // Fallback is simply calling the smart advice now
-export const generateFallbackAdvice = (current: CurrentWeather): AdviceResponse => {
+export const generateFallbackAdvice = (current: CurrentWeather, unit: 'celsius' | 'fahrenheit' = 'celsius'): AdviceResponse => {
     // Mock weather data structure for simple fallback
     return generateSmartAdvice({
         current,
         daily: { uv_index_max: [0], precipitation_probability_max: [0] } as any,
         hourly: {} as any,
         latitude: 0, longitude: 0, generationtime_ms: 0, utc_offset_seconds: 0, elevation: 0, current_units: {}
-    });
+    }, unit);
 };
 
 // 24 Saatlik Format (HH:mm)
@@ -171,7 +171,7 @@ export const triggerHapticFeedback = (pattern: number | number[] = 10) => {
 };
 
 // --- HAVA DURUMU UYARILARI ANALİZİ ---
-export const checkWeatherAlerts = (weather: WeatherData): WeatherAlert[] => {
+export const checkWeatherAlerts = (weather: WeatherData, unit: 'celsius' | 'fahrenheit' = 'celsius'): WeatherAlert[] => {
     const alerts: WeatherAlert[] = [];
     const current = weather.current;
     const daily = weather.daily;
@@ -193,7 +193,7 @@ export const checkWeatherAlerts = (weather: WeatherData): WeatherAlert[] => {
             type: 'heat',
             level: 'warning',
             title: 'Aşırı Sıcak',
-            message: `Sıcaklık ${Math.round(current.temperature_2m)}°C'ye ulaştı. Bol su tüketin ve güneşten korunun.`
+            message: `Sıcaklık ${Math.round(convertTemperature(current.temperature_2m, unit))}°${unit === 'celsius' ? 'C' : 'F'}'ye ulaştı. Bol su tüketin ve güneşten korunun.`
         });
     }
 

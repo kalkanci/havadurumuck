@@ -12,3 +12,9 @@
 
 ## Testing
 - **Unit Tests:** Added unit tests for `convertTemperature` helper using `vitest`.
+
+## Features
+- **Dynamic Temperature Unit Formatting:** Updated `generateSmartAdvice` and `checkWeatherAlerts` to format text dynamically using the user's preferred temperature unit (Celsius/Fahrenheit), instead of hardcoding Celsius values in output strings.
+
+## Testing
+- **Unit Tests:** Added unit tests for `generateSmartAdvice` and `checkWeatherAlerts` to verify that text formats correctly for both Celsius and Fahrenheit.
