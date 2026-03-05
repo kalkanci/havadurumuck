@@ -1,6 +1,7 @@
 
 import { WeatherData, GeoLocation, AirQuality, PublicHoliday } from '../types';
 import { fetchWithRetry } from '../utils/api';
+import { AppError } from '../utils/AppError';
 
 const SEARCH_API_URL = 'https://nominatim.openstreetmap.org/search';
 const WEATHER_API_URL = 'https://api.open-meteo.com/v1/forecast';
@@ -153,7 +154,7 @@ export const fetchWeather = async (lat: number, lon: number): Promise<WeatherDat
     if (!weatherRes.ok) {
         const errorText = await weatherRes.text();
         console.error("Open-Meteo API Error:", errorText);
-        throw new Error(`Weather fetch failed: ${weatherRes.status}`);
+        throw new AppError(`Weather fetch failed: ${weatherRes.status}`, 'API');
     }
     
     const weatherData = await weatherRes.json();
@@ -171,9 +172,12 @@ export const fetchWeather = async (lat: number, lon: number): Promise<WeatherDat
       air_quality: aqiData
     };
 
-  } catch (error) {
+  } catch (error: any) {
     console.error("API Error:", error);
-    throw error;
+    if (error instanceof AppError) {
+      throw error;
+    }
+    throw new AppError(error.message || 'Unknown error occurred', 'UNKNOWN');
   }
 };
 
