@@ -4,6 +4,7 @@ import { GeoLocation, WeatherData, WeatherAlert, PublicHoliday, AppSettings, Ast
 import { fetchWeather, getDetailedAddress, fetchHolidays } from './services/weatherService';
 import { fetchAstronomyPicture } from './services/astronomyService';
 import { calculateDistance, checkWeatherAlerts, triggerHapticFeedback } from './utils/helpers';
+import { AppError } from './utils/AppError';
 import Background from './components/Background';
 import Search from './components/Search';
 import SkeletonLoader from './components/SkeletonLoader';
@@ -157,8 +158,20 @@ const App: React.FC = () => {
       }
 
       if (location.country !== 'GPS') setGpsError(false); 
-    } catch (err) {
-      setError('Hava durumu verisi alınamadı. İnternet bağlantınızı kontrol edin.');
+    } catch (err: any) {
+      if (err instanceof AppError) {
+        if (err.code === 'NETWORK') {
+          setError('Hava durumu verisi alınamadı. İnternet bağlantınızı kontrol edin.');
+        } else if (err.code === 'API') {
+          setError('Hava durumu servisi şu an geçici olarak hizmet veremiyor. Lütfen daha sonra tekrar deneyin.');
+        } else if (err.code === 'GPS') {
+          setError('Konum alınamadı.');
+        } else {
+          setError('Bilinmeyen bir hata oluştu.');
+        }
+      } else {
+        setError('Bilinmeyen bir hata oluştu.');
+      }
     } finally {
       setLoading(false);
       setRefreshing(false);

@@ -12,3 +12,6 @@
 
 ## Testing
 - **Unit Tests:** Added unit tests for `convertTemperature` helper using `vitest`.
+\n- **API Error Handling:** Introduced  class with specific error codes. Updated  and  to throw typed errors. Improved  catch block to display precise, localized user messages based on the error code.
+
+- **API Error Handling:** Introduced `AppError` class with specific error codes. Updated `fetchWithRetry` and `weatherService.ts` to throw typed errors. Improved `App.tsx` catch block to display precise, localized user messages based on the error code.
