@@ -1,3 +1,5 @@
+import { AppError } from "../utils/AppError";
+
 
 import { WeatherData, GeoLocation, AirQuality, PublicHoliday } from '../types';
 import { fetchWithRetry } from '../utils/api';
@@ -153,7 +155,7 @@ export const fetchWeather = async (lat: number, lon: number): Promise<WeatherDat
     if (!weatherRes.ok) {
         const errorText = await weatherRes.text();
         console.error("Open-Meteo API Error:", errorText);
-        throw new Error(`Weather fetch failed: ${weatherRes.status}`);
+        throw new AppError(`Hava durumu verisi alınamadı (Hata Kodu: ${weatherRes.status})`, 'API');
     }
     
     const weatherData = await weatherRes.json();
@@ -173,7 +175,10 @@ export const fetchWeather = async (lat: number, lon: number): Promise<WeatherDat
 
   } catch (error) {
     console.error("API Error:", error);
-    throw error;
+    if (error instanceof AppError) {
+        throw error;
+    }
+    throw new AppError('Sunucuya bağlanılamadı. Lütfen internet bağlantınızı kontrol edin.', 'NETWORK');
   }
 };
 

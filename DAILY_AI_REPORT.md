@@ -12,3 +12,5 @@
 
 ## Testing
 - **Unit Tests:** Added unit tests for `convertTemperature` helper using `vitest`.
+
+- **API Error Handling Improvement:** Added `AppError` class and refactored `weatherService.ts` and `App.tsx` to throw and handle typed errors (NETWORK, API, GPS). Also added dynamic unit support to `checkWeatherAlerts`.

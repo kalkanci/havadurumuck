@@ -4,6 +4,7 @@ import { GeoLocation, WeatherData, WeatherAlert, PublicHoliday, AppSettings, Ast
 import { fetchWeather, getDetailedAddress, fetchHolidays } from './services/weatherService';
 import { fetchAstronomyPicture } from './services/astronomyService';
 import { calculateDistance, checkWeatherAlerts, triggerHapticFeedback } from './utils/helpers';
+import { AppError } from './utils/AppError';
 import Background from './components/Background';
 import Search from './components/Search';
 import SkeletonLoader from './components/SkeletonLoader';
@@ -147,7 +148,7 @@ const App: React.FC = () => {
       const data = await fetchWeather(location.latitude, location.longitude);
       setWeather(data);
       
-      const generatedAlerts = checkWeatherAlerts(data);
+      const generatedAlerts = checkWeatherAlerts(data, settings.temperatureUnit);
       setAlerts(generatedAlerts);
       
       if (generatedAlerts.some(a => a.level === 'critical')) {
@@ -158,7 +159,17 @@ const App: React.FC = () => {
 
       if (location.country !== 'GPS') setGpsError(false); 
     } catch (err) {
-      setError('Hava durumu verisi alınamadı. İnternet bağlantınızı kontrol edin.');
+      if (err instanceof AppError) {
+        if (err.code === 'NETWORK') {
+           setError('İnternet bağlantınızı kontrol edin.');
+        } else if (err.code === 'API') {
+           setError('Hava durumu sunucusuna erişilemiyor.');
+        } else {
+           setError(err.message);
+        }
+      } else {
+        setError('Hava durumu verisi alınamadı.');
+      }
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -180,7 +191,7 @@ const App: React.FC = () => {
     haptic(10);
 
     if (!navigator.geolocation) {
-      handleLocationError('Cihazınız konum özelliğini desteklemiyor.');
+      handleLocationError(new AppError('Cihazınız konum özelliğini desteklemiyor.', 'GPS'));
       return;
     }
 
@@ -204,7 +215,7 @@ const App: React.FC = () => {
       },
       (err) => {
         console.warn("GPS Error:", err);
-        handleLocationError('Konum alınamadı.');
+        handleLocationError(new AppError('Konum alınamadı.', 'GPS'));
       },
       {
         enableHighAccuracy: true,
@@ -214,7 +225,7 @@ const App: React.FC = () => {
     );
   }, [initialBoot, haptic]);
 
-  const handleLocationError = useCallback((msg: string) => {
+  const handleLocationError = useCallback((err: AppError) => {
       // Fallback to Istanbul if GPS fails on boot
       if (initialBoot) {
           const defaultLoc = {
@@ -223,7 +234,7 @@ const App: React.FC = () => {
           setLocation(defaultLoc);
           setGpsError(true);
       } else {
-          setError(msg);
+          setError(err.message);
           setLoading(false);
           setGpsError(true);
       }
