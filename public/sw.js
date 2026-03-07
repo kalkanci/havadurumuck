@@ -81,20 +81,25 @@ self.addEventListener('fetch', (event) => {
   // Strategy 2: Stale-While-Revalidate for API Calls
   if (url.hostname.match(/open-meteo|nominatim|nager/)) {
     event.respondWith(
-      caches.match(request)
-        .then(cachedResponse => {
-          const fetchPromise = fetch(request)
-            .then(response => {
-              if (!response || response.status !== 200) return response;
-              const cloned = response.clone();
+      caches.match(request).then(cachedResponse => {
+        const fetchPromise = fetch(request)
+          .then(networkResponse => {
+            if (networkResponse && networkResponse.status === 200) {
+              const cloned = networkResponse.clone();
               caches.open(API_CACHE).then(cache => cache.put(request, cloned));
-              return response;
-            })
-            .catch(() => cachedResponse || new Response('API Offline', { status: 503 }));
+            }
+            return networkResponse;
+          })
+          .catch(error => {
+            console.warn('[SW] Fetch failed for SWR, returning cache if available', error);
+            if (cachedResponse) {
+              return cachedResponse;
+            }
+            return new Response('API Offline', { status: 503 });
+          });
 
-          return cachedResponse || fetchPromise;
-        })
-        .catch(() => new Response('Network Error', { status: 503 }))
+        return cachedResponse || fetchPromise;
+      })
     );
     return;
   }

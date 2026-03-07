@@ -9,6 +9,7 @@ import Search from './components/Search';
 import SkeletonLoader from './components/SkeletonLoader';
 import PWAInstallBanner from './components/PWAInstallBanner';
 import TodayView from './components/TodayView';
+import OfflineIndicator from './components/OfflineIndicator';
 
 const DailyForecast = React.lazy(() => import('./components/DailyForecast'));
 const FavoritesModal = React.lazy(() => import('./components/FavoritesModal'));
@@ -55,6 +56,7 @@ const App: React.FC = () => {
   
   const [error, setError] = useState<string | null>(null);
   const [gpsError, setGpsError] = useState<boolean>(false);
+  const [isOffline, setIsOffline] = useState<boolean>(!navigator.onLine);
 
   // Widget Mode Detection
   const isWidgetMode = new URLSearchParams(window.location.search).get('mode') === 'widget';
@@ -90,10 +92,17 @@ const App: React.FC = () => {
       setDeferredPrompt(e);
     };
 
+    const handleOnline = () => setIsOffline(false);
+    const handleOffline = () => setIsOffline(true);
+
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
     };
   }, []);
 
@@ -330,6 +339,7 @@ const App: React.FC = () => {
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
+      <OfflineIndicator isOffline={isOffline} />
       <Background 
         city={location?.name || ''} 
         weatherCode={weather?.current.weather_code}
