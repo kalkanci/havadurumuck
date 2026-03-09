@@ -98,7 +98,7 @@ const TodayView: React.FC<TodayViewProps> = ({
       <div className="flex-1 flex flex-col gap-5">
         <WeatherAlerts alerts={alerts} />
         <HolidayCard holidays={upcomingHolidays} />
-        <AdviceCard weather={weather} cityName={location.name} />
+        <AdviceCard weather={weather} cityName={location.name} unit={unit} />
         <ForecastInsight weather={weather} />
         <HourlyForecast weather={weather} unit={unit} />
 

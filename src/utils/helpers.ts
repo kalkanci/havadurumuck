@@ -21,7 +21,7 @@ export const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2
 };
 
 // Akıllı Tavsiye Motoru (Gelişmiş Mantık)
-export const generateSmartAdvice = (weather: WeatherData): AdviceResponse => {
+export const generateSmartAdvice = (weather: WeatherData, unit: 'celsius' | 'fahrenheit' = 'celsius'): AdviceResponse => {
   const { current, daily, air_quality } = weather;
   const temp = current.temperature_2m;
   const code = current.weather_code;
@@ -171,10 +171,12 @@ export const triggerHapticFeedback = (pattern: number | number[] = 10) => {
 };
 
 // --- HAVA DURUMU UYARILARI ANALİZİ ---
-export const checkWeatherAlerts = (weather: WeatherData): WeatherAlert[] => {
+export const checkWeatherAlerts = (weather: WeatherData, unit: 'celsius' | 'fahrenheit' = 'celsius'): WeatherAlert[] => {
     const alerts: WeatherAlert[] = [];
     const current = weather.current;
     const daily = weather.daily;
+    const isFahrenheit = unit === 'fahrenheit';
+    const tempUnitLabel = isFahrenheit ? '°F' : '°C';
 
     // 1. Fırtına / Şiddetli Yağmur (Code 95-99, 65, 82)
     const severeCodes = [95, 96, 99, 65, 82];
@@ -193,7 +195,7 @@ export const checkWeatherAlerts = (weather: WeatherData): WeatherAlert[] => {
             type: 'heat',
             level: 'warning',
             title: 'Aşırı Sıcak',
-            message: `Sıcaklık ${Math.round(current.temperature_2m)}°C'ye ulaştı. Bol su tüketin ve güneşten korunun.`
+            message: `Sıcaklık ${Math.round(convertTemperature(current.temperature_2m, unit))}${tempUnitLabel}'ye ulaştı. Bol su tüketin ve güneşten korunun.`
         });
     }
 
