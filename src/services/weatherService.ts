@@ -15,6 +15,7 @@ export const getDetailedAddress = async (lat: number, lon: number): Promise<{ ci
         'User-Agent': 'AtmosferAI/1.0'
       }
     });
+    // fetchWithRetry throws ApiError or NetworkError on failure, no need for manual res.ok check.
     const data = await res.json();
     const addr = data.address || {};
     
@@ -84,6 +85,7 @@ export const searchCity = async (query: string): Promise<GeoLocation[]> => {
             'User-Agent': 'AtmosferAI/1.0'
         }
     });
+    // fetchWithRetry handles throwing on non-ok responses
     const data = await res.json();
     
     if (!data || data.length === 0) return [];
@@ -150,11 +152,10 @@ export const fetchWeather = async (lat: number, lon: number): Promise<WeatherDat
       fetchWithRetry(`${AIR_QUALITY_API_URL}?${aqiParams.toString()}`)
     ]);
 
-    if (!weatherRes.ok) {
-        const errorText = await weatherRes.text();
-        console.error("Open-Meteo API Error:", errorText);
-        throw new Error(`Weather fetch failed: ${weatherRes.status}`);
-    }
+    // `fetchWithRetry` now throws ApiError if `!weatherRes.ok`,
+    // so we only need to parse the JSON if it succeeded.
+    // However, if we reach here and it's somehow not ok (due to custom logic, though API throws),
+    // it will be caught by the try/catch.
     
     const weatherData = await weatherRes.json();
     let aqiData: AirQuality | undefined;
