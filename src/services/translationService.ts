@@ -2,6 +2,8 @@
 // Ücretsiz MyMemory Translation API kullanarak metinleri Türkçeye çevirir.
 // Not: Günlük limitleri vardır, prodüksiyon için Google Translate API veya benzeri önerilir.
 
+import { fetchWithRetry } from '../utils/api';
+
 export const translateToTurkish = async (text: string): Promise<string> => {
   if (!text) return "";
   
@@ -12,7 +14,7 @@ export const translateToTurkish = async (text: string): Promise<string> => {
     
     const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(textToTranslate)}&langpair=en|tr`;
     
-    const response = await fetch(url);
+    const response = await fetchWithRetry(url, {}, 2, 500);
     const data = await response.json();
     
     if (data.responseStatus === 200 && data.responseData.translatedText) {
