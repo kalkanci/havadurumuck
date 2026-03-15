@@ -1,6 +1,6 @@
 
 import { WeatherData, GeoLocation, AirQuality, PublicHoliday } from '../types';
-import { fetchWithRetry } from '../utils/api';
+import { fetchWithRetry, ApiError, NetworkError } from '../utils/api';
 
 const SEARCH_API_URL = 'https://nominatim.openstreetmap.org/search';
 const WEATHER_API_URL = 'https://api.open-meteo.com/v1/forecast';
@@ -68,7 +68,11 @@ export const getDetailedAddress = async (lat: number, lon: number): Promise<{ ci
 
     return { city: mainName, address: subText, country: country, countryCode };
   } catch (error) {
-    console.warn("Reverse geocoding failed", error);
+    if (error instanceof ApiError || error instanceof NetworkError) {
+      console.warn(`Reverse geocoding API error: ${error.message}`);
+    } else {
+      console.warn("Reverse geocoding failed", error);
+    }
     return { city: 'Konum Bulunamadı', address: '', country: '', countryCode: '' };
   }
 };
@@ -113,7 +117,11 @@ export const searchCity = async (query: string): Promise<GeoLocation[]> => {
     });
 
   } catch (error) {
-    console.error("Geocoding error:", error);
+    if (error instanceof ApiError || error instanceof NetworkError) {
+      console.error(`Geocoding API error: ${error.message}`);
+    } else {
+      console.error("Geocoding error:", error);
+    }
     return [];
   }
 };
@@ -145,21 +153,25 @@ export const fetchWeather = async (lat: number, lon: number): Promise<WeatherDat
   });
 
   try {
+    // Promise.all to fetch both concurrently.
+    // If weather fails, it throws and is caught by the try-catch block.
+    // If AQI fails, we gracefully handle it returning null, preventing UI breakage.
     const [weatherRes, aqiRes] = await Promise.all([
       fetchWithRetry(`${WEATHER_API_URL}?${weatherParams.toString()}`),
-      fetchWithRetry(`${AIR_QUALITY_API_URL}?${aqiParams.toString()}`)
+      fetchWithRetry(`${AIR_QUALITY_API_URL}?${aqiParams.toString()}`).catch(error => {
+        if (error instanceof ApiError || error instanceof NetworkError) {
+            console.warn(`AQI Fetch Error: ${error.message}. Proceeding without AQI.`);
+        } else {
+            console.warn("AQI Fetch Error", error);
+        }
+        return null;
+      })
     ]);
 
-    if (!weatherRes.ok) {
-        const errorText = await weatherRes.text();
-        console.error("Open-Meteo API Error:", errorText);
-        throw new Error(`Weather fetch failed: ${weatherRes.status}`);
-    }
-    
     const weatherData = await weatherRes.json();
     let aqiData: AirQuality | undefined;
 
-    if (aqiRes.ok) {
+    if (aqiRes) {
       const aqiJson = await aqiRes.json();
       if (aqiJson.current) {
         aqiData = aqiJson.current;
@@ -181,11 +193,14 @@ export const fetchHolidays = async (year: number, countryCode: string): Promise<
     if (!countryCode) return [];
     try {
         const res = await fetchWithRetry(`${HOLIDAY_API_URL}/${year}/${countryCode}`);
-        if (!res.ok) return [];
         const data = await res.json();
         return data || [];
     } catch (error) {
-        console.warn("Holiday fetch error:", error);
+        if (error instanceof ApiError || error instanceof NetworkError) {
+            console.warn(`Holiday fetch API error: ${error.message}`);
+        } else {
+            console.warn("Holiday fetch error:", error);
+        }
         return [];
     }
 };
