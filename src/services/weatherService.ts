@@ -1,6 +1,6 @@
 
 import { WeatherData, GeoLocation, AirQuality, PublicHoliday } from '../types';
-import { fetchWithRetry } from '../utils/api';
+import { fetchWithRetry, ApiError, NetworkError } from '../utils/api';
 
 const SEARCH_API_URL = 'https://nominatim.openstreetmap.org/search';
 const WEATHER_API_URL = 'https://api.open-meteo.com/v1/forecast';
@@ -147,19 +147,20 @@ export const fetchWeather = async (lat: number, lon: number): Promise<WeatherDat
   try {
     const [weatherRes, aqiRes] = await Promise.all([
       fetchWithRetry(`${WEATHER_API_URL}?${weatherParams.toString()}`),
-      fetchWithRetry(`${AIR_QUALITY_API_URL}?${aqiParams.toString()}`)
+      fetchWithRetry(`${AIR_QUALITY_API_URL}?${aqiParams.toString()}`).catch(err => {
+        if (err instanceof ApiError || err instanceof NetworkError) {
+          console.warn("AQI fetch failed, gracefully ignoring:", err.message);
+        } else {
+          console.warn("AQI fetch failed with unknown error, gracefully ignoring:", err);
+        }
+        return null;
+      })
     ]);
 
-    if (!weatherRes.ok) {
-        const errorText = await weatherRes.text();
-        console.error("Open-Meteo API Error:", errorText);
-        throw new Error(`Weather fetch failed: ${weatherRes.status}`);
-    }
-    
     const weatherData = await weatherRes.json();
     let aqiData: AirQuality | undefined;
 
-    if (aqiRes.ok) {
+    if (aqiRes) {
       const aqiJson = await aqiRes.json();
       if (aqiJson.current) {
         aqiData = aqiJson.current;
@@ -173,7 +174,7 @@ export const fetchWeather = async (lat: number, lon: number): Promise<WeatherDat
 
   } catch (error) {
     console.error("API Error:", error);
-    throw error;
+    throw error; // Weather fetch errors should still bubble up
   }
 };
 
@@ -181,11 +182,14 @@ export const fetchHolidays = async (year: number, countryCode: string): Promise<
     if (!countryCode) return [];
     try {
         const res = await fetchWithRetry(`${HOLIDAY_API_URL}/${year}/${countryCode}`);
-        if (!res.ok) return [];
         const data = await res.json();
         return data || [];
     } catch (error) {
-        console.warn("Holiday fetch error:", error);
+        if (error instanceof ApiError || error instanceof NetworkError) {
+           console.warn(`Holiday fetch failed: ${error.message}`);
+        } else {
+           console.warn("Holiday fetch error:", error);
+        }
         return [];
     }
 };

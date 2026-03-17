@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Settings, Vibrate, Thermometer } from 'lucide-react';
+import { X, Settings, Vibrate, Thermometer, Download } from 'lucide-react';
 import { AppSettings } from '../types';
 
 interface SettingsModalProps {
@@ -9,9 +9,10 @@ interface SettingsModalProps {
   onClose: () => void;
   settings: AppSettings;
   onUpdate: (newSettings: AppSettings) => void;
+  onInstall?: () => void;
 }
 
-const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, settings, onUpdate }) => {
+const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, settings, onUpdate, onInstall }) => {
   const [isClosing, setIsClosing] = useState(false);
 
   // Lock body scroll
@@ -66,6 +67,24 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, settings
         </div>
 
         <div className="space-y-4">
+            {/* PWA Install Button */}
+            {onInstall && (
+                <button
+                    onClick={onInstall}
+                    className="w-full bg-blue-600/20 hover:bg-blue-600/30 p-4 rounded-2xl border border-blue-500/30 flex items-center justify-between group active:scale-[0.98] transition-all mb-4"
+                >
+                    <div className="flex items-center gap-3">
+                        <div className="p-2 rounded-lg bg-blue-500/20 text-blue-400">
+                            <Download size={18} />
+                        </div>
+                        <div className="text-left">
+                            <span className="block text-blue-100 font-bold text-sm">Uygulamayı Yükle</span>
+                            <span className="text-xs text-blue-200/70">Daha hızlı erişim için ana ekrana ekle</span>
+                        </div>
+                    </div>
+                </button>
+            )}
+
             {/* Haptics */}
             <button 
                 onClick={toggleHaptics}
