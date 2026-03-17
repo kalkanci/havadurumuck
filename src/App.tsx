@@ -369,6 +369,7 @@ const App: React.FC = () => {
             onClose={() => setIsSettingsOpen(false)}
             settings={settings}
             onUpdate={setSettings}
+            onInstall={deferredPrompt ? handleInstallClick : undefined}
           />
         </React.Suspense>
       )}
