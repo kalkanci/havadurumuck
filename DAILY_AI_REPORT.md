@@ -12,3 +12,10 @@
 
 ## Testing
 - **Unit Tests:** Added unit tests for `convertTemperature` helper using `vitest`.
+- **API Tests:** Added unit tests for enhanced `fetchWithRetry` logic checking `ApiError` and `NetworkError` scenarios.
+
+## Error Handling
+- **API Resiliency:** Replaced raw `throw Error` with domain-specific `ApiError` and `NetworkError` classes. Refactored `weatherService` and `astronomyService` to handle failures gracefully.
+
+## PWA
+- **Service Worker:** Added programmatic registration of `sw.js` in `src/index.tsx` to enable proper offline caching and installation features.
