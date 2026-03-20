@@ -147,19 +147,13 @@ export const fetchWeather = async (lat: number, lon: number): Promise<WeatherDat
   try {
     const [weatherRes, aqiRes] = await Promise.all([
       fetchWithRetry(`${WEATHER_API_URL}?${weatherParams.toString()}`),
-      fetchWithRetry(`${AIR_QUALITY_API_URL}?${aqiParams.toString()}`)
+      fetchWithRetry(`${AIR_QUALITY_API_URL}?${aqiParams.toString()}`).catch(() => null)
     ]);
-
-    if (!weatherRes.ok) {
-        const errorText = await weatherRes.text();
-        console.error("Open-Meteo API Error:", errorText);
-        throw new Error(`Weather fetch failed: ${weatherRes.status}`);
-    }
     
     const weatherData = await weatherRes.json();
     let aqiData: AirQuality | undefined;
 
-    if (aqiRes.ok) {
+    if (aqiRes) {
       const aqiJson = await aqiRes.json();
       if (aqiJson.current) {
         aqiData = aqiJson.current;
@@ -181,7 +175,6 @@ export const fetchHolidays = async (year: number, countryCode: string): Promise<
     if (!countryCode) return [];
     try {
         const res = await fetchWithRetry(`${HOLIDAY_API_URL}/${year}/${countryCode}`);
-        if (!res.ok) return [];
         const data = await res.json();
         return data || [];
     } catch (error) {
