@@ -145,30 +145,14 @@ export const fetchWeather = async (lat: number, lon: number): Promise<WeatherDat
   });
 
   try {
-    const [weatherRes, aqiRes] = await Promise.all([
-      fetchWithRetry(`${WEATHER_API_URL}?${weatherParams.toString()}`),
-      fetchWithRetry(`${AIR_QUALITY_API_URL}?${aqiParams.toString()}`)
+    const [weatherData, aqiData] = await Promise.all([
+      fetchWithRetry(`${WEATHER_API_URL}?${weatherParams.toString()}`).then(res => res.json()),
+      fetchWithRetry(`${AIR_QUALITY_API_URL}?${aqiParams.toString()}`).then(res => res.json()).catch(() => null)
     ]);
-
-    if (!weatherRes.ok) {
-        const errorText = await weatherRes.text();
-        console.error("Open-Meteo API Error:", errorText);
-        throw new Error(`Weather fetch failed: ${weatherRes.status}`);
-    }
-    
-    const weatherData = await weatherRes.json();
-    let aqiData: AirQuality | undefined;
-
-    if (aqiRes.ok) {
-      const aqiJson = await aqiRes.json();
-      if (aqiJson.current) {
-        aqiData = aqiJson.current;
-      }
-    }
 
     return {
       ...weatherData,
-      air_quality: aqiData
+      air_quality: aqiData?.current || undefined
     };
 
   } catch (error) {
