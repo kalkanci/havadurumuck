@@ -171,7 +171,7 @@ export const triggerHapticFeedback = (pattern: number | number[] = 10) => {
 };
 
 // --- HAVA DURUMU UYARILARI ANALİZİ ---
-export const checkWeatherAlerts = (weather: WeatherData): WeatherAlert[] => {
+export const checkWeatherAlerts = (weather: WeatherData, unit: 'celsius' | 'fahrenheit' = 'celsius'): WeatherAlert[] => {
     const alerts: WeatherAlert[] = [];
     const current = weather.current;
     const daily = weather.daily;
@@ -189,11 +189,13 @@ export const checkWeatherAlerts = (weather: WeatherData): WeatherAlert[] => {
 
     // 2. Aşırı Sıcaklık (> 35°C)
     if (current.temperature_2m > 35) {
+        const displayTemp = Math.round(convertTemperature(current.temperature_2m, unit));
+        const tempUnitStr = unit === 'celsius' ? '°C' : '°F';
         alerts.push({
             type: 'heat',
             level: 'warning',
             title: 'Aşırı Sıcak',
-            message: `Sıcaklık ${Math.round(current.temperature_2m)}°C'ye ulaştı. Bol su tüketin ve güneşten korunun.`
+            message: `Sıcaklık ${displayTemp}${tempUnitStr}'ye ulaştı. Bol su tüketin ve güneşten korunun.`
         });
     }
 
