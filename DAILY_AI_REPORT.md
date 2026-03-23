@@ -9,6 +9,7 @@
     - Added toggle switch in `SettingsModal`.
     - Implemented `convertTemperature` helper in `src/utils/helpers.ts`.
     - Updated `TodayView`, `HourlyForecast`, `DailyForecast`, and `DetailsGrid` to respect the selected unit.
+    - Updated `checkWeatherAlerts` logic to utilize the selected unit dynamically (Celsius vs Fahrenheit).
 
 ## Testing
-- **Unit Tests:** Added unit tests for `convertTemperature` helper using `vitest`.
+- **Unit Tests:** Added unit tests for `convertTemperature` and `checkWeatherAlerts` helpers using `vitest`.
