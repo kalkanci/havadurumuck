@@ -12,3 +12,5 @@
 
 ## Testing
 - **Unit Tests:** Added unit tests for `convertTemperature` helper using `vitest`.
+
+- **API Error Management:** Created `ApiError` and `NetworkError` classes in `src/utils/api.ts`. Updated `fetchWithRetry` to explicitly throw these errors for server rate limits and network failures respectively. Handled these gracefully in `weatherService.ts` and `astronomyService.ts` by propagating proper log messages or fallback behaviors.
