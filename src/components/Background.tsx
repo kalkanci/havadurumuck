@@ -1,6 +1,7 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 import { getWeatherLabel } from '../constants';
+import WeatherOverlay from './WeatherOverlay';
 
 interface BackgroundProps {
   city: string;
@@ -108,6 +109,8 @@ const Background: React.FC<BackgroundProps> = ({ city, weatherCode, isDay, cosmi
       {/* Optional: Subtle Blue Glow Overlay */}
       <div className="absolute inset-0 bg-blue-500/5 pointer-events-none z-20 mix-blend-overlay" />
 
+      {/* 4. Weather Effects Layer */}
+      {weatherCode !== undefined && <WeatherOverlay weatherCode={weatherCode} />}
     </div>
   );
 };
