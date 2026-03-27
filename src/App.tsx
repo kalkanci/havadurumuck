@@ -147,12 +147,7 @@ const App: React.FC = () => {
       const data = await fetchWeather(location.latitude, location.longitude);
       setWeather(data);
       
-      const generatedAlerts = checkWeatherAlerts(data);
-      setAlerts(generatedAlerts);
-      
-      if (generatedAlerts.some(a => a.level === 'critical')) {
-          haptic([50, 100, 50]);
-      } else if (isRefresh) {
+      if (isRefresh) {
           haptic(20);
       }
 
@@ -171,6 +166,17 @@ const App: React.FC = () => {
       }
     }
   }, [location, initialBoot, haptic]);
+
+  useEffect(() => {
+    if (weather) {
+      const generatedAlerts = checkWeatherAlerts(weather, settings.temperatureUnit);
+      setAlerts(generatedAlerts);
+
+      if (generatedAlerts.some(a => a.level === 'critical')) {
+          haptic([50, 100, 50]);
+      }
+    }
+  }, [weather, settings.temperatureUnit, haptic]);
 
   const handleCurrentLocation = useCallback(() => {
     // If manually triggered later, show loading
@@ -369,6 +375,7 @@ const App: React.FC = () => {
             onClose={() => setIsSettingsOpen(false)}
             settings={settings}
             onUpdate={setSettings}
+            onInstall={deferredPrompt ? handleInstallClick : undefined}
           />
         </React.Suspense>
       )}

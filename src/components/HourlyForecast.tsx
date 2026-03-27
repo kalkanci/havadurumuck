@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { WeatherData } from '../types';
 import { getWeatherIcon, getWeatherLabel } from '../constants';
@@ -38,16 +38,18 @@ const HourlyForecast: React.FC<HourlyForecastProps> = ({ weather, unit }) => {
     };
   }, [selectedHour]);
 
-  const now = new Date();
-  const currentHourIndex = weather.hourly.time.findIndex(t => {
-      const d = new Date(t);
-      return d.getDate() === now.getDate() && d.getHours() === now.getHours();
-  });
+  const forecastIndices = useMemo(() => {
+      const now = new Date();
+      const currentHourIndex = weather.hourly.time.findIndex(t => {
+          const d = new Date(t);
+          return d.getDate() === now.getDate() && d.getHours() === now.getHours();
+      });
 
-  const startIndex = currentHourIndex !== -1 ? currentHourIndex : 0;
-  const hoursCount = 24;
-  const forecastIndices = Array.from({ length: hoursCount }, (_, i) => startIndex + i);
-  
+      const startIndex = currentHourIndex !== -1 ? currentHourIndex : 0;
+      const hoursCount = 24;
+      return Array.from({ length: hoursCount }, (_, i) => startIndex + i);
+  }, [weather.hourly.time]);
+
   const handleOpenWithDelay = (index: number) => {
     triggerHapticFeedback(15);
     setTimeout(() => {
