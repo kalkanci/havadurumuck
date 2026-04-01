@@ -12,3 +12,5 @@
 
 ## Testing
 - **Unit Tests:** Added unit tests for `convertTemperature` helper using `vitest`.
+- **Search Component Refactor:** Extracted the search debounce logic into a generic, reusable `useDebounce` hook, addressing an outstanding refactoring checklist item.
+- **Alert & Advice Unit Support:** Updated `generateSmartAdvice`, `generateFallbackAdvice`, and `checkWeatherAlerts` to accept and process temperature unit configurations dynamically. Added corresponding tests.

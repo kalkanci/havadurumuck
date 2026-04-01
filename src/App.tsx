@@ -147,7 +147,7 @@ const App: React.FC = () => {
       const data = await fetchWeather(location.latitude, location.longitude);
       setWeather(data);
       
-      const generatedAlerts = checkWeatherAlerts(data);
+      const generatedAlerts = checkWeatherAlerts(data, settings.temperatureUnit);
       setAlerts(generatedAlerts);
       
       if (generatedAlerts.some(a => a.level === 'critical')) {
@@ -170,7 +170,14 @@ const App: React.FC = () => {
           }, 800);
       }
     }
-  }, [location, initialBoot, haptic]);
+  }, [location, initialBoot, haptic]); // Removed settings.temperatureUnit
+
+  // Recalculate alerts when unit changes without fetching API
+  useEffect(() => {
+    if (weather) {
+      setAlerts(checkWeatherAlerts(weather, settings.temperatureUnit));
+    }
+  }, [settings.temperatureUnit, weather]);
 
   const handleCurrentLocation = useCallback(() => {
     // If manually triggered later, show loading
