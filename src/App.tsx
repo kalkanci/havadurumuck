@@ -105,6 +105,14 @@ const App: React.FC = () => {
     }
   }, [location]);
 
+  // Recalculate alerts when weather or temperature unit changes
+  useEffect(() => {
+      if (weather) {
+          const generatedAlerts = checkWeatherAlerts(weather, settings.temperatureUnit);
+          setAlerts(generatedAlerts);
+      }
+  }, [weather, settings.temperatureUnit]);
+
   const haptic = useCallback((pattern?: number | number[]) => {
       if (settings.hapticsEnabled) {
           triggerHapticFeedback(pattern);
@@ -147,9 +155,8 @@ const App: React.FC = () => {
       const data = await fetchWeather(location.latitude, location.longitude);
       setWeather(data);
       
-      const generatedAlerts = checkWeatherAlerts(data);
-      setAlerts(generatedAlerts);
-      
+      // alerts will be set by the new useEffect observing 'weather'
+      const generatedAlerts = checkWeatherAlerts(data, settings.temperatureUnit);
       if (generatedAlerts.some(a => a.level === 'critical')) {
           haptic([50, 100, 50]);
       } else if (isRefresh) {
