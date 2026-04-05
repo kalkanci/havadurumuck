@@ -147,7 +147,10 @@ export const fetchWeather = async (lat: number, lon: number): Promise<WeatherDat
   try {
     const [weatherRes, aqiRes] = await Promise.all([
       fetchWithRetry(`${WEATHER_API_URL}?${weatherParams.toString()}`),
-      fetchWithRetry(`${AIR_QUALITY_API_URL}?${aqiParams.toString()}`)
+      fetchWithRetry(`${AIR_QUALITY_API_URL}?${aqiParams.toString()}`).catch((err) => {
+          console.warn("AQI fetch failed:", err);
+          return null;
+      })
     ]);
 
     if (!weatherRes.ok) {
@@ -159,7 +162,7 @@ export const fetchWeather = async (lat: number, lon: number): Promise<WeatherDat
     const weatherData = await weatherRes.json();
     let aqiData: AirQuality | undefined;
 
-    if (aqiRes.ok) {
+    if (aqiRes && aqiRes.ok) {
       const aqiJson = await aqiRes.json();
       if (aqiJson.current) {
         aqiData = aqiJson.current;

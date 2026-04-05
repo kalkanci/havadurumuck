@@ -33,9 +33,13 @@ const App: React.FC = () => {
       const saved = localStorage.getItem('atmosfer_settings');
       if (saved) {
           const parsed = JSON.parse(saved);
-          return { ...parsed, temperatureUnit: parsed.temperatureUnit || 'celsius' };
+          return {
+            ...parsed,
+            temperatureUnit: parsed.temperatureUnit || 'celsius',
+            windSpeedUnit: parsed.windSpeedUnit || 'kmh'
+          };
       }
-      return { hapticsEnabled: true, temperatureUnit: 'celsius' };
+      return { hapticsEnabled: true, temperatureUnit: 'celsius', windSpeedUnit: 'kmh' };
   });
 
   const [favorites, setFavorites] = useState<GeoLocation[]>(() => {
@@ -470,11 +474,12 @@ const App: React.FC = () => {
                 onOpenCalendar={() => setIsCalendarOpen(true)}
                 onOpenFavorites={() => setIsFavoritesOpen(true)}
                 unit={settings.temperatureUnit}
+                windSpeedUnit={settings.windSpeedUnit}
               />
             ) : (
               // --- 16 DAYS FORECAST VIEW ---
               <React.Suspense fallback={<SkeletonLoader />}>
-                <DailyForecast weather={weather} unit={settings.temperatureUnit} />
+                <DailyForecast weather={weather} unit={settings.temperatureUnit} windSpeedUnit={settings.windSpeedUnit} />
               </React.Suspense>
             )}
           </main>
