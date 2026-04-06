@@ -4,6 +4,7 @@ import { GeoLocation, WeatherData, WeatherAlert, PublicHoliday, AppSettings, Ast
 import { fetchWeather, getDetailedAddress, fetchHolidays } from './services/weatherService';
 import { fetchAstronomyPicture } from './services/astronomyService';
 import { calculateDistance, checkWeatherAlerts, triggerHapticFeedback } from './utils/helpers';
+import { useGeolocation } from './utils/useGeolocation';
 import Background from './components/Background';
 import Search from './components/Search';
 import SkeletonLoader from './components/SkeletonLoader';
@@ -172,48 +173,6 @@ const App: React.FC = () => {
     }
   }, [location, initialBoot, haptic]);
 
-  const handleCurrentLocation = useCallback(() => {
-    // If manually triggered later, show loading
-    if (!initialBoot) setLoading(true);
-    
-    setGpsError(false);
-    haptic(10);
-
-    if (!navigator.geolocation) {
-      handleLocationError('Cihazınız konum özelliğini desteklemiyor.');
-      return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const { latitude, longitude } = position.coords;
-        const details = await getDetailedAddress(latitude, longitude);
-        
-        const loc: GeoLocation = {
-          id: Date.now(),
-          name: details.city, 
-          latitude,
-          longitude,
-          country: details.country || 'Konum',
-          countryCode: details.countryCode,
-          subtext: details.address,
-          admin1: details.country
-        };
-        setLocation(loc); // This triggers useEffect -> loadWeather
-        haptic(20);
-      },
-      (err) => {
-        console.warn("GPS Error:", err);
-        handleLocationError('Konum alınamadı.');
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 0
-      }
-    );
-  }, [initialBoot, haptic]);
-
   const handleLocationError = useCallback((msg: string) => {
       // Fallback to Istanbul if GPS fails on boot
       if (initialBoot) {
@@ -228,6 +187,20 @@ const App: React.FC = () => {
           setGpsError(true);
       }
   }, [initialBoot]);
+
+  const { getCurrentLocation: handleCurrentLocation } = useGeolocation({
+    onSuccess: (loc) => {
+      setLocation(loc);
+    },
+    onError: (msg) => {
+      handleLocationError(msg);
+    },
+    onStart: () => {
+      if (!initialBoot) setLoading(true);
+      setGpsError(false);
+    },
+    hapticsEnabled: settings.hapticsEnabled
+  });
 
   const addFavorite = useCallback((loc: GeoLocation) => {
      if (!favorites.some(f => f.id === loc.id)) {

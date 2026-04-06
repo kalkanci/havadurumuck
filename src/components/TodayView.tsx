@@ -11,6 +11,7 @@ import GoldenHourCard from './GoldenHourCard';
 import ActivityScore from './ActivityScore';
 import AirQualityCard from './AirQualityCard';
 import DetailsGrid from './DetailsGrid';
+import ShareButton from './ShareButton';
 import { getWeatherLabel } from '../constants';
 import { convertTemperature } from '../utils/helpers';
 
@@ -47,14 +48,18 @@ const TodayView: React.FC<TodayViewProps> = ({
     <>
       <div className="flex flex-col items-center justify-center mb-10 mt-6 text-center relative z-10">
 
-        {/* Date Pill (Top - Clickable) */}
-        <button
-          onClick={onOpenCalendar}
-          className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 hover:bg-white/10 backdrop-blur-md border border-white/10 shadow-lg mb-6 active:scale-95 transition-transform"
-        >
-          <Calendar size={12} className="text-blue-400" />
-          <span className="text-xs font-bold text-white tracking-wide uppercase">{todayStr}</span>
-        </button>
+        <div className="flex items-center gap-2">
+            {/* Date Pill (Top - Clickable) */}
+            <button
+            onClick={onOpenCalendar}
+            className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 hover:bg-white/10 backdrop-blur-md border border-white/10 shadow-lg mb-6 active:scale-95 transition-transform"
+            >
+            <Calendar size={12} className="text-blue-400" />
+            <span className="text-xs font-bold text-white tracking-wide uppercase">{todayStr}</span>
+            </button>
+
+            <ShareButton weather={weather} location={location} unit={unit} />
+        </div>
 
         {/* Massive Temperature (The Hero) */}
         <div className="relative">

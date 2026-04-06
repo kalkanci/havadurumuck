@@ -12,3 +12,9 @@
 
 ## Testing
 - **Unit Tests:** Added unit tests for `convertTemperature` helper using `vitest`.
+
+## AI Update - 2026-04-06
+### Refactoring
+- **useGeolocation Hook:** Extracted geolocation logic from `App.tsx` into `src/utils/useGeolocation.ts`, adhering to Clean Code principles and making `App.tsx` cleaner.
+### Features
+- **Share Weather:** Added `ShareButton.tsx` to allow sharing current weather details using the Web Share API (with a clipboard fallback), integrated into `TodayView.tsx`.
