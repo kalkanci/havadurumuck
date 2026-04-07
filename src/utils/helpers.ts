@@ -7,6 +7,12 @@ export const convertTemperature = (temp: number, unit: 'celsius' | 'fahrenheit')
     return (temp * 9 / 5) + 32;
 };
 
+// Rüzgar Hızı Dönüştürücü (km/h -> mph)
+export const convertWindSpeed = (speedKmh: number, unit?: 'kmh' | 'mph' | string): number => {
+    if (unit === 'mph') return speedKmh * 0.621371;
+    return speedKmh;
+};
+
 // Haversine formula for distance
 export const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
   const R = 6371; // km

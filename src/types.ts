@@ -92,6 +92,7 @@ export interface UserSettings {
 export interface AppSettings {
   hapticsEnabled: boolean;
   temperatureUnit: 'celsius' | 'fahrenheit';
+  windSpeedUnit?: 'kmh' | 'mph';
 }
 
 export interface AdviceResponse {

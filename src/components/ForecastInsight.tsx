@@ -5,10 +5,11 @@ import {
     CloudRain, Sun, Moon, Sunrise, Sunset, CloudLightning, 
     Umbrella, Timer, TrendingUp, TrendingDown, Minus, Wind 
 } from 'lucide-react';
-import { formatTime, formatCountdown } from '../utils/helpers';
+import { formatTime, formatCountdown, convertWindSpeed } from '../utils/helpers';
 
 interface ForecastInsightProps {
   weather: WeatherData;
+  windSpeedUnit?: 'kmh' | 'mph';
 }
 
 interface EventTarget {
@@ -19,7 +20,7 @@ interface EventTarget {
   colorClass: string;
 }
 
-const ForecastInsight: React.FC<ForecastInsightProps> = ({ weather }) => {
+const ForecastInsight: React.FC<ForecastInsightProps> = ({ weather, windSpeedUnit = 'kmh' }) => {
   const current = weather.current;
   const hourly = weather.hourly;
   
@@ -174,7 +175,7 @@ const ForecastInsight: React.FC<ForecastInsightProps> = ({ weather }) => {
       const nextRainProbs = hourly.precipitation_probability.slice(startIndex, startIndex + 4);
       const maxRain = Math.max(...nextRainProbs);
       const nextWinds = hourly.wind_speed_10m.slice(startIndex, startIndex + 4);
-      const maxWind = Math.max(...nextWinds);
+      const maxWind = convertWindSpeed(Math.max(...nextWinds), windSpeedUnit);
 
       let trendIcon = <Minus size={18} className="text-slate-400" />;
       let trendText = "Sıcaklık sabit";
@@ -189,7 +190,9 @@ const ForecastInsight: React.FC<ForecastInsightProps> = ({ weather }) => {
 
       let conditionText = "Hava sakin.";
       if (maxRain > 40) conditionText = "Yağmur ihtimali var.";
-      if (maxWind > 25) conditionText = "Rüzgar sertleşiyor.";
+
+      const windThreshold = convertWindSpeed(25, windSpeedUnit);
+      if (maxWind > windThreshold) conditionText = "Rüzgar sertleşiyor.";
 
       return {
           trendIcon,
@@ -270,7 +273,7 @@ const ForecastInsight: React.FC<ForecastInsightProps> = ({ weather }) => {
                                 <span className="text-xs text-slate-400 font-bold">Rüzgar</span>
                                 <div className="flex items-center gap-1">
                                     <Wind size={14} className="text-teal-400" />
-                                    <span className="text-sm font-bold text-white">{Math.round(summary.maxWind)}</span>
+                                    <span className="text-sm font-bold text-white">{Math.round(summary.maxWind)} <span className="text-[10px] font-normal text-slate-400">{windSpeedUnit === 'mph' ? 'mph' : 'km/s'}</span></span>
                                 </div>
                             </div>
                             {summary.maxRain > 0 && (
