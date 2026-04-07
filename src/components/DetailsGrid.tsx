@@ -3,22 +3,23 @@ import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { WeatherData } from '../types';
 import { Droplets, Wind, Sun, Gauge, Thermometer, Navigation, X, Clock, Sunrise, Sunset, ArrowUpRight, ArrowDownRight, Minus, HelpCircle } from 'lucide-react';
-import { formatTime, getWindDirection, triggerHapticFeedback, convertTemperature } from '../utils/helpers';
+import { formatTime, getWindDirection, triggerHapticFeedback, convertTemperature, convertWindSpeed } from '../utils/helpers';
 
 interface DetailsGridProps {
   weather: WeatherData;
   unit: 'celsius' | 'fahrenheit';
+  windSpeedUnit?: 'kmh' | 'mph';
 }
 
 type DetailType = 'feels_like' | 'wind' | 'humidity' | 'dew_point' | 'uv' | 'pressure' | 'sunrise' | 'sunset' | null;
 
-const DetailsGrid: React.FC<DetailsGridProps> = ({ weather, unit }) => {
+const DetailsGrid: React.FC<DetailsGridProps> = ({ weather, unit, windSpeedUnit = 'kmh' }) => {
   const { current, daily, hourly } = weather;
   const [selectedDetail, setSelectedDetail] = useState<DetailType>(null);
   const [isClosing, setIsClosing] = useState(false);
 
   const tempUnit = unit === 'celsius' ? '°' : '°F';
-  const speedUnit = 'km/s';
+  const speedUnit = windSpeedUnit === 'mph' ? 'mph' : 'km/s';
 
   useEffect(() => {
     if (selectedDetail !== null) {
@@ -68,7 +69,7 @@ const DetailsGrid: React.FC<DetailsGridProps> = ({ weather, unit }) => {
           return {
             time: t,
             temp: hourly.temperature_2m[idx],
-            windSpeed: hourly.wind_speed_10m[idx],
+            windSpeed: convertWindSpeed(hourly.wind_speed_10m[idx], windSpeedUnit),
             windDir: hourly.wind_direction_10m[idx],
             humidity: hourly.relative_humidity_2m ? hourly.relative_humidity_2m[idx] : 0,
             uv: hourly.uv_index ? hourly.uv_index[idx] : 0,
@@ -103,7 +104,7 @@ const DetailsGrid: React.FC<DetailsGridProps> = ({ weather, unit }) => {
                    </div>
 
                    <div className="text-center z-10 bg-slate-900/90 p-4 rounded-full backdrop-blur-md border border-white/10 shadow-xl">
-                       <span className="block text-2xl font-bold text-white leading-none">{current.wind_speed_10m}</span>
+                       <span className="block text-2xl font-bold text-white leading-none">{Math.round(convertWindSpeed(current.wind_speed_10m, windSpeedUnit))}</span>
                        <span className="block text-[10px] text-slate-400 mt-1">{speedUnit}</span>
                    </div>
                </div>
@@ -120,10 +121,10 @@ const DetailsGrid: React.FC<DetailsGridProps> = ({ weather, unit }) => {
                           <span className="text-xs font-medium text-slate-400 w-12">{formatTime(h.time)}</span>
                           <div className="flex-1 px-4">
                                <div className="w-full h-1.5 bg-slate-700/50 rounded-full overflow-hidden">
-                                   <div className="h-full bg-teal-500 rounded-full shadow-[0_0_8px_rgba(20,184,166,0.5)]" style={{ width: `${Math.min(h.windSpeed * 3, 100)}%` }}></div>
+                                   <div className="h-full bg-teal-500 rounded-full shadow-[0_0_8px_rgba(20,184,166,0.5)]" style={{ width: `${Math.min(h.windSpeed * (windSpeedUnit === 'mph' ? 4.8 : 3), 100)}%` }}></div>
                                </div>
                           </div>
-                          <span className="text-xs font-bold text-white w-14 text-right">{h.windSpeed} <span className="text-[9px] font-normal text-slate-500">{speedUnit}</span></span>
+                          <span className="text-xs font-bold text-white w-14 text-right">{Math.round(h.windSpeed)} <span className="text-[9px] font-normal text-slate-500">{speedUnit}</span></span>
                       </div>
                   ))}
               </div>
@@ -388,7 +389,7 @@ const DetailsGrid: React.FC<DetailsGridProps> = ({ weather, unit }) => {
     {
       id: 'wind',
       label: 'Rüzgar',
-      value: current.wind_speed_10m,
+      value: Math.round(convertWindSpeed(current.wind_speed_10m, windSpeedUnit)),
       unit: ' ' + speedUnit,
       icon: <Wind size={24} className="text-teal-400" />,
       subtext: (

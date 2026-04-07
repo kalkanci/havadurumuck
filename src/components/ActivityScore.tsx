@@ -3,13 +3,14 @@ import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Car, Footprints, Shovel, ThermometerSun, Bike as MotorBike, Utensils, X, ThumbsUp, ThumbsDown, Minus } from 'lucide-react';
 import { WeatherData } from '../types';
-import { triggerHapticFeedback } from '../utils/helpers';
+import { triggerHapticFeedback, convertWindSpeed } from '../utils/helpers';
 
 interface ActivityScoreProps {
   weather: WeatherData;
+  windSpeedUnit?: 'kmh' | 'mph';
 }
 
-const ActivityScore: React.FC<ActivityScoreProps> = ({ weather }) => {
+const ActivityScore: React.FC<ActivityScoreProps> = ({ weather, windSpeedUnit = 'kmh' }) => {
   const [selectedActivity, setSelectedActivity] = useState<any>(null);
   const [isClosing, setIsClosing] = useState(false);
 
@@ -17,7 +18,7 @@ const ActivityScore: React.FC<ActivityScoreProps> = ({ weather }) => {
   const today = weather.daily;
 
   const temp = current.temperature_2m;
-  const wind = current.wind_speed_10m;
+  const wind = convertWindSpeed(current.wind_speed_10m, windSpeedUnit);
   const rain = current.precipitation;
   const rainProb = today.precipitation_probability_max[0];
   const humidity = current.relative_humidity_2m;
@@ -41,13 +42,18 @@ const ActivityScore: React.FC<ActivityScoreProps> = ({ weather }) => {
 
     const addReason = (t: 'pos' | 'neg' | 'neutral', txt: string) => reasons.push({ type: t, text: txt });
 
+    const windThreshold1 = convertWindSpeed(15, windSpeedUnit);
+    const windThreshold2 = convertWindSpeed(20, windSpeedUnit);
+    const windThreshold3 = convertWindSpeed(25, windSpeedUnit);
+    const windThreshold4 = convertWindSpeed(30, windSpeedUnit);
+
     if (type === 'running') {
         if (temp > 25) { score -= 3; addReason('neg', 'Hava sıcak, performans düşebilir.'); }
         else if (temp < 5) { score -= 3; addReason('neg', 'Hava çok soğuk.'); }
         else { addReason('pos', 'Sıcaklık koşu için ideal.'); }
 
         if (rain > 0) { score -= 4; addReason('neg', 'Yağış var, zemin kaygan.'); }
-        if (wind > 20) { score -= 2; addReason('neg', 'Rüzgar direnci yüksek.'); }
+        if (wind > windThreshold2) { score -= 2; addReason('neg', 'Rüzgar direnci yüksek.'); }
     } 
     else if (type === 'carwash') {
         if (rainProb > 30) { score -= 5; addReason('neg', 'Bugün yağmur riski var.'); }
@@ -59,7 +65,7 @@ const ActivityScore: React.FC<ActivityScoreProps> = ({ weather }) => {
         const diff = Math.abs(temp - idealTemp);
         if (diff > 0) { score -= diff * 0.5; }
         if (temp > 25 && humidity > 60) { score -= 2; addReason('neg', 'Yüksek nem bunaltıcı olabilir.'); }
-        if (temp < 15 && wind > 15) { score -= 2; addReason('neg', 'Rüzgar hissedilen sıcaklığı düşürüyor.'); }
+        if (temp < 15 && wind > windThreshold1) { score -= 2; addReason('neg', 'Rüzgar hissedilen sıcaklığı düşürüyor.'); }
         
         if (score > 8) addReason('pos', 'Termal konfor yüksek.');
         else if (score < 5) addReason('neg', 'Konfor seviyesi düşük.');
@@ -68,7 +74,7 @@ const ActivityScore: React.FC<ActivityScoreProps> = ({ weather }) => {
         if (rain > 0) { score = 1; addReason('neg', 'Yağış var, sürüş tehlikeli.'); }
         else if (rainProb > 50) { score -= 4; addReason('neg', 'Yüksek yağmur ihtimali.'); }
         
-        if (wind > 25) { score -= 3; addReason('neg', 'Şiddetli yan rüzgar riski.'); }
+        if (wind > windThreshold3) { score -= 3; addReason('neg', 'Şiddetli yan rüzgar riski.'); }
         if (temp < 5) { score -= 3; addReason('neg', 'Hava çok soğuk, ekipman önemli.'); }
         
         if (score > 8) addReason('pos', 'Sürüş için harika bir hava.');
@@ -76,13 +82,13 @@ const ActivityScore: React.FC<ActivityScoreProps> = ({ weather }) => {
     else if (type === 'garden') {
         if (rain > 0) { score = 1; addReason('neg', 'Toprak çamurlu.'); }
         else if (rainProb > 60) { score -= 3; addReason('neg', 'Yağmur riski yüksek.'); }
-        if (wind > 30) { score -= 4; addReason('neg', 'Rüzgar bitkilere zarar verebilir.'); }
+        if (wind > windThreshold4) { score -= 4; addReason('neg', 'Rüzgar bitkilere zarar verebilir.'); }
         if (temp > 32) { score -= 3; addReason('neg', 'Güneş çarpması riski.'); }
     }
     else if (type === 'bbq') {
         if (rain > 0) { score = 1; addReason('neg', 'Yağmur yağıyor.'); }
         else if (rainProb > 30) { score = 4; addReason('neg', 'Yağmur riski keyif kaçırabilir.'); }
-        if (wind > 20) { score -= 4; addReason('neg', 'Rüzgar ateşi etkileyebilir.'); }
+        if (wind > windThreshold2) { score -= 4; addReason('neg', 'Rüzgar ateşi etkileyebilir.'); }
         if (temp < 12) { score -= 3; addReason('neg', 'Hava serin, sıkı giyinin.'); }
         if (score > 8) addReason('pos', 'Mangal için mükemmel şartlar.');
     }

@@ -23,6 +23,7 @@ interface TodayViewProps {
   onOpenCalendar: () => void;
   onOpenFavorites: () => void;
   unit: 'celsius' | 'fahrenheit';
+  windSpeedUnit?: 'kmh' | 'mph';
 }
 
 const TodayView: React.FC<TodayViewProps> = ({
@@ -33,7 +34,8 @@ const TodayView: React.FC<TodayViewProps> = ({
   distanceToStation,
   onOpenCalendar,
   onOpenFavorites,
-  unit
+  unit,
+  windSpeedUnit = 'kmh'
 }) => {
   const todayStr = new Date().toLocaleDateString('tr-TR', {
     weekday: 'long', day: 'numeric', month: 'long'
@@ -99,17 +101,17 @@ const TodayView: React.FC<TodayViewProps> = ({
         <WeatherAlerts alerts={alerts} />
         <HolidayCard holidays={upcomingHolidays} />
         <AdviceCard weather={weather} cityName={location.name} />
-        <ForecastInsight weather={weather} />
-        <HourlyForecast weather={weather} unit={unit} />
+        <ForecastInsight weather={weather} windSpeedUnit={windSpeedUnit} />
+        <HourlyForecast weather={weather} unit={unit} windSpeedUnit={windSpeedUnit} />
 
         <div className="grid grid-cols-1 gap-5">
           <SpotifyCard weather={weather} />
           <GoldenHourCard weather={weather} />
-          <ActivityScore weather={weather} />
+          <ActivityScore weather={weather} windSpeedUnit={windSpeedUnit} />
         </div>
 
         <AirQualityCard data={weather.air_quality} />
-        <DetailsGrid weather={weather} unit={unit} />
+        <DetailsGrid weather={weather} unit={unit} windSpeedUnit={windSpeedUnit} />
 
         <div className="text-center pt-4 opacity-50">
           <p className="text-[10px] uppercase tracking-widest text-zinc-400">

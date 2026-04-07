@@ -9,14 +9,15 @@ import {
     TrendingUp, TrendingDown, Minus, ArrowUp, ArrowDown, 
     ThermometerSun, ThermometerSnowflake, CalendarDays
 } from 'lucide-react';
-import { getWindDirection, formatTime, triggerHapticFeedback, convertTemperature } from '../utils/helpers';
+import { getWindDirection, formatTime, triggerHapticFeedback, convertTemperature, convertWindSpeed } from '../utils/helpers';
 
 interface DailyForecastProps {
   weather: WeatherData;
   unit: 'celsius' | 'fahrenheit';
+  windSpeedUnit?: 'kmh' | 'mph';
 }
 
-const DailyForecast: React.FC<DailyForecastProps> = ({ weather, unit }) => {
+const DailyForecast: React.FC<DailyForecastProps> = ({ weather, unit, windSpeedUnit = 'kmh' }) => {
   // Slicing data to exactly 15 days
   const limit = 15;
   
@@ -39,7 +40,7 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ weather, unit }) => {
   const [isDetailClosing, setIsDetailClosing] = useState(false);
 
   const tempUnit = unit === 'celsius' ? '°' : '°F';
-  const speedUnit = 'km/s';
+  const speedUnit = windSpeedUnit === 'mph' ? 'mph' : 'km/s';
 
   // Statistics for the summary header
   const globalMin = Math.min(...temperature_2m_min);
@@ -124,7 +125,8 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ weather, unit }) => {
       const minT = Math.round(temperature_2m_min[index]);
       const feels = Math.round(apparent_temperature_max ? apparent_temperature_max[index] : maxT);
       const rain = precipitation_probability_max ? precipitation_probability_max[index] : 0;
-      const wind = Math.round(wind_speed_10m_max ? wind_speed_10m_max[index] : 0);
+      const windRaw = wind_speed_10m_max ? wind_speed_10m_max[index] : 0;
+      const wind = Math.round(convertWindSpeed(windRaw, windSpeedUnit));
       const windDir = wind_direction_10m_dominant ? wind_direction_10m_dominant[index] : 0;
       const sr = sunrise[index];
       const ss = sunset[index];

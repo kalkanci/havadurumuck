@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { convertTemperature } from '../helpers';
+import { convertTemperature, convertWindSpeed } from '../helpers';
 
 describe('convertTemperature', () => {
   it('should return celsius as is', () => {
@@ -13,5 +13,19 @@ describe('convertTemperature', () => {
     expect(convertTemperature(100, 'fahrenheit')).toBe(212);
     expect(convertTemperature(-40, 'fahrenheit')).toBe(-40);
     expect(convertTemperature(25, 'fahrenheit')).toBe(77);
+  });
+});
+
+describe('convertWindSpeed', () => {
+  it('should return kmh as is', () => {
+    expect(convertWindSpeed(10, 'kmh')).toBe(10);
+    expect(convertWindSpeed(0, 'kmh')).toBe(0);
+    expect(convertWindSpeed(50, undefined)).toBe(50);
+  });
+
+  it('should convert kmh to mph', () => {
+    expect(convertWindSpeed(10, 'mph')).toBeCloseTo(6.21371, 4);
+    expect(convertWindSpeed(100, 'mph')).toBeCloseTo(62.1371, 4);
+    expect(convertWindSpeed(0, 'mph')).toBe(0);
   });
 });

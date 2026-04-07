@@ -12,3 +12,10 @@
 
 ## Testing
 - **Unit Tests:** Added unit tests for `convertTemperature` helper using `vitest`.
+
+## Refactoring & Features (2nd Pass)
+- **Wind Speed Unit Support:** Implemented toggle between km/h and mph.
+    - Updated `AppSettings` interface.
+    - Added `convertWindSpeed` to `helpers.ts` with unit tests.
+    - Added UI toggle in `SettingsModal.tsx`.
+    - Integrated `windSpeedUnit` logic in `TodayView`, `HourlyForecast`, `DailyForecast`, `DetailsGrid`, `ActivityScore`, and `ForecastInsight`.
