@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Settings, Vibrate, Thermometer } from 'lucide-react';
+import { X, Settings, Vibrate, Thermometer, Wind } from 'lucide-react';
 import { AppSettings } from '../types';
 
 interface SettingsModalProps {
@@ -42,6 +42,10 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, settings
 
   const toggleUnit = () => {
     onUpdate({ ...settings, temperatureUnit: settings.temperatureUnit === 'celsius' ? 'fahrenheit' : 'celsius' });
+  };
+
+  const toggleWindSpeedUnit = () => {
+    onUpdate({ ...settings, windSpeedUnit: settings.windSpeedUnit === 'kmh' ? 'mph' : 'kmh' });
   };
 
   return createPortal(
@@ -103,6 +107,26 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, settings
 
                 <div className="px-3 py-1 bg-white/5 rounded-lg border border-white/5 text-xs font-bold text-slate-300">
                     {settings.temperatureUnit === 'celsius' ? '°C' : '°F'}
+                </div>
+            </button>
+
+            {/* Wind Speed Unit */}
+            <button
+                onClick={toggleWindSpeedUnit}
+                className="w-full bg-slate-900/50 p-4 rounded-2xl border border-white/5 flex items-center justify-between group active:scale-[0.98] transition-all"
+            >
+                <div className="flex items-center gap-3">
+                    <div className={`p-2 rounded-lg transition-colors ${settings.windSpeedUnit === 'kmh' ? 'bg-teal-500/20 text-teal-400' : 'bg-indigo-500/20 text-indigo-400'}`}>
+                        <Wind size={18} />
+                    </div>
+                    <div className="text-left">
+                        <span className="block text-slate-200 font-bold text-sm">Rüzgar Hızı Birimi</span>
+                        <span className="text-xs text-slate-500">{settings.windSpeedUnit === 'kmh' ? 'Kilometre/Saat (km/s)' : 'Mil/Saat (mph)'}</span>
+                    </div>
+                </div>
+
+                <div className="px-3 py-1 bg-white/5 rounded-lg border border-white/5 text-xs font-bold text-slate-300">
+                    {settings.windSpeedUnit === 'kmh' ? 'km/s' : 'mph'}
                 </div>
             </button>
         </div>

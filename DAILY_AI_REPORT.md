@@ -1,14 +1,23 @@
-# Daily AI Report
+# 📅 Günlük Yapay Zeka Raporu
 
-## Refactoring
-- **TodayView Extraction:** Extracted the "Today" tab rendering logic from `App.tsx` into a new `src/components/TodayView.tsx` component. This reduced `App.tsx` size by ~100 lines and improved modularity.
+## 📌 08 Nisan 2026 - Rüzgar Hızı Birimi Özelliği
 
-## Features
-- **Temperature Unit Support:** Implemented Celsius/Fahrenheit toggle.
-    - Added `temperatureUnit` to `AppSettings`.
-    - Added toggle switch in `SettingsModal`.
-    - Implemented `convertTemperature` helper in `src/utils/helpers.ts`.
-    - Updated `TodayView`, `HourlyForecast`, `DailyForecast`, and `DetailsGrid` to respect the selected unit.
+### 🚀 Geliştirmeler (Özellik Geliştirme)
+- **Rüzgar Hızı Birimi Seçeneği (km/h & mph):** Kullanıcılara rüzgar hızını kilometre/saat (km/h) veya mil/saat (mph) olarak görme imkanı sunan bir özellik eklendi.
+  - `AppSettings` arayüzü güncellenerek `windSpeedUnit` ayarı eklendi.
+  - `src/utils/helpers.ts` dosyasına `convertWindSpeed` fonksiyonu eklendi.
+  - `App.tsx`'te kullanıcı tercihleri local storage üzerinden yüklenirken yeni ayar entegre edildi.
+  - `SettingsModal` bileşenine Rüzgar Hızı Birimi toggle seçeneği eklendi.
+  - `TodayView`, `HourlyForecast`, `DailyForecast` ve `DetailsGrid` bileşenleri yeni birime uyumlu hale getirildi.
 
-## Testing
-- **Unit Tests:** Added unit tests for `convertTemperature` helper using `vitest`.
+### 🧪 Test & Doğrulama
+- TypeScript kontrolleri `npx tsc --noEmit` ile başarıyla tamamlandı.
+- Mevcut unit testler `npx vitest run` ile çalıştırılarak değişikliklerin mevcut testleri bozmadığı doğrulandı.
+- Yeni `windSpeedUnit` özelliğinin kullanıcı arayüzünde doğru çalıştığı Playwright scriptleri ile görsel olarak test edildi ve ekran görüntüleri alındı.
+
+### 🔍 Kod İnceleme & Optimizasyon (Günlük Analiz)
+- Kod analizi sonucunda, bileşenlerin eklenen yeni özellikleri render ederken gereksiz render'lardan kaçınması ve veri yapılarının doğru olması için proplar aşağıya doğru güvenli bir şekilde taşındı.
+- Yeni eklenen çeviri fonksiyonlarında "Clean Code" standartlarına uyuldu.
+
+**Branch:** `ai-development`
+**Durum:** ✅ Başarılı (Ready for Merge)
