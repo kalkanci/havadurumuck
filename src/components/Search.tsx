@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Search as SearchIcon, MapPin, X, Loader2 } from 'lucide-react';
 import { GeoLocation } from '../types';
 import { searchCity } from '../services/weatherService';
+import { useDebounce } from '../utils/hooks';
 
 interface SearchProps {
   onSelect: (location: GeoLocation) => void;
@@ -16,11 +17,13 @@ const Search: React.FC<SearchProps> = ({ onSelect, onCurrentLocation }) => {
   const [loading, setLoading] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
+  const debouncedQuery = useDebounce(query, 500);
+
   useEffect(() => {
-    const delayDebounce = setTimeout(async () => {
-      if (query.length >= 2) {
+    const fetchResults = async () => {
+      if (debouncedQuery.length >= 2) {
         setLoading(true);
-        const data = await searchCity(query);
+        const data = await searchCity(debouncedQuery);
         setResults(data);
         setLoading(false);
         setIsOpen(true);
@@ -28,10 +31,10 @@ const Search: React.FC<SearchProps> = ({ onSelect, onCurrentLocation }) => {
         setResults([]);
         setIsOpen(false);
       }
-    }, 500);
+    };
 
-    return () => clearTimeout(delayDebounce);
-  }, [query]);
+    fetchResults();
+  }, [debouncedQuery]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
