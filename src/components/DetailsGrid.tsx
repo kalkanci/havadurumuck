@@ -3,22 +3,23 @@ import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { WeatherData } from '../types';
 import { Droplets, Wind, Sun, Gauge, Thermometer, Navigation, X, Clock, Sunrise, Sunset, ArrowUpRight, ArrowDownRight, Minus, HelpCircle } from 'lucide-react';
-import { formatTime, getWindDirection, triggerHapticFeedback, convertTemperature } from '../utils/helpers';
+import { formatTime, getWindDirection, triggerHapticFeedback, convertTemperature, convertWindSpeed } from '../utils/helpers';
 
 interface DetailsGridProps {
   weather: WeatherData;
   unit: 'celsius' | 'fahrenheit';
+  windSpeedUnit: 'kmh' | 'mph';
 }
 
 type DetailType = 'feels_like' | 'wind' | 'humidity' | 'dew_point' | 'uv' | 'pressure' | 'sunrise' | 'sunset' | null;
 
-const DetailsGrid: React.FC<DetailsGridProps> = ({ weather, unit }) => {
+const DetailsGrid: React.FC<DetailsGridProps> = ({ weather, unit, windSpeedUnit }) => {
   const { current, daily, hourly } = weather;
   const [selectedDetail, setSelectedDetail] = useState<DetailType>(null);
   const [isClosing, setIsClosing] = useState(false);
 
   const tempUnit = unit === 'celsius' ? '°' : '°F';
-  const speedUnit = 'km/s';
+  const speedUnit = windSpeedUnit === 'kmh' ? 'km/h' : 'mph';
 
   useEffect(() => {
     if (selectedDetail !== null) {
@@ -68,7 +69,7 @@ const DetailsGrid: React.FC<DetailsGridProps> = ({ weather, unit }) => {
           return {
             time: t,
             temp: hourly.temperature_2m[idx],
-            windSpeed: hourly.wind_speed_10m[idx],
+            windSpeed: convertWindSpeed(hourly.wind_speed_10m[idx], windSpeedUnit),
             windDir: hourly.wind_direction_10m[idx],
             humidity: hourly.relative_humidity_2m ? hourly.relative_humidity_2m[idx] : 0,
             uv: hourly.uv_index ? hourly.uv_index[idx] : 0,
@@ -103,7 +104,7 @@ const DetailsGrid: React.FC<DetailsGridProps> = ({ weather, unit }) => {
                    </div>
 
                    <div className="text-center z-10 bg-slate-900/90 p-4 rounded-full backdrop-blur-md border border-white/10 shadow-xl">
-                       <span className="block text-2xl font-bold text-white leading-none">{current.wind_speed_10m}</span>
+                       <span className="block text-2xl font-bold text-white leading-none">{Math.round(convertWindSpeed(current.wind_speed_10m, windSpeedUnit))}</span>
                        <span className="block text-[10px] text-slate-400 mt-1">{speedUnit}</span>
                    </div>
                </div>
@@ -388,7 +389,7 @@ const DetailsGrid: React.FC<DetailsGridProps> = ({ weather, unit }) => {
     {
       id: 'wind',
       label: 'Rüzgar',
-      value: current.wind_speed_10m,
+      value: Math.round(convertWindSpeed(current.wind_speed_10m, windSpeedUnit)),
       unit: ' ' + speedUnit,
       icon: <Wind size={24} className="text-teal-400" />,
       subtext: (

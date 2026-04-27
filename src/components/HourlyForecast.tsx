@@ -3,12 +3,13 @@ import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { WeatherData } from '../types';
 import { getWeatherIcon, getWeatherLabel } from '../constants';
-import { formatTime, triggerHapticFeedback, convertTemperature } from '../utils/helpers';
+import { formatTime, triggerHapticFeedback, convertTemperature, convertWindSpeed } from '../utils/helpers';
 import { Droplets, Navigation, X, Wind, Thermometer, Sun, Gauge } from 'lucide-react';
 
 interface HourlyForecastProps {
   weather: WeatherData;
   unit: 'celsius' | 'fahrenheit';
+  windSpeedUnit: 'kmh' | 'mph';
 }
 
 // Sıcaklığa göre arka plan rengi
@@ -20,12 +21,12 @@ const getTempColor = (temp: number, isDay: number) => {
     return "text-rose-300";
 };
 
-const HourlyForecast: React.FC<HourlyForecastProps> = ({ weather, unit }) => {
+const HourlyForecast: React.FC<HourlyForecastProps> = ({ weather, unit, windSpeedUnit }) => {
   const [selectedHour, setSelectedHour] = useState<number | null>(null);
   const [isClosing, setIsClosing] = useState(false);
 
   const tempUnit = unit === 'celsius' ? '°' : '°F';
-  const speedUnit = 'km/s';
+  const speedUnit = windSpeedUnit === 'kmh' ? 'km/h' : 'mph';
 
   useEffect(() => {
     if (selectedHour !== null) {
@@ -80,7 +81,7 @@ const HourlyForecast: React.FC<HourlyForecastProps> = ({ weather, unit }) => {
     const feelsLike = convertTemperature(feelsLikeRaw, unit);
     const uv = weather.hourly.uv_index?.[index] ?? 0;
     const pressure = weather.hourly.surface_pressure?.[index] ?? 0;
-    const windSpeed = weather.hourly.wind_speed_10m?.[index] ?? 0;
+    const windSpeed = convertWindSpeed(weather.hourly.wind_speed_10m?.[index] ?? 0, windSpeedUnit);
     const windDir = weather.hourly.wind_direction_10m?.[index] ?? 0;
 
     return createPortal(
