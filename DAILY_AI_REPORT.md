@@ -12,3 +12,5 @@
 
 ## Testing
 - **Unit Tests:** Added unit tests for `convertTemperature` helper using `vitest`.
+- **Bug Fix:** Fixed a typo replacing `km/s` with `km/h` in wind speed labels, ensuring correct metric display.
+- **Bug Fix:** Handled unit conversions for dynamically changing temperature units in `checkWeatherAlerts` and `generateSmartAdvice` ensuring proper values and recalculations of alerts.

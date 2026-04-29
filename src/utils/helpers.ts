@@ -21,9 +21,9 @@ export const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2
 };
 
 // Akıllı Tavsiye Motoru (Gelişmiş Mantık)
-export const generateSmartAdvice = (weather: WeatherData): AdviceResponse => {
+export const generateSmartAdvice = (weather: WeatherData, unit: 'celsius' | 'fahrenheit' = 'celsius'): AdviceResponse => {
   const { current, daily, air_quality } = weather;
-  const temp = current.temperature_2m;
+  const temp = convertTemperature(current.temperature_2m, unit);
   const code = current.weather_code;
   const wind = current.wind_speed_10m;
   const isDay = current.is_day === 1;
@@ -72,25 +72,25 @@ export const generateSmartAdvice = (weather: WeatherData): AdviceResponse => {
      activities = ["Müze/Galeri Gezisi", "AVM Turu", "Sinema", "Kahve Dükkanı Keşfi"];
   } 
   // Aşırı Sıcak (>32°C)
-  else if (temp > 32) { 
+  else if (temp > convertTemperature(32, unit)) {
      mood = "Kavurucu";
      advice = "Güneş yakıcı seviyede. Dışarıda fazla kalmamaya ve bol sıvı tüketmeye dikkat et.";
      activities = ["Yüzme Havuzu", "Kliması Olan Mekanlar", "Soğuk Kahve Molası", "Siesta"];
   } 
   // Soğuk (<5°C)
-  else if (temp < 5) { 
+  else if (temp < convertTemperature(5, unit)) {
      mood = "Dondurucu";
      advice = "Hava ısırıyor! Kat kat giyinmeden kapıdan çıkma. Sıcak içecekler en iyi dostun olacak.";
      activities = ["Sıcak Çikolata", "Arkadaş Evinde Toplanma", "Termal Giyim Alışverişi"];
   } 
-  // Rüzgarlı (>30 km/s)
+  // Rüzgarlı (>30 km/h)
   else if (wind > 30) { 
      mood = "Rüzgarlı";
      advice = "Rüzgar saçını başını dağıtabilir. Açık alanlarda yürümek biraz zorlayıcı olabilir.";
      activities = ["Uçurtma Uçurma (Varsa)", "Hızlı Tempolu Yürüyüş", "Kapalı Spor Salonu"];
   } 
   // Mükemmel Hava (18-26°C, Açık/Parçalı)
-  else if (temp >= 18 && temp <= 26 && code <= 3) { 
+  else if (temp >= convertTemperature(18, unit) && temp <= convertTemperature(26, unit) && code <= 3) {
      mood = "Enerjik";
      advice = "Hava tam anlamıyla 'gezmelik'. Evde durmak için çok güzel bir gün, dışarı at kendini!";
      activities = ["Yeni Semt Keşfi", "Sahil Yürüyüşü", "Dışarıda Yemek", "Fotoğraf Safarisi"];
@@ -171,7 +171,7 @@ export const triggerHapticFeedback = (pattern: number | number[] = 10) => {
 };
 
 // --- HAVA DURUMU UYARILARI ANALİZİ ---
-export const checkWeatherAlerts = (weather: WeatherData): WeatherAlert[] => {
+export const checkWeatherAlerts = (weather: WeatherData, unit: 'celsius' | 'fahrenheit' = 'celsius'): WeatherAlert[] => {
     const alerts: WeatherAlert[] = [];
     const current = weather.current;
     const daily = weather.daily;
@@ -187,13 +187,16 @@ export const checkWeatherAlerts = (weather: WeatherData): WeatherAlert[] => {
         });
     }
 
+    const tempUnitStr = unit === 'celsius' ? '°C' : '°F';
+    const currentTemp = convertTemperature(current.temperature_2m, unit);
+
     // 2. Aşırı Sıcaklık (> 35°C)
     if (current.temperature_2m > 35) {
         alerts.push({
             type: 'heat',
             level: 'warning',
             title: 'Aşırı Sıcak',
-            message: `Sıcaklık ${Math.round(current.temperature_2m)}°C'ye ulaştı. Bol su tüketin ve güneşten korunun.`
+            message: `Sıcaklık ${Math.round(currentTemp)}${tempUnitStr}'ye ulaştı. Bol su tüketin ve güneşten korunun.`
         });
     }
 
@@ -207,13 +210,13 @@ export const checkWeatherAlerts = (weather: WeatherData): WeatherAlert[] => {
         });
     }
 
-    // 4. Şiddetli Rüzgar (> 50 km/s)
+    // 4. Şiddetli Rüzgar (> 50 km/h)
     if (current.wind_speed_10m > 50) {
         alerts.push({
             type: 'wind',
             level: 'warning',
             title: 'Şiddetli Rüzgar',
-            message: `Rüzgar hızı ${current.wind_speed_10m} km/s. Çatı uçması ve ağaç devrilmelerine karşı dikkatli olun.`
+            message: `Rüzgar hızı ${current.wind_speed_10m} km/h. Çatı uçması ve ağaç devrilmelerine karşı dikkatli olun.`
         });
     }
 

@@ -39,7 +39,7 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ weather, unit }) => {
   const [isDetailClosing, setIsDetailClosing] = useState(false);
 
   const tempUnit = unit === 'celsius' ? '°' : '°F';
-  const speedUnit = 'km/s';
+  const speedUnit = 'km/h';
 
   // Statistics for the summary header
   const globalMin = Math.min(...temperature_2m_min);
