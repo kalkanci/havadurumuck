@@ -18,7 +18,7 @@ const DetailsGrid: React.FC<DetailsGridProps> = ({ weather, unit }) => {
   const [isClosing, setIsClosing] = useState(false);
 
   const tempUnit = unit === 'celsius' ? '°' : '°F';
-  const speedUnit = 'km/s';
+  const speedUnit = 'km/h';
 
   useEffect(() => {
     if (selectedDetail !== null) {
