@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Settings, Vibrate, Thermometer } from 'lucide-react';
 import { AppSettings } from '../types';
@@ -26,12 +26,17 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, settings
     };
   }, [isOpen]);
 
+  const onCloseRef = useRef(onClose);
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
+
   if (!isOpen) return null;
 
   const handleClose = () => {
     setIsClosing(true);
     setTimeout(() => {
-      onClose();
+      onCloseRef.current();
       setIsClosing(false);
     }, 200);
   };
