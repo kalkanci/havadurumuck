@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { WeatherData } from '../types';
 import { getWeatherIcon, getWeatherLabel } from '../constants';
@@ -39,16 +39,21 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ weather, unit }) => {
   const [isDetailClosing, setIsDetailClosing] = useState(false);
 
   const tempUnit = unit === 'celsius' ? '°' : '°F';
-  const speedUnit = 'km/s';
+  const speedUnit = 'km/h';
 
   // Statistics for the summary header
-  const globalMin = Math.min(...temperature_2m_min);
-  const globalMax = Math.max(...temperature_2m_max);
-  const tempRange = globalMax - globalMin;
-  
-  const hottestDayIndex = temperature_2m_max.indexOf(globalMax);
-  const coldestDayIndex = temperature_2m_min.indexOf(globalMin);
-  const rainyDaysCount = precipitation_probability_max.filter(p => p > 50).length;
+  const { globalMin, globalMax, tempRange, hottestDayIndex, coldestDayIndex, rainyDaysCount } = useMemo(() => {
+    const min = Math.min(...temperature_2m_min);
+    const max = Math.max(...temperature_2m_max);
+    return {
+      globalMin: min,
+      globalMax: max,
+      tempRange: max - min,
+      hottestDayIndex: temperature_2m_max.indexOf(max),
+      coldestDayIndex: temperature_2m_min.indexOf(min),
+      rainyDaysCount: precipitation_probability_max.filter(p => p > 50).length
+    };
+  }, [temperature_2m_max, temperature_2m_min, precipitation_probability_max]);
 
   // Trend Analysis
   const startAvg = (temperature_2m_max[0] + temperature_2m_min[0]) / 2;

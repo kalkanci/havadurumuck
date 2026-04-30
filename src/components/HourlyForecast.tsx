@@ -25,7 +25,7 @@ const HourlyForecast: React.FC<HourlyForecastProps> = ({ weather, unit }) => {
   const [isClosing, setIsClosing] = useState(false);
 
   const tempUnit = unit === 'celsius' ? '°' : '°F';
-  const speedUnit = 'km/s';
+  const speedUnit = 'km/h';
 
   useEffect(() => {
     if (selectedHour !== null) {
