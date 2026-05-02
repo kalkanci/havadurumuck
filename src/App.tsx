@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Heart, Navigation, RefreshCw, Calendar, CloudSun, Loader2, Settings } from 'lucide-react';
+import { Heart, Navigation, RefreshCw, Calendar, CloudSun, Loader2, Settings, Share2 } from 'lucide-react';
 import { GeoLocation, WeatherData, WeatherAlert, PublicHoliday, AppSettings, AstronomyData } from './types';
 import { fetchWeather, getDetailedAddress, fetchHolidays } from './services/weatherService';
 import { fetchAstronomyPicture } from './services/astronomyService';
@@ -254,6 +254,23 @@ const App: React.FC = () => {
     }
   }, [deferredPrompt, haptic]);
 
+  const handleShare = useCallback(async () => {
+    if (navigator.share && location && weather) {
+      try {
+        const tempUnit = settings.temperatureUnit === 'celsius' ? '°C' : '°F';
+        const temp = Math.round(convertTemperature(weather.current.temperature_2m, settings.temperatureUnit));
+        await navigator.share({
+          title: `Atmosfer - ${location.name} Hava Durumu`,
+          text: `Şu an ${location.name} konumunda hava ${temp}${tempUnit}. Detaylı hava durumu tahminleri için Atmosfer'i ziyaret edin!`,
+          url: window.location.href,
+        });
+        haptic(20);
+      } catch (err) {
+        console.error("Share failed:", err);
+      }
+    }
+  }, [location, weather, settings.temperatureUnit, haptic]);
+
   // Pull to Refresh Logic
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
     if (window.scrollY === 0) {
@@ -417,6 +434,15 @@ const App: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-2">
+            {navigator.share && (
+              <button
+                onClick={handleShare}
+                aria-label="Paylaş"
+                className="p-3 glass-card rounded-3xl transition-all active:scale-95 duration-200 hover:bg-white/10 text-white/70 hover:text-white"
+              >
+                <Share2 size={22} />
+              </button>
+            )}
             <button 
               onClick={() => setIsFavoritesOpen(true)} 
               aria-label="Favori Konumlar"
