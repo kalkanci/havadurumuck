@@ -7,6 +7,12 @@ export const convertTemperature = (temp: number, unit: 'celsius' | 'fahrenheit')
     return (temp * 9 / 5) + 32;
 };
 
+// Rüzgar Hızı Dönüştürücü (km/h -> mph)
+export const convertWindSpeed = (speed: number, unit: 'kmh' | 'mph'): number => {
+    if (unit === 'kmh') return speed;
+    return speed * 0.621371;
+};
+
 // Haversine formula for distance
 export const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
   const R = 6371; // km
@@ -83,7 +89,7 @@ export const generateSmartAdvice = (weather: WeatherData): AdviceResponse => {
      advice = "Hava ısırıyor! Kat kat giyinmeden kapıdan çıkma. Sıcak içecekler en iyi dostun olacak.";
      activities = ["Sıcak Çikolata", "Arkadaş Evinde Toplanma", "Termal Giyim Alışverişi"];
   } 
-  // Rüzgarlı (>30 km/s)
+  // Rüzgarlı (>30 km/h)
   else if (wind > 30) { 
      mood = "Rüzgarlı";
      advice = "Rüzgar saçını başını dağıtabilir. Açık alanlarda yürümek biraz zorlayıcı olabilir.";
@@ -207,13 +213,13 @@ export const checkWeatherAlerts = (weather: WeatherData): WeatherAlert[] => {
         });
     }
 
-    // 4. Şiddetli Rüzgar (> 50 km/s)
+    // 4. Şiddetli Rüzgar (> 50 km/h)
     if (current.wind_speed_10m > 50) {
         alerts.push({
             type: 'wind',
             level: 'warning',
             title: 'Şiddetli Rüzgar',
-            message: `Rüzgar hızı ${current.wind_speed_10m} km/s. Çatı uçması ve ağaç devrilmelerine karşı dikkatli olun.`
+            message: `Rüzgar hızı ${current.wind_speed_10m} km/h. Çatı uçması ve ağaç devrilmelerine karşı dikkatli olun.`
         });
     }
 
