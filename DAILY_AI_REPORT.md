@@ -16,5 +16,8 @@
     - Updated `TodayView`, `HourlyForecast`, `DailyForecast`, and `DetailsGrid` to pass and display wind speed in the selected unit.
     - Corrected the static metric unit from `km/s` to `km/h` in helper functions (`checkWeatherAlerts`).
 
+- **PWA Install Button:** Added a PWA install button utilizing the `Download` icon to the `SettingsModal` component. This button becomes visible if the `deferredPrompt` is available.
+- **Graceful AQI Error Handling:** Optimized `src/services/weatherService.ts` to fetch AQI data using `Promise.all` with a `.catch(() => null)` fallback, preventing AQI API failures from crashing the weather load process.
+
 ## Testing
-- **Unit Tests:** Added unit tests for `convertTemperature` and `convertWindSpeed` helpers using `vitest`.
+- **Unit Tests:** Added unit tests for `convertTemperature` and `convertWindSpeed` helpers using `vitest`. All tests continue to pass.
