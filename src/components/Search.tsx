@@ -61,7 +61,7 @@ const Search: React.FC<SearchProps> = ({ onSelect, onCurrentLocation }) => {
           aria-label="Şehir veya bölge ara"
           className="w-full bg-white/10 backdrop-blur-xl text-white pl-10 pr-12 py-3 rounded-3xl border border-white/10 focus:outline-none focus:border-white/30 focus:ring-1 focus:ring-white/20 placeholder-white/50 transition-all shadow-lg"
         />
-        <div className="absolute left-3 text-zinc-500 dark:text-zinc-400 pointer-events-none">
+        <div className="absolute left-3 text-zinc-400 pointer-events-none">
           {loading ? (
             <Loader2 size={20} className="animate-spin text-blue-400" />
           ) : (
