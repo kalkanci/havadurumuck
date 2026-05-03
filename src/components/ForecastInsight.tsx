@@ -215,7 +215,7 @@ const ForecastInsight: React.FC<ForecastInsightProps> = ({ weather }) => {
                 <div className="snap-center min-w-full">
                     <div className={`glass-card p-4 rounded-2xl flex items-center justify-between gap-4 h-full bg-gradient-to-br ${targetEvent.colorClass} transition-transform duration-200 active:scale-95`}>
                         <div className="flex items-center gap-3">
-                            <div className="p-2.5 bg-slate-100/10 dark:bg-white/10 rounded-full shrink-0 shadow-inner backdrop-blur-md">
+                            <div className="p-2.5 bg-white/10 rounded-full shrink-0 shadow-inner backdrop-blur-md">
                                 {targetEvent.icon}
                             </div>
                             <div className="flex flex-col">
