@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { convertTemperature, convertWindSpeed } from '../helpers';
+import { convertTemperature, convertWindSpeed, checkWeatherAlerts } from '../helpers';
+import { WeatherData } from '../../types';
 
 describe('convertTemperature', () => {
   it('should return celsius as is', () => {
@@ -30,5 +31,42 @@ describe('convertWindSpeed', () => {
     expect(convertWindSpeed(0, 'mph')).toBe(0);
     // 100 km/h = 62.1371 mph
     expect(convertWindSpeed(100, 'mph')).toBeCloseTo(62.1371, 4);
+  });
+});
+
+describe('checkWeatherAlerts', () => {
+  it('should format extreme heat warning correctly in celsius', () => {
+    const mockWeather = {
+      current: {
+        temperature_2m: 38,
+        weather_code: 0,
+      },
+      daily: {
+        uv_index_max: [5],
+      },
+    } as unknown as WeatherData;
+
+    const alerts = checkWeatherAlerts(mockWeather, 'celsius');
+    const heatAlert = alerts.find(a => a.type === 'heat');
+    expect(heatAlert).toBeDefined();
+    expect(heatAlert?.message).toBe("Sıcaklık 38°C'ye ulaştı. Bol su tüketin ve güneşten korunun.");
+  });
+
+  it('should format extreme heat warning correctly in fahrenheit', () => {
+    const mockWeather = {
+      current: {
+        temperature_2m: 38,
+        weather_code: 0,
+      },
+      daily: {
+        uv_index_max: [5],
+      },
+    } as unknown as WeatherData;
+
+    const alerts = checkWeatherAlerts(mockWeather, 'fahrenheit');
+    const heatAlert = alerts.find(a => a.type === 'heat');
+    expect(heatAlert).toBeDefined();
+    // 38 C = 100.4 F, rounded to 100
+    expect(heatAlert?.message).toBe("Sıcaklık 100°F'ye ulaştı. Bol su tüketin ve güneşten korunun.");
   });
 });

@@ -18,3 +18,4 @@
 
 ## Testing
 - **Unit Tests:** Added unit tests for `convertTemperature` and `convertWindSpeed` helpers using `vitest`.
+- **Weather Alerts Unit Support**: Updated `checkWeatherAlerts` to dynamically format the 'Aşırı Sıcak' temperature string and append '°C' or '°F' based on user settings.
