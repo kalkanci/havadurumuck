@@ -18,3 +18,8 @@
 
 ## Testing
 - **Unit Tests:** Added unit tests for `convertTemperature` and `convertWindSpeed` helpers using `vitest`.
+
+## 2026-05-07
+- **Geliştirme:** `generateSmartAdvice` ve `checkWeatherAlerts` fonksiyonları, kullanıcı ayarlarındaki sıcaklık birimine (`celsius` veya `fahrenheit`) uygun olarak güncellendi.
+- **Teknik Detay:** `App.tsx` içerisine, sıcaklık birimi değiştiğinde uyarıları yeniden hesaplayan bir `useEffect` hook'u eklendi. Uyarı metinlerindeki sıcaklıklar, birime göre formatlanacak şekilde düzeltildi, ancak temel mantık kontrolleri her zaman Celsius üzerinden yapılarak hataların önüne geçildi.
+- **Test:** Sıcaklık dönüşümleri ve yeni uyarı mantığı için `helpers.test.ts` dosyasına yeni birim testleri eklendi ve tüm testlerin başarılı olduğu doğrulandı.

@@ -27,9 +27,9 @@ export const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2
 };
 
 // Akıllı Tavsiye Motoru (Gelişmiş Mantık)
-export const generateSmartAdvice = (weather: WeatherData): AdviceResponse => {
+export const generateSmartAdvice = (weather: WeatherData, unit: 'celsius' | 'fahrenheit' = 'celsius'): AdviceResponse => {
   const { current, daily, air_quality } = weather;
-  const temp = current.temperature_2m;
+  const temp = convertTemperature(current.temperature_2m, unit);
   const code = current.weather_code;
   const wind = current.wind_speed_10m;
   const isDay = current.is_day === 1;
@@ -78,13 +78,13 @@ export const generateSmartAdvice = (weather: WeatherData): AdviceResponse => {
      activities = ["Müze/Galeri Gezisi", "AVM Turu", "Sinema", "Kahve Dükkanı Keşfi"];
   } 
   // Aşırı Sıcak (>32°C)
-  else if (temp > 32) { 
+  else if (current.temperature_2m > 32) {
      mood = "Kavurucu";
      advice = "Güneş yakıcı seviyede. Dışarıda fazla kalmamaya ve bol sıvı tüketmeye dikkat et.";
      activities = ["Yüzme Havuzu", "Kliması Olan Mekanlar", "Soğuk Kahve Molası", "Siesta"];
   } 
   // Soğuk (<5°C)
-  else if (temp < 5) { 
+  else if (current.temperature_2m < 5) {
      mood = "Dondurucu";
      advice = "Hava ısırıyor! Kat kat giyinmeden kapıdan çıkma. Sıcak içecekler en iyi dostun olacak.";
      activities = ["Sıcak Çikolata", "Arkadaş Evinde Toplanma", "Termal Giyim Alışverişi"];
@@ -96,7 +96,7 @@ export const generateSmartAdvice = (weather: WeatherData): AdviceResponse => {
      activities = ["Uçurtma Uçurma (Varsa)", "Hızlı Tempolu Yürüyüş", "Kapalı Spor Salonu"];
   } 
   // Mükemmel Hava (18-26°C, Açık/Parçalı)
-  else if (temp >= 18 && temp <= 26 && code <= 3) { 
+  else if (current.temperature_2m >= 18 && current.temperature_2m <= 26 && code <= 3) {
      mood = "Enerjik";
      advice = "Hava tam anlamıyla 'gezmelik'. Evde durmak için çok güzel bir gün, dışarı at kendini!";
      activities = ["Yeni Semt Keşfi", "Sahil Yürüyüşü", "Dışarıda Yemek", "Fotoğraf Safarisi"];
@@ -117,14 +117,14 @@ export const generateSmartAdvice = (weather: WeatherData): AdviceResponse => {
 };
 
 // Fallback is simply calling the smart advice now
-export const generateFallbackAdvice = (current: CurrentWeather): AdviceResponse => {
+export const generateFallbackAdvice = (current: CurrentWeather, unit: 'celsius' | 'fahrenheit' = 'celsius'): AdviceResponse => {
     // Mock weather data structure for simple fallback
     return generateSmartAdvice({
         current,
         daily: { uv_index_max: [0], precipitation_probability_max: [0] } as any,
         hourly: {} as any,
         latitude: 0, longitude: 0, generationtime_ms: 0, utc_offset_seconds: 0, elevation: 0, current_units: {}
-    });
+    }, unit);
 };
 
 // 24 Saatlik Format (HH:mm)
@@ -177,9 +177,11 @@ export const triggerHapticFeedback = (pattern: number | number[] = 10) => {
 };
 
 // --- HAVA DURUMU UYARILARI ANALİZİ ---
-export const checkWeatherAlerts = (weather: WeatherData): WeatherAlert[] => {
+export const checkWeatherAlerts = (weather: WeatherData, unit: 'celsius' | 'fahrenheit' = 'celsius'): WeatherAlert[] => {
     const alerts: WeatherAlert[] = [];
     const current = weather.current;
+    const currentTemp = convertTemperature(current.temperature_2m, unit);
+    const tempSymbol = unit === 'celsius' ? '°C' : '°F';
     const daily = weather.daily;
 
     // 1. Fırtına / Şiddetli Yağmur (Code 95-99, 65, 82)
@@ -199,7 +201,7 @@ export const checkWeatherAlerts = (weather: WeatherData): WeatherAlert[] => {
             type: 'heat',
             level: 'warning',
             title: 'Aşırı Sıcak',
-            message: `Sıcaklık ${Math.round(current.temperature_2m)}°C'ye ulaştı. Bol su tüketin ve güneşten korunun.`
+            message: `Sıcaklık ${Math.round(currentTemp)}${tempSymbol}'ye ulaştı. Bol su tüketin ve güneşten korunun.`
         });
     }
 

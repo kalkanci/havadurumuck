@@ -147,7 +147,7 @@ const App: React.FC = () => {
       const data = await fetchWeather(location.latitude, location.longitude);
       setWeather(data);
       
-      const generatedAlerts = checkWeatherAlerts(data);
+      const generatedAlerts = checkWeatherAlerts(data, settings.temperatureUnit);
       setAlerts(generatedAlerts);
       
       if (generatedAlerts.some(a => a.level === 'critical')) {
