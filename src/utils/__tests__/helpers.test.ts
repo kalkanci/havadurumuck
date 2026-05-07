@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { convertTemperature, convertWindSpeed } from '../helpers';
+import { convertTemperature, convertWindSpeed, generateSmartAdvice } from '../helpers';
 
 describe('convertTemperature', () => {
   it('should return celsius as is', () => {
@@ -31,4 +31,37 @@ describe('convertWindSpeed', () => {
     // 100 km/h = 62.1371 mph
     expect(convertWindSpeed(100, 'mph')).toBeCloseTo(62.1371, 4);
   });
+});
+
+describe('generateSmartAdvice', () => {
+    // Tests for smart advice based on temperatures
+    const baseWeather = {
+        current: {
+            temperature_2m: 20,
+            weather_code: 0,
+            wind_speed_10m: 10,
+            is_day: 1
+        },
+        daily: {
+            precipitation_probability_max: [0],
+            uv_index_max: [0]
+        },
+        air_quality: { european_aqi: 20 }
+    } as any;
+
+    it('should generate advice based on unit passed', () => {
+        let weatherHot = { ...baseWeather, current: { ...baseWeather.current, temperature_2m: 35 } };
+        let adviceCelcius = generateSmartAdvice(weatherHot, 'celsius');
+        expect(adviceCelcius.mood).toBe("Kavurucu");
+
+        let weatherCold = { ...baseWeather, current: { ...baseWeather.current, temperature_2m: 0 } };
+        let adviceCelciusCold = generateSmartAdvice(weatherCold, 'celsius');
+        expect(adviceCelciusCold.mood).toBe("Dondurucu");
+    });
+
+    it('should generate fahrenheit correctly', () => {
+        let weatherHot = { ...baseWeather, current: { ...baseWeather.current, temperature_2m: 35 } };
+        let adviceFahrenheit = generateSmartAdvice(weatherHot, 'fahrenheit');
+        expect(adviceFahrenheit.mood).toBe("Kavurucu");
+    });
 });
