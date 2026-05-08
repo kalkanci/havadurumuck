@@ -16,5 +16,9 @@
     - Updated `TodayView`, `HourlyForecast`, `DailyForecast`, and `DetailsGrid` to pass and display wind speed in the selected unit.
     - Corrected the static metric unit from `km/s` to `km/h` in helper functions (`checkWeatherAlerts`).
 
+## Features
+- **API Error Handling:** Improved Air Quality (AQI) fetch logic in `weatherService.ts`. Replaced simple `Promise.all` with `.catch(() => null)` for the AQI request. This prevents a potential AQI API failure from blocking the core weather data, improving app resilience.
+
 ## Testing
 - **Unit Tests:** Added unit tests for `convertTemperature` and `convertWindSpeed` helpers using `vitest`.
+- **Weather Service Tests:** Added `src/services/__tests__/weatherService.test.ts` to verify fallback behavior of `fetchWeather` when AQI fetch fails.
