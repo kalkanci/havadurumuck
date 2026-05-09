@@ -18,3 +18,10 @@
 
 ## Testing
 - **Unit Tests:** Added unit tests for `convertTemperature` and `convertWindSpeed` helpers using `vitest`.
+
+## Features
+- **Dynamic Temperature Alerts & Advice:**
+    - Updated `generateSmartAdvice` and `generateFallbackAdvice` to accept a unit parameter.
+    - Updated `checkWeatherAlerts` to dynamically format temperature warnings (e.g., Extreme Heat) in the correct unit (Celsius/Fahrenheit).
+    - Added a `useEffect` hook in `App.tsx` to recalculate and translate weather alerts immediately when the user changes the temperature unit from settings, without needing a network refresh.
+    - Updated `AdviceCard.tsx` and `TodayView.tsx` to pipe the unit preference through correctly.
