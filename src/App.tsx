@@ -105,6 +105,13 @@ const App: React.FC = () => {
     }
   }, [location]);
 
+  // Recalculate alerts when temperature unit changes without fetching data
+  useEffect(() => {
+    if (weather) {
+      setAlerts(checkWeatherAlerts(weather, settings.temperatureUnit));
+    }
+  }, [settings.temperatureUnit, weather]);
+
   const haptic = useCallback((pattern?: number | number[]) => {
       if (settings.hapticsEnabled) {
           triggerHapticFeedback(pattern);
@@ -147,7 +154,7 @@ const App: React.FC = () => {
       const data = await fetchWeather(location.latitude, location.longitude);
       setWeather(data);
       
-      const generatedAlerts = checkWeatherAlerts(data);
+      const generatedAlerts = checkWeatherAlerts(data, settings.temperatureUnit);
       setAlerts(generatedAlerts);
       
       if (generatedAlerts.some(a => a.level === 'critical')) {
