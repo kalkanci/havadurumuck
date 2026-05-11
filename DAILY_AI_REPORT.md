@@ -18,3 +18,8 @@
 
 ## Testing
 - **Unit Tests:** Added unit tests for `convertTemperature` and `convertWindSpeed` helpers using `vitest`.
+- **Dynamic Units in Insights and Alerts:** Refactored `checkWeatherAlerts` and `ForecastInsight` components.
+    - Updated `checkWeatherAlerts` to format message text dynamically based on the selected unit.
+    - Updated `App.tsx`'s `useEffect` hook to recalculate alerts on setting change.
+    - Updated `ForecastInsight` to accept user selected units and convert metrics in `getSummaryAnalysis` before calculations.
+    - Dynamically adjusted difference thresholds for varying units (e.g., automatically adjusting the 1.5°C temperature difference threshold to 2.7°F for Fahrenheit users).
