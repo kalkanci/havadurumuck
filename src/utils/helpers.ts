@@ -177,10 +177,13 @@ export const triggerHapticFeedback = (pattern: number | number[] = 10) => {
 };
 
 // --- HAVA DURUMU UYARILARI ANALİZİ ---
-export const checkWeatherAlerts = (weather: WeatherData): WeatherAlert[] => {
+export const checkWeatherAlerts = (weather: WeatherData, unit: 'celsius' | 'fahrenheit' = 'celsius', windSpeedUnit: 'kmh' | 'mph' = 'kmh'): WeatherAlert[] => {
     const alerts: WeatherAlert[] = [];
     const current = weather.current;
     const daily = weather.daily;
+
+    const tempUnitStr = unit === 'celsius' ? '°C' : '°F';
+    const windUnitStr = windSpeedUnit === 'kmh' ? 'km/h' : 'mph';
 
     // 1. Fırtına / Şiddetli Yağmur (Code 95-99, 65, 82)
     const severeCodes = [95, 96, 99, 65, 82];
@@ -199,7 +202,7 @@ export const checkWeatherAlerts = (weather: WeatherData): WeatherAlert[] => {
             type: 'heat',
             level: 'warning',
             title: 'Aşırı Sıcak',
-            message: `Sıcaklık ${Math.round(current.temperature_2m)}°C'ye ulaştı. Bol su tüketin ve güneşten korunun.`
+            message: `Sıcaklık ${Math.round(convertTemperature(current.temperature_2m, unit))}${tempUnitStr}'ye ulaştı. Bol su tüketin ve güneşten korunun.`
         });
     }
 
@@ -219,7 +222,7 @@ export const checkWeatherAlerts = (weather: WeatherData): WeatherAlert[] => {
             type: 'wind',
             level: 'warning',
             title: 'Şiddetli Rüzgar',
-            message: `Rüzgar hızı ${current.wind_speed_10m} km/h. Çatı uçması ve ağaç devrilmelerine karşı dikkatli olun.`
+            message: `Rüzgar hızı ${Math.round(convertWindSpeed(current.wind_speed_10m, windSpeedUnit))} ${windUnitStr}. Çatı uçması ve ağaç devrilmelerine karşı dikkatli olun.`
         });
     }
 

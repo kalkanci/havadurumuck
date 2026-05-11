@@ -71,7 +71,13 @@ const App: React.FC = () => {
 
   useEffect(() => {
     localStorage.setItem('atmosfer_settings', JSON.stringify(settings));
-  }, [settings]);
+
+    // Recalculate alerts if units change
+    if (weather) {
+      const generatedAlerts = checkWeatherAlerts(weather, settings.temperatureUnit, settings.windSpeedUnit);
+      setAlerts(generatedAlerts);
+    }
+  }, [settings, weather]);
 
   // Sekme değiştiğinde sayfayı en yukarı kaydır
   useEffect(() => {
@@ -147,7 +153,7 @@ const App: React.FC = () => {
       const data = await fetchWeather(location.latitude, location.longitude);
       setWeather(data);
       
-      const generatedAlerts = checkWeatherAlerts(data);
+      const generatedAlerts = checkWeatherAlerts(data, settings.temperatureUnit, settings.windSpeedUnit);
       setAlerts(generatedAlerts);
       
       if (generatedAlerts.some(a => a.level === 'critical')) {

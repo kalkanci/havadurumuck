@@ -5,10 +5,12 @@ import {
     CloudRain, Sun, Moon, Sunrise, Sunset, CloudLightning, 
     Umbrella, Timer, TrendingUp, TrendingDown, Minus, Wind 
 } from 'lucide-react';
-import { formatTime, formatCountdown } from '../utils/helpers';
+import { formatTime, formatCountdown, convertTemperature, convertWindSpeed } from '../utils/helpers';
 
 interface ForecastInsightProps {
   weather: WeatherData;
+  unit: 'celsius' | 'fahrenheit';
+  windSpeedUnit: 'kmh' | 'mph';
 }
 
 interface EventTarget {
@@ -19,7 +21,7 @@ interface EventTarget {
   colorClass: string;
 }
 
-const ForecastInsight: React.FC<ForecastInsightProps> = ({ weather }) => {
+const ForecastInsight: React.FC<ForecastInsightProps> = ({ weather, unit, windSpeedUnit }) => {
   const current = weather.current;
   const hourly = weather.hourly;
   
@@ -166,30 +168,34 @@ const ForecastInsight: React.FC<ForecastInsightProps> = ({ weather }) => {
       const startIndex = hourly.time.findIndex(t => new Date(t).getHours() === now.getHours());
       if (startIndex === -1) return null;
 
-      const next4Hours = hourly.temperature_2m.slice(startIndex, startIndex + 4);
+      const next4HoursRaw = hourly.temperature_2m.slice(startIndex, startIndex + 4);
+      const next4Hours = next4HoursRaw.map(t => convertTemperature(t, unit));
       const startTemp = next4Hours[0];
       const endTemp = next4Hours[next4Hours.length - 1];
       const diff = endTemp - startTemp;
       
       const nextRainProbs = hourly.precipitation_probability.slice(startIndex, startIndex + 4);
       const maxRain = Math.max(...nextRainProbs);
-      const nextWinds = hourly.wind_speed_10m.slice(startIndex, startIndex + 4);
-      const maxWind = Math.max(...nextWinds);
+      const nextWindsRaw = hourly.wind_speed_10m.slice(startIndex, startIndex + 4);
+      const maxWind = Math.max(...nextWindsRaw.map(w => convertWindSpeed(w, windSpeedUnit)));
 
       let trendIcon = <Minus size={18} className="text-slate-400" />;
       let trendText = "Sıcaklık sabit";
       
-      if (diff > 1.5) {
+      const tempDiffThreshold = unit === 'fahrenheit' ? 2.7 : 1.5;
+
+      if (diff > tempDiffThreshold) {
           trendIcon = <TrendingUp size={18} className="text-orange-400" />;
           trendText = `Isınıyor (+${Math.round(diff)}°)`;
-      } else if (diff < -1.5) {
+      } else if (diff < -tempDiffThreshold) {
           trendIcon = <TrendingDown size={18} className="text-blue-400" />;
           trendText = `Soğuyor (${Math.round(diff)}°)`;
       }
 
       let conditionText = "Hava sakin.";
       if (maxRain > 40) conditionText = "Yağmur ihtimali var.";
-      if (maxWind > 25) conditionText = "Rüzgar sertleşiyor.";
+      const windThreshold = windSpeedUnit === 'mph' ? 15.5 : 25; // roughly equivalent
+      if (maxWind > windThreshold) conditionText = "Rüzgar sertleşiyor.";
 
       return {
           trendIcon,
