@@ -18,3 +18,4 @@
 
 ## Testing
 - **Unit Tests:** Added unit tests for `convertTemperature` and `convertWindSpeed` helpers using `vitest`.
+- **Global Error Boundary:** Added `ErrorBoundary` in `src/components/ErrorBoundary.tsx` and integrated it into `src/index.tsx` to prevent the app from crashing to a blank screen on uncaught errors. This gives the app a graceful fallback UI. Tested with unit tests using Vitest and React Testing Library.
