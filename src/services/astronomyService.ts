@@ -1,6 +1,8 @@
 
 import { AstronomyData } from '../types';
 import { translateToTurkish } from './translationService';
+import { ApiError, NetworkError } from '../utils/errors';
+import { fetchWithRetry } from '../utils/api';
 
 const NASA_API_URL = 'https://api.nasa.gov/planetary/apod';
 const API_KEY = 'DEMO_KEY'; // Rate limits apply.
@@ -16,11 +18,10 @@ const FALLBACK_DATA: AstronomyData = {
 
 export const fetchAstronomyPicture = async (): Promise<AstronomyData | null> => {
   try {
-    const response = await fetch(`${NASA_API_URL}?api_key=${API_KEY}`);
+    const response = await fetchWithRetry(`${NASA_API_URL}?api_key=${API_KEY}`);
     
     if (!response.ok) {
-      console.warn(`NASA API Error: ${response.status}. Using fallback.`);
-      return FALLBACK_DATA;
+      throw new ApiError(`NASA API Error: ${response.status}`, response.status);
     }
 
     const data = await response.json();
@@ -43,7 +44,11 @@ export const fetchAstronomyPicture = async (): Promise<AstronomyData | null> => 
     }
 
   } catch (error) {
-    console.error("Failed to fetch astronomy data:", error);
+    if (error instanceof ApiError || error instanceof NetworkError) {
+      console.warn("NASA API or Network Error. Using fallback:", error.message);
+    } else {
+      console.error("Failed to fetch astronomy data:", error);
+    }
     // Return fallback instead of null so the card doesn't disappear
     return FALLBACK_DATA;
   }
