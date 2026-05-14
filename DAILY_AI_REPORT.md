@@ -18,3 +18,6 @@
 
 ## Testing
 - **Unit Tests:** Added unit tests for `convertTemperature` and `convertWindSpeed` helpers using `vitest`.
+
+- **PWA Settings Button:** Added an optional `onInstall` prop to `SettingsModal.tsx` to show a 'Uygulamayı Yükle' button, passed from `App.tsx`.
+- **Search Debounce Refactor:** Replaced inline `setTimeout` in `Search.tsx` with the `useDebounce` performance utility hook.
