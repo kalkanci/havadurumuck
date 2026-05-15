@@ -18,3 +18,4 @@
 
 ## Testing
 - **Unit Tests:** Added unit tests for `convertTemperature` and `convertWindSpeed` helpers using `vitest`.
+- **PWA Settings Install Button:** Implemented a new feature in `SettingsModal` to trigger PWA installation via a dedicated button, replacing/augmenting the `PWAInstallBanner` overlay approach for better user experience.
