@@ -18,3 +18,12 @@
 
 ## Testing
 - **Unit Tests:** Added unit tests for `convertTemperature` and `convertWindSpeed` helpers using `vitest`.
+
+## Features
+- **API Error Management:** Improved custom API error handling to distinguish between network and HTTP errors.
+    - Introduced `ApiError` and `NetworkError` classes in `src/utils/errors.ts`.
+    - Updated `fetchWithRetry` in `src/utils/api.ts` to throw `ApiError` and `NetworkError` appropriately.
+    - Gracefully handled custom API and Network errors in `src/services/astronomyService.ts` to ensure consistent fallbacks and prevent unhandled promise rejections.
+
+## Testing
+- **Unit Tests:** Added full test coverage for API error handling in `src/utils/__tests__/api.test.ts` utilizing `vi.useFakeTimers()` to ensure retry and timeout functions evaluate perfectly.
